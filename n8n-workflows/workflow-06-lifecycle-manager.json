@@ -45,7 +45,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       },
       "retryOnFail": true,
@@ -117,7 +117,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "supabase_credentials",
-          "name": "Supabase API"
+          "name": "ZO Supabase"
         }
       },
       "retryOnFail": true,
@@ -156,7 +156,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "stripe_credentials",
-          "name": "Stripe API"
+          "name": "ZO Stripe"
         }
       },
       "retryOnFail": true,
@@ -265,7 +265,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "stripe_credentials",
-          "name": "Stripe API"
+          "name": "ZO Stripe"
         }
       },
       "onError": "continueRegularOutput"
@@ -309,7 +309,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       }
     },
@@ -354,7 +354,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       }
     },
@@ -397,7 +397,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "resend_credentials",
-          "name": "Resend API"
+          "name": "ZO Resend"
         }
       }
     }

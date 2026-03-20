@@ -45,7 +45,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       },
       "retryOnFail": true,
@@ -92,7 +92,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "stripe_credentials",
-          "name": "Stripe API"
+          "name": "ZO Stripe"
         }
       },
       "retryOnFail": true,
@@ -192,7 +192,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -235,7 +235,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       },
       "retryOnFail": true,
@@ -271,7 +271,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "resend_credentials",
-          "name": "Resend API"
+          "name": "ZO Resend"
         }
       }
     }

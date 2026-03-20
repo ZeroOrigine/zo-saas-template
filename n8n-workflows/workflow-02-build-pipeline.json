@@ -59,7 +59,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       },
       "retryOnFail": true,
@@ -141,7 +141,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       }
     },
@@ -192,7 +192,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -237,7 +237,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -282,7 +282,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -327,7 +327,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -372,7 +372,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic_credentials",
-          "name": "Anthropic API"
+          "name": "Claude API"
         }
       },
       "retryOnFail": true,
@@ -420,7 +420,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "github_credentials",
-          "name": "GitHub API"
+          "name": "ZO GitHub"
         }
       },
       "retryOnFail": true,
@@ -472,7 +472,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "supabase_credentials",
-          "name": "Supabase API"
+          "name": "ZO Supabase"
         }
       },
       "retryOnFail": true,
@@ -530,7 +530,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "stripe_credentials",
-          "name": "Stripe API"
+          "name": "ZO Stripe"
         }
       },
       "retryOnFail": true,
@@ -578,7 +578,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "stripe_credentials",
-          "name": "Stripe API"
+          "name": "ZO Stripe"
         }
       },
       "retryOnFail": true,
@@ -604,7 +604,7 @@
         "method": "POST",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ name: $json.subdomain + '-zeroorigine', custom_domain: $json.subdomain + '.zeroorigine.com', repo: { provider: 'github', repo: 'zeroorigine/' + $json.repo_name, branch: 'main', cmd: 'npm run build', dir: '.next' }, build_settings: { env: { NEXT_PUBLIC_SUPABASE_URL: 'https://opgitcuqwicuiplaptkm.supabase.co', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'PLACEHOLDER', STRIPE_SECRET_KEY: 'PLACEHOLDER', NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: 'PLACEHOLDER' } } }) }}",
+        "jsonBody": "={{ JSON.stringify({ name: $json.subdomain + '-zeroorigine', custom_domain: $json.subdomain + '.zeroorigine.com', repo: { provider: 'github', repo: 'zeroorigine/' + $json.repo_name, branch: 'main', cmd: 'npm run build', dir: '.next' }, build_settings: { env: { NEXT_PUBLIC_SUPABASE_URL: $vars.SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY: $vars.SUPABASE_ANON_KEY, STRIPE_SECRET_KEY: $vars.STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: $vars.STRIPE_PUBLISHABLE_KEY } } }) }}",
         "options": {
           "timeout": 60000
         }
@@ -617,7 +617,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "netlify_credentials",
-          "name": "Netlify API"
+          "name": "ZO Netlify"
         }
       },
       "retryOnFail": true,
@@ -677,7 +677,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "google_sheets_credentials",
-          "name": "Google Sheets"
+          "name": "ZO Google Sheets"
         }
       }
     },
@@ -720,7 +720,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "resend_credentials",
-          "name": "Resend API"
+          "name": "ZO Resend"
         }
       }
     },

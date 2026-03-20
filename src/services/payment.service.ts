@@ -94,6 +94,20 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
       break;
     }
 
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = invoice.subscription as string;
+
+      if (subscriptionId) {
+        await supabase
+          .from('subscriptions')
+          .update({ status: 'past_due' })
+          .eq('stripe_subscription_id', subscriptionId);
+      }
+
+      break;
+    }
+
     default:
       // Unhandled event type — no action needed
       break;
