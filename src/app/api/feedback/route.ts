@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/types/api';
 
 const feedbackSchema = z.object({
-  type: z.enum(['bug', 'feature', 'improvement', 'other'], {
+  type: z.enum(['bug', 'feature', 'question', 'other'], {
     required_error: 'Please select a feedback type.',
   }),
   message: z
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       email: parsed.data.email ?? null,
       user_id: user?.id ?? null,
       project_id: projectId,
-    });
+    } as any);
 
     if (error) {
       return NextResponse.json(
