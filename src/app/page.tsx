@@ -35,7 +35,7 @@ export default function HomePage() {
               Building in Public — Every Number Real
             </div>
             <h1>Built from zero.<br />By eight minds.<br />For everyone.</h1>
-            <p className="subtitle">A philosophy manuscript became an operating system. Eight AI Minds governed by a constitution — discovering problems, judging ethics, building solutions. No investors. No employees. No permission needed.</p>
+            <p className="subtitle">A philosophy became an operating system. Eight AI Minds governed by a constitution — discovering problems, judging ethics, building solutions. No investors. No employees. No permission needed.</p>
             <LiveStats />
           </div>
         </section>
