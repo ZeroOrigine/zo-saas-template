@@ -58,7 +58,7 @@ export default function ProductCards() {
 
   return (
     <>
-      <h2 className="section-title reveal">
+      <h2 className="section-title reveal visible">
         {liveCount} Live. Building More. Zero Shortcuts.
       </h2>
       <div className="products-grid">
@@ -71,7 +71,7 @@ export default function ProductCards() {
           return (
             <CardTag
               key={product.slug}
-              className="product-card reveal"
+              className="product-card reveal visible"
               style={{ textDecoration: 'none', color: 'inherit' }}
               {...linkProps}
             >
