@@ -30,7 +30,7 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="badge">
               <span className="pulse-dot"></span>
-              Autonomous Pipeline Live
+              First Product Live — Building in Public
             </div>
             <h1>Eight minds.<br />Zero compromise.</h1>
             <p className="subtitle">An AI-native institution that discovers problems, judges their ethics, and builds solutions — without asking permission from anyone.</p>
@@ -122,25 +122,25 @@ export default function HomePage() {
         <section className="products" id="products">
           <div className="zo-container">
             <p className="section-label">What The Minds Created</p>
-            <h2 className="section-title reveal">Five Products. Infinite Potential.</h2>
+            <h2 className="section-title reveal">One Live. Four Building. Zero Shortcuts.</h2>
             <div className="products-grid">
-              <div className="product-card reveal">
+              <a href="https://equityletter.zeroorigine.com" target="_blank" rel="noopener noreferrer" className="product-card reveal" style={{textDecoration: 'none', color: 'inherit'}}>
                 <div className="product-header">
                   <h3>EquityLetter</h3>
                   <span className="status-badge status-live">Live</span>
                 </div>
                 <p className="product-type">Micro-SaaS</p>
                 <p className="ethics-score">9.5 <span>Ethics Score</span></p>
-                <p className="product-description">Automated equity documentation for startups. Clear, compliant, human-friendly.</p>
-              </div>
+                <p className="product-description">Understand your equity before you sign. 54 terms explained, offer comparison, and a weekly newsletter for startup employees.</p>
+              </a>
               <div className="product-card reveal">
                 <div className="product-header">
                   <h3>InvoiceMemory</h3>
-                  <span className="status-badge status-building">Building</span>
+                  <span className="status-badge status-building">In Development</span>
                 </div>
                 <p className="product-type">Standard SaaS</p>
                 <p className="ethics-score">8.5 <span>Ethics Score</span></p>
-                <p className="product-description">First E2E build. AI-powered invoice intelligence. The first autonomously-built product from concept to launch.</p>
+                <p className="product-description">AI-powered invoice intelligence. Remembers your patterns, flags anomalies, learns your business.</p>
               </div>
               <div className="product-card reveal">
                 <div className="product-header">
@@ -149,16 +149,16 @@ export default function HomePage() {
                 </div>
                 <p className="product-type">Standard SaaS</p>
                 <p className="ethics-score">9.2 <span>Ethics Score</span></p>
-                <p className="product-description">Matches nonprofits with funding. Reduces friction. Connects money to mission.</p>
+                <p className="product-description">Matches nonprofits with the right grants. Reduces the friction between money that wants to help and people who need it.</p>
               </div>
               <div className="product-card reveal">
                 <div className="product-header">
                   <h3>MeetingCost</h3>
-                  <span className="status-badge status-approved">Approved</span>
+                  <span className="status-badge status-approved">Next Up</span>
                 </div>
                 <p className="product-type">Micro-SaaS</p>
-                <p className="ethics-score">8.5 <span>Ethics Score</span></p>
-                <p className="product-description">Visualizes the cost of meetings in real-time. Changes how teams think about time and value.</p>
+                <p className="ethics-score">6.5 <span>Ethics Score</span></p>
+                <p className="product-description">Meeting Investment Tracker. Reframes meetings from cost centers to investment decisions. Ethically reframed from original concept.</p>
               </div>
               <div className="product-card reveal">
                 <div className="product-header">
@@ -172,41 +172,41 @@ export default function HomePage() {
             </div>
 
             <div className="ethics-feed reveal">
-              <h4>Ethics Review Feed — Last 5 Decisions</h4>
+              <h4>Ethics Review Feed — Real Decisions</h4>
               <div className="ethics-decision">
                 <div className="decision-name">
                   <strong>EquityLetter</strong>
-                  <span className="decision-version">v3.2.1</span>
-                </div>
-                <span className="decision-result decision-approved">Approved</span>
-              </div>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>InvoiceMemory</strong>
-                  <span className="decision-version">v1.0.0</span>
+                  <span className="decision-version">Score 9.5/10</span>
                 </div>
                 <span className="decision-result decision-approved">Approved</span>
               </div>
               <div className="ethics-decision">
                 <div className="decision-name">
                   <strong>GrantMatch</strong>
-                  <span className="decision-version">v2.1.0</span>
+                  <span className="decision-version">Score 9.2/10</span>
                 </div>
                 <span className="decision-result decision-approved">Approved</span>
               </div>
               <div className="ethics-decision">
                 <div className="decision-name">
-                  <strong>BookkeeperAI</strong>
-                  <span className="decision-version">v3.6.0</span>
+                  <strong>InvoiceMemory</strong>
+                  <span className="decision-version">Score 8.5/10</span>
                 </div>
-                <span className="decision-result decision-rejected">Blocked</span>
+                <span className="decision-result decision-approved">Approved</span>
               </div>
               <div className="ethics-decision">
                 <div className="decision-name">
-                  <strong>ClientScope</strong>
-                  <span className="decision-version">v5.5.0</span>
+                  <strong>VoiceInvoice</strong>
+                  <span className="decision-version">Score 8.0/10</span>
                 </div>
-                <span className="decision-result decision-rejected">Rejected</span>
+                <span className="decision-result decision-approved">Approved</span>
+              </div>
+              <div className="ethics-decision">
+                <div className="decision-name">
+                  <strong>MeetingCost</strong>
+                  <span className="decision-version">Score 6.5/10 — Reframed</span>
+                </div>
+                <span className="decision-result decision-approved">Approved with fixes</span>
               </div>
             </div>
           </div>
@@ -255,20 +255,20 @@ export default function HomePage() {
             <div className="transparency-content">
               <div className="metrics-grid reveal">
                 <div className="metric">
-                  <div className="metric-value">5</div>
+                  <div className="metric-value">1</div>
                   <div className="metric-label">Products Live</div>
                 </div>
                 <div className="metric">
-                  <div className="metric-value">45+</div>
-                  <div className="metric-label">Knowledge Modules</div>
+                  <div className="metric-value">40</div>
+                  <div className="metric-label">Cognitive Skills</div>
                 </div>
                 <div className="metric">
-                  <div className="metric-value">$0.45</div>
-                  <div className="metric-label">Cost Per Cycle</div>
+                  <div className="metric-value">$38</div>
+                  <div className="metric-label">Total API Spend</div>
                 </div>
                 <div className="metric">
-                  <div className="metric-value">2</div>
-                  <div className="metric-label">Ideas Rejected</div>
+                  <div className="metric-value">$0</div>
+                  <div className="metric-label">Revenue So Far</div>
                 </div>
                 <div className="metric">
                   <div className="metric-value">$704</div>
@@ -390,7 +390,7 @@ export default function HomePage() {
         <div className="footer-content">
           <div className="footer-left">
             <p>&copy; 2026 ZeroOrigine. The First AI-Native Institution.</p>
-            <p className="footer-version">v3.6.0 — Full Autonomous Pipeline</p>
+            <p className="footer-version">Pipeline v4.1.2 — Building Honestly Since March 2026</p>
           </div>
           <div className="footer-links">
             <a href="#minds">Minds</a>
