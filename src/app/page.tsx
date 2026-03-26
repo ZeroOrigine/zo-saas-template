@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import LiveStats from '@/components/LiveStats';
+import ProductCards from '@/components/ProductCards';
+import TransparencyStats from '@/components/TransparencyStats';
 import RevealObserver from '@/components/RevealObserver';
 
 export default function HomePage() {
@@ -122,54 +124,7 @@ export default function HomePage() {
         <section className="products" id="products">
           <div className="zo-container">
             <p className="section-label">What The Minds Created</p>
-            <h2 className="section-title reveal">One Live. Four Building. Zero Shortcuts.</h2>
-            <div className="products-grid">
-              <a href="https://equityletter.zeroorigine.com" target="_blank" rel="noopener noreferrer" className="product-card reveal" style={{textDecoration: 'none', color: 'inherit'}}>
-                <div className="product-header">
-                  <h3>EquityLetter</h3>
-                  <span className="status-badge status-live">Live</span>
-                </div>
-                <p className="product-type">Micro-SaaS</p>
-                <p className="ethics-score">9.5 <span>Ethics Score</span></p>
-                <p className="product-description">Understand your equity before you sign. 54 terms explained, offer comparison, and a weekly newsletter for startup employees.</p>
-              </a>
-              <div className="product-card reveal">
-                <div className="product-header">
-                  <h3>InvoiceMemory</h3>
-                  <span className="status-badge status-building">In Development</span>
-                </div>
-                <p className="product-type">Standard SaaS</p>
-                <p className="ethics-score">8.5 <span>Ethics Score</span></p>
-                <p className="product-description">AI-powered invoice intelligence. Remembers your patterns, flags anomalies, learns your business.</p>
-              </div>
-              <div className="product-card reveal">
-                <div className="product-header">
-                  <h3>GrantMatch</h3>
-                  <span className="status-badge status-approved">Approved</span>
-                </div>
-                <p className="product-type">Standard SaaS</p>
-                <p className="ethics-score">9.2 <span>Ethics Score</span></p>
-                <p className="product-description">Matches nonprofits with the right grants. Reduces the friction between money that wants to help and people who need it.</p>
-              </div>
-              <div className="product-card reveal">
-                <div className="product-header">
-                  <h3>MeetingCost</h3>
-                  <span className="status-badge status-approved">Next Up</span>
-                </div>
-                <p className="product-type">Micro-SaaS</p>
-                <p className="ethics-score">6.5 <span>Ethics Score</span></p>
-                <p className="product-description">Meeting Investment Tracker. Reframes meetings from cost centers to investment decisions. Ethically reframed from original concept.</p>
-              </div>
-              <div className="product-card reveal">
-                <div className="product-header">
-                  <h3>VoiceInvoice</h3>
-                  <span className="status-badge status-approved">Approved</span>
-                </div>
-                <p className="product-type">Standard SaaS</p>
-                <p className="ethics-score">8.0 <span>Ethics Score</span></p>
-                <p className="product-description">Invoicing by voice. Faster, simpler, for teams that don&apos;t have time for forms.</p>
-              </div>
-            </div>
+            <ProductCards />
 
             <div className="ethics-feed reveal">
               <h4>Ethics Review Feed — Real Decisions</h4>
@@ -253,32 +208,7 @@ export default function HomePage() {
             <p className="section-label">Radical Transparency</p>
             <h2 className="section-title reveal">We Show Everything</h2>
             <div className="transparency-content">
-              <div className="metrics-grid reveal">
-                <div className="metric">
-                  <div className="metric-value">1</div>
-                  <div className="metric-label">Products Live</div>
-                </div>
-                <div className="metric">
-                  <div className="metric-value">40</div>
-                  <div className="metric-label">Cognitive Skills</div>
-                </div>
-                <div className="metric">
-                  <div className="metric-value">$38</div>
-                  <div className="metric-label">Total API Spend</div>
-                </div>
-                <div className="metric">
-                  <div className="metric-value">$0</div>
-                  <div className="metric-label">Revenue So Far</div>
-                </div>
-                <div className="metric">
-                  <div className="metric-value">$704</div>
-                  <div className="metric-label">Monthly Budget</div>
-                </div>
-                <div className="metric">
-                  <div className="metric-value">$0</div>
-                  <div className="metric-label">Founder Salary</div>
-                </div>
-              </div>
+              <TransparencyStats />
               <div className="constitutional-box reveal">
                 <h4>Constitutional Red Lines</h4>
                 <div className="red-line">We will never collect personal data without explicit consent</div>

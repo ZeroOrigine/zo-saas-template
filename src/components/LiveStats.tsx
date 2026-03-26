@@ -4,33 +4,34 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface LiveStatsData {
-  productsCount: number;
-  modulesCount: number;
+  liveCount: number;
+  totalCount: number;
 }
 
 export default function LiveStats() {
   const [stats, setStats] = useState<LiveStatsData>({
-    productsCount: 5,
-    modulesCount: 45,
+    liveCount: 2,
+    totalCount: 5,
   });
 
   const fetchStats = useCallback(async () => {
     try {
       const supabase = createClient();
 
-      // Fetch projects count
-      const { count: projectsCount } = await supabase
-        .from('zo_projects')
-        .select('project_id', { count: 'exact', head: true });
+      // Fetch live products count from zo_products
+      const { count: liveCount } = await supabase
+        .from('zo_products')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'live');
 
-      // Fetch builder modules count
-      const { count: modulesCount } = await supabase
-        .from('zo_builder_modules')
+      // Fetch total products count
+      const { count: totalCount } = await supabase
+        .from('zo_products')
         .select('id', { count: 'exact', head: true });
 
       setStats({
-        productsCount: projectsCount ?? 5,
-        modulesCount: modulesCount ?? 45,
+        liveCount: liveCount ?? 2,
+        totalCount: totalCount ?? 5,
       });
     } catch (e) {
       console.log('Stats fetch skipped:', e);
@@ -50,16 +51,16 @@ export default function LiveStats() {
         <div className="stat-label">AI Minds</div>
       </div>
       <div className="stat">
-        <div className="stat-value">{stats.modulesCount}+</div>
-        <div className="stat-label">Knowledge Modules</div>
+        <div className="stat-value">{stats.liveCount}</div>
+        <div className="stat-label">Products Live</div>
       </div>
       <div className="stat">
-        <div className="stat-value">{stats.productsCount}</div>
-        <div className="stat-label">Products</div>
+        <div className="stat-value">{stats.totalCount}</div>
+        <div className="stat-label">Total Products</div>
       </div>
       <div className="stat">
-        <div className="stat-value">$0.45</div>
-        <div className="stat-label">Per Cycle</div>
+        <div className="stat-value">$0</div>
+        <div className="stat-label">Revenue So Far</div>
       </div>
     </div>
   );
