@@ -1,51 +1,29 @@
-'use client';
-
-import { useState } from 'react';
+// Direct Stripe Payment Links — no API calls, just works
+const PAYMENT_LINKS: Record<number, string> = {
+  1: 'https://buy.stripe.com/aFaeVebd6eewefb36K6sw03',
+  5: 'https://buy.stripe.com/28E28s4OI0nG1sp22G6sw04',
+  10: 'https://buy.stripe.com/cNibJ20ys2vO8URgXA6sw05',
+  25: 'https://buy.stripe.com/6oU5kE1Cw2vO0olazc6sw06',
+};
 
 interface SupportButtonProps {
   amount: number;
 }
 
-const RAILWAY_URL = process.env.NEXT_PUBLIC_RAILWAY_URL || 'https://zo-langgraph-production-3c96.up.railway.app';
-
 export default function SupportButton({ amount }: SupportButtonProps) {
-  const [loading, setLoading] = useState(false);
-
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${RAILWAY_URL}/donations/create-checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const data = await res.json();
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url;
-      }
-    } catch (err) {
-      console.error('Checkout error:', err);
-      // Fallback: open mailto with amount context
-      window.location.href = `mailto:hello@zeroorigine.com?subject=Support ZeroOrigine ($${amount}/mo)&body=I'd like to support ZeroOrigine at $${amount}/month.`;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const url = PAYMENT_LINKS[amount] || PAYMENT_LINKS[1];
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
       className="amount-button"
       aria-label={`Support with ${amount} dollar${amount === 1 ? '' : 's'} per month`}
+      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
     >
-      {loading ? '...' : `$${amount}`}
+      ${amount}
       <span className="amount-label">/mo</span>
-    </button>
+    </a>
   );
 }
