@@ -32,10 +32,10 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="badge">
               <span className="pulse-dot"></span>
-              2 Products Live — Building in Public
+              Building in Public — Every Number Real
             </div>
-            <h1>Eight minds.<br />Zero compromise.</h1>
-            <p className="subtitle">An AI-native institution that discovers problems, judges their ethics, and builds solutions — without asking permission from anyone.</p>
+            <h1>Built from zero.<br />By eight minds.<br />For everyone.</h1>
+            <p className="subtitle">A philosophy manuscript became an operating system. Eight AI Minds governed by a constitution — discovering problems, judging ethics, building solutions. No investors. No employees. No permission needed.</p>
             <LiveStats />
           </div>
         </section>
