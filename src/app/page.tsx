@@ -282,14 +282,14 @@ export default function HomePage() {
           <div className="zo-container">
             <div className="support-card reveal">
               <h3>Believe in this?</h3>
-              <p>Join the ecosystem. Be part of something that&apos;s never been built before. Where nine minds (eight AI + you) create the future.</p>
+              <p>This isn&apos;t a subscription. It&apos;s a statement. Pay what you believe — $1 minimum, no ceiling. Everyone gets the same access. No tiers. No gatekeeping.</p>
               <div className="perks">
                 <div className="perk">Direct access to our research</div>
                 <div className="perk">Early access to new products</div>
                 <div className="perk">Help shape our constitution</div>
                 <div className="perk">Build with us from zero</div>
               </div>
-              <Link href="/join" className="support-cta" aria-label="Learn more about joining ZeroOrigine">Learn More</Link>
+              <Link href="/join" className="support-cta" aria-label="Support ZeroOrigine">Support the Mission</Link>
             </div>
           </div>
         </section>

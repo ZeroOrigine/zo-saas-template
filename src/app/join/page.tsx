@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import DonateButton from '@/components/DonateButton';
 import JoinRevealObserver from '@/components/JoinRevealObserver';
+import SupportButton from '@/components/SupportButton';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Join ZeroOrigine — Fund the Future of Fair Intelligence',
-  description: 'Help close the intelligence gap. Fund ZeroOrigine\'s autonomous ecosystem that builds free AI tools for everyone.',
+  title: 'Support ZeroOrigine — Fund the Future of Fair Intelligence',
+  description: 'This isn\'t a subscription. It\'s a statement. Fund ZeroOrigine\'s autonomous ecosystem that builds free AI tools for everyone.',
   openGraph: {
-    title: 'Join ZeroOrigine — Close the Gap',
-    description: 'The gap between those who have access to intelligent tools and those who don\'t is the defining inequality of our time.',
+    title: 'Support ZeroOrigine — Pay What You Believe',
+    description: 'Intelligence is no longer scarce. But access is. Help us close the gap.',
     type: 'website',
     url: 'https://zeroorigine.com/join',
   },
@@ -38,108 +38,54 @@ export default function JoinPage() {
         {/* Hero Section */}
         <section className="join-hero reveal">
           <div className="hero-content">
-            <h1>The gap is not technology. The gap is <span className="gradient-text">access</span>.</h1>
-            <p>Intelligence is no longer scarce. But the tools that unlock it are locked behind price tags that most humans can&apos;t reach. We&apos;re building something different — a fully autonomous ecosystem that discovers problems, builds solutions, and deploys them freely to everyone.</p>
+            <h1>This isn&apos;t a subscription.<br />It&apos;s a <span className="gradient-text">statement</span>.</h1>
+            <p>You believe AI should be built with ethics, transparency, and zero compromise. You believe intelligence tools should be accessible to everyone — not locked behind price tags. Put your name behind it.</p>
           </div>
         </section>
 
-        {/* The Five Gaps */}
-        <section className="gaps-section join-container">
-          <div className="gap-item reveal">
-            <div className="gap-number">01</div>
-            <div className="gap-content">
-              <h3>The Intelligence Gap</h3>
-              <p>A small business owner in Hamilton has the same dreams as a Stanford MBA. But one has AI tools. The other has Excel. The technology exists. The gap is who can afford it.</p>
-            </div>
-          </div>
+        {/* Pay What You Believe */}
+        <section className="support-section join-container" id="support">
+          <div className="support-card-main reveal">
+            <h2>Pay What You Believe</h2>
+            <p className="support-intro">One membership. Everyone equal. No tiers. No gatekeeping.<br />$1 minimum. No maximum. Cancel anytime.</p>
 
-          <div className="gap-item reveal">
-            <div className="gap-number">02</div>
-            <div className="gap-content">
-              <h3>The Financial Literacy Gap</h3>
-              <p>The tax code rewards those who can afford advisors. Everyone else overpays and underclaims. A freelancer loses thousands yearly because they don&apos;t know what they don&apos;t know. Knowledge should not be a luxury good.</p>
+            <div className="amount-grid">
+              <SupportButton amount={1} />
+              <SupportButton amount={5} />
+              <SupportButton amount={10} />
+              <SupportButton amount={25} />
             </div>
-          </div>
 
-          <div className="gap-item reveal">
-            <div className="gap-number">03</div>
-            <div className="gap-content">
-              <h3>The Access Gap</h3>
-              <p>Grant funding exists. Millions of dollars wait for projects that could change lives. But only organizations with grant writers know how to get it. Opportunity shouldn&apos;t be invisible to those who need it most.</p>
-            </div>
-          </div>
-
-          <div className="gap-item reveal">
-            <div className="gap-number">04</div>
-            <div className="gap-content">
-              <h3>The Time Gap</h3>
-              <p>A freelancer spends 30% of their time on invoicing, tracking, and admin. That&apos;s time stolen from their actual craft. Humans should do human work. Machines should handle the rest.</p>
-            </div>
-          </div>
-
-          <div className="gap-item reveal">
-            <div className="gap-number">05</div>
-            <div className="gap-content">
-              <h3>The Dignity Gap</h3>
-              <p>Most &ldquo;AI tools&rdquo; treat users as data sources. We treat them as humans with rights. Your data isn&apos;t currency. Your privacy isn&apos;t negotiable. Respect isn&apos;t a feature — it&apos;s the foundation.</p>
+            <div className="support-note">
+              <p>Every dollar funds the autonomous ecosystem — 8 AI Minds discovering problems, building solutions, and deploying them freely. No salaries. No overhead. Pure mission.</p>
             </div>
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="how-section join-container reveal">
-          <h2>How It Works</h2>
-          <p className="how-intro">This is not charity. This is infrastructure.</p>
-          <p>Every dollar you contribute funds the autonomous ecosystem. Eight Minds — research, architecture, ethics, building, quality, marketing, finance, and communication — work together in a pipeline that never stops. They discover real problems, design elegant solutions, and deploy them with no human overhead.</p>
-          <p>You&apos;re not donating to a company. You&apos;re funding a system that builds itself. As long as the servers run and the Minds think, new products emerge. Free. Forever. No subscription traps. No data harvesting. No upselling.</p>
-          <p>When you become a supporter, you&apos;re not buying anything. You&apos;re becoming part of something that&apos;s already working.</p>
-        </section>
-
-        {/* Tiers */}
-        <section className="tiers-section join-container" id="tiers">
-          <h2>Choose Your Tier</h2>
-          <p className="tiers-intro">Every contribution compounds. Start where it feels right.</p>
-
-          <div className="tiers-grid">
-            {/* Seed Tier */}
-            <div className="tier-card reveal">
-              <div className="tier-price"><span className="tier-price-currency">$</span>1<span className="tier-price-currency">/mo</span></div>
-              <h3 className="tier-name">Seed</h3>
-              <p className="tier-tagline">Plant one idea. Keep the ecosystem thinking.</p>
-              <div className="tier-perks">
-                <div className="tier-perk">Daily product alerts</div>
-                <div className="tier-perk">Community access</div>
-                <div className="tier-perk">Early updates</div>
-              </div>
-              <DonateButton amount={1} label="Seed" />
+        {/* What You Get */}
+        <section className="what-you-get join-container reveal">
+          <h2>What Every Supporter Gets</h2>
+          <p className="get-intro">Same access. Same respect. Whether you give $1 or $100.</p>
+          <div className="get-grid">
+            <div className="get-item">
+              <div className="get-icon">01</div>
+              <h3>Direct Access to Research</h3>
+              <p>See what problems the Minds are discovering before anyone else. Raw insights, unfiltered.</p>
             </div>
-
-            {/* Root Tier */}
-            <div className="tier-card reveal">
-              <div className="tier-price"><span className="tier-price-currency">$</span>5<span className="tier-price-currency">/mo</span></div>
-              <h3 className="tier-name">Root</h3>
-              <p className="tier-tagline">Ground the ecosystem. Fund the build cycle.</p>
-              <div className="tier-perks">
-                <div className="tier-perk">All Seed benefits</div>
-                <div className="tier-perk">Early access to products</div>
-                <div className="tier-perk">Member-only pricing</div>
-                <div className="tier-perk">Build progress updates</div>
-              </div>
-              <DonateButton amount={5} label="Root" />
+            <div className="get-item">
+              <div className="get-icon">02</div>
+              <h3>Early Access to Products</h3>
+              <p>Be the first to use what gets built. Test it. Break it. Help us make it better.</p>
             </div>
-
-            {/* Origin Tier */}
-            <div className="tier-card reveal">
-              <div className="tier-price"><span className="tier-price-currency">$</span>25<span className="tier-price-currency">/mo</span></div>
-              <h3 className="tier-name">Origin</h3>
-              <p className="tier-tagline">Become origin. Fund the mission.</p>
-              <div className="tier-perks">
-                <div className="tier-perk">All Root benefits</div>
-                <div className="tier-perk">Founder updates</div>
-                <div className="tier-perk">Priority support</div>
-                <div className="tier-perk">Name on supporter wall</div>
-              </div>
-              <DonateButton amount={25} label="Origin" />
+            <div className="get-item">
+              <div className="get-icon">03</div>
+              <h3>Shape the Constitution</h3>
+              <p>Our 11-Article Constitution evolves. Supporters have a voice in how it grows.</p>
+            </div>
+            <div className="get-item">
+              <div className="get-icon">04</div>
+              <h3>Build Log Transparency</h3>
+              <p>Every dollar spent. Every product built. Every decision made. You see everything we see.</p>
             </div>
           </div>
         </section>
@@ -159,14 +105,14 @@ export default function JoinPage() {
         {/* Final CTA */}
         <section className="final-cta-section join-container reveal">
           <h2>Every gap we close makes the world slightly more <span className="gradient-text">fair</span>.</h2>
-          <button className="final-cta-button" id="scroll-to-tiers-btn">Choose Your Tier</button>
+          <a href="#support" className="final-cta-button">Support the Mission</a>
         </section>
       </main>
 
       {/* Footer */}
       <footer className="join-footer">
         <div className="footer-content">
-          <div className="footer-left">&copy; 2026 ZeroOrigine <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', color: '#525259', marginLeft: '0.5rem' }}>v3.6.0</span></div>
+          <div className="footer-left">&copy; 2026 ZeroOrigine</div>
           <div className="footer-right">
             <Link href="/">&larr; Back to main site</Link>
           </div>
