@@ -1062,6 +1062,15 @@ nav.glass-nav {
 }
 
 @media (max-width: 768px) {
+  .support-card {
+    padding: 1.5rem;
+  }
+
+  .perks {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
   .final-cta {
     padding: 4rem 0;
   }
@@ -1134,6 +1143,33 @@ nav.glass-nav {
 
   .footer-links {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .minds-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .beliefs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .amount-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
