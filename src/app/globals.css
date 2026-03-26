@@ -332,8 +332,8 @@ nav.glass-nav {
 
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
   padding-top: 3rem;
   border-top: 1px solid var(--border);
   animation: fadeInDown 0.8s ease 0.3s both;
@@ -958,33 +958,39 @@ nav.glass-nav {
   background: var(--black);
   border: 1px solid rgba(226, 179, 64, 0.3);
   border-radius: 12px;
-  padding: 3rem;
+  padding: 2rem 2.5rem;
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .support-card h3 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
   color: var(--white);
+}
+
+.support-card > p {
+  margin-bottom: 1rem;
 }
 
 .perks {
   text-align: left;
-  margin: 2rem 0;
-  padding: 1.5rem;
+  margin: 1rem 0;
+  padding: 1rem 1.5rem;
   background: rgba(226, 179, 64, 0.05);
   border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.5rem;
 }
 
 .perk {
   color: var(--text-secondary);
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .perk::before {
@@ -994,19 +1000,15 @@ nav.glass-nav {
   flex-shrink: 0;
 }
 
-.perk:last-child {
-  margin-bottom: 0;
-}
-
 .support-cta {
   display: inline-block;
   background: var(--amber);
   color: var(--void);
-  padding: 1rem 2rem;
+  padding: 0.75rem 2rem;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
   transition: all 0.3s ease;
   border: 2px solid var(--amber);
 }
