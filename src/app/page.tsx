@@ -316,7 +316,6 @@ export default function HomePage() {
             <a href="#beliefs">Beliefs</a>
             <a href="#transparency">Transparency</a>
             <a href="#constitution">Law</a>
-            <a href="https://jagdishlade.com" target="_blank" rel="noopener noreferrer">Origin</a>
           </div>
         </div>
       </footer>
