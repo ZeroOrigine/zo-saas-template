@@ -18,8 +18,30 @@ export default function RevealObserver() {
       });
     }, observerOptions);
 
+    // Observe all existing .reveal elements
     document.querySelectorAll('.reveal').forEach((el) => {
       observer.observe(el);
+    });
+
+    // Watch for dynamically-added .reveal elements (e.g. from client components)
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            if (node.classList.contains('reveal')) {
+              observer.observe(node);
+            }
+            node.querySelectorAll('.reveal').forEach((el) => {
+              observer.observe(el);
+            });
+          }
+        });
+      });
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
     });
 
     // Manifesto block observer
@@ -43,6 +65,7 @@ export default function RevealObserver() {
     return () => {
       observer.disconnect();
       manifestoObserver.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 

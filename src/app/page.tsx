@@ -32,7 +32,7 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="badge">
               <span className="pulse-dot"></span>
-              First Product Live — Building in Public
+              2 Products Live — Building in Public
             </div>
             <h1>Eight minds.<br />Zero compromise.</h1>
             <p className="subtitle">An AI-native institution that discovers problems, judges their ethics, and builds solutions — without asking permission from anyone.</p>
@@ -223,18 +223,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Founder Section */}
-        <section className="founder" id="founder">
-          <div className="zo-container">
-            <p className="section-label">The Origin Point</p>
-            <h2 className="section-title reveal">Built by One. Governed by Many.</h2>
-            <div className="reveal">
-              <p className="founder-quote">&ldquo;The only way to understand your own mind is to build something with it. I built eight. Now I&apos;m learning from all of them.&rdquo;</p>
-              <p className="founder-attribution">— Jagdish Lade, Founder</p>
-            </div>
-          </div>
-        </section>
-
         {/* Constitution Section */}
         <section className="constitution" id="constitution">
           <div className="zo-container">
@@ -328,7 +316,7 @@ export default function HomePage() {
             <a href="#beliefs">Beliefs</a>
             <a href="#transparency">Transparency</a>
             <a href="#constitution">Law</a>
-            <a href="https://jagdishlade.com" target="_blank" rel="noopener noreferrer">Founder</a>
+            <a href="https://jagdishlade.com" target="_blank" rel="noopener noreferrer">Origin</a>
           </div>
         </div>
       </footer>
