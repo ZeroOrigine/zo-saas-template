@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function TransparencyStats() {
-  const [liveCount, setLiveCount] = useState(2);
+  const [liveCount, setLiveCount] = useState<number | null>(null);
+  const [totalSpend, setTotalSpend] = useState<number | null>(null);
 
   const fetchStats = useCallback(async () => {
     try {
-      const supabase = createClient();
-      const { count } = await supabase
-        .from('zo_products')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'live');
-
-      if (count !== null) setLiveCount(count);
+      const res = await fetch('/api/stats', { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.ok) {
+        if (typeof data.liveCount === 'number') setLiveCount(data.liveCount);
+        if (typeof data.totalSpend === 'number') setTotalSpend(data.totalSpend);
+      }
     } catch (e) {
       console.log('Transparency stats fetch skipped:', e);
     }
@@ -24,10 +23,14 @@ export default function TransparencyStats() {
     fetchStats();
   }, [fetchStats]);
 
+  const num = (n: number | null) => (n === null ? '—' : String(n));
+  const money = (n: number | null) =>
+    n === null ? '—' : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
   return (
     <div className="metrics-grid reveal">
       <div className="metric">
-        <div className="metric-value">{liveCount}</div>
+        <div className="metric-value">{num(liveCount)}</div>
         <div className="metric-label">Products Live</div>
       </div>
       <div className="metric">
@@ -35,7 +38,7 @@ export default function TransparencyStats() {
         <div className="metric-label">Cognitive Skills</div>
       </div>
       <div className="metric">
-        <div className="metric-value">$38</div>
+        <div className="metric-value">{money(totalSpend)}</div>
         <div className="metric-label">Total API Spend</div>
       </div>
       <div className="metric">

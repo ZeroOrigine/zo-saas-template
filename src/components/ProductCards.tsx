@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 interface Product {
   slug: string;
@@ -28,22 +27,15 @@ export default function ProductCards() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const supabase = createClient();
-
-      // zo_products RLS only allows anon to read 'live' products
-      // Use service role via API route or just show live ones publicly
-      const { data, error } = await supabase
-        .from('zo_products')
-        .select('slug, name, tagline, description, status, url, icon')
-        .eq('status', 'live')
-        .order('sort_order', { ascending: true });
-
-      if (!error && data) {
-        setProducts(data);
-        setLiveCount(data.length);
-        setTotalCount(data.length); // Only live visible to anon
+      const res = await fetch('/api/stats', { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.ok && Array.isArray(data.products)) {
+        setProducts(data.products);
+        setLiveCount(data.liveCount ?? data.products.length);
+        setTotalCount(data.totalCount ?? data.products.length);
       }
     } catch (e) {
+      // Keep last-known content; fall back to static page.tsx if empty.
       console.log('Products fetch skipped:', e);
     }
   }, []);

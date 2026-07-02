@@ -1,39 +1,28 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 interface LiveStatsData {
-  liveCount: number;
-  totalCount: number;
+  liveCount: number | null;
+  totalCount: number | null;
 }
 
 export default function LiveStats() {
+  // null = not loaded yet. We never show invented numbers (Rule: every number real).
   const [stats, setStats] = useState<LiveStatsData>({
-    liveCount: 2,
-    totalCount: 5,
+    liveCount: null,
+    totalCount: null,
   });
 
   const fetchStats = useCallback(async () => {
     try {
-      const supabase = createClient();
-
-      // Fetch live products count from zo_products
-      const { count: liveCount } = await supabase
-        .from('zo_products')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'live');
-
-      // Fetch total products count
-      const { count: totalCount } = await supabase
-        .from('zo_products')
-        .select('id', { count: 'exact', head: true });
-
-      setStats({
-        liveCount: liveCount ?? 2,
-        totalCount: totalCount ?? 5,
-      });
+      const res = await fetch('/api/stats', { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.ok) {
+        setStats({ liveCount: data.liveCount, totalCount: data.totalCount });
+      }
     } catch (e) {
+      // Keep last-known values; never overwrite with a guess.
       console.log('Stats fetch skipped:', e);
     }
   }, []);
@@ -44,6 +33,8 @@ export default function LiveStats() {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
+  const show = (n: number | null) => (n === null ? '—' : String(n));
+
   return (
     <div className="hero-stats">
       <div className="stat">
@@ -51,11 +42,11 @@ export default function LiveStats() {
         <div className="stat-label">AI Minds</div>
       </div>
       <div className="stat">
-        <div className="stat-value">{stats.liveCount}</div>
+        <div className="stat-value">{show(stats.liveCount)}</div>
         <div className="stat-label">Products Live</div>
       </div>
       <div className="stat">
-        <div className="stat-value">{stats.totalCount}</div>
+        <div className="stat-value">{show(stats.totalCount)}</div>
         <div className="stat-label">Total Products</div>
       </div>
       <div className="stat">
