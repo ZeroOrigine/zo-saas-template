@@ -148,7 +148,7 @@ export interface MindStatus {
 const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string[]; busyStatuses: string[] }[] = [
   { key: 'research_a', name: 'Research Mind A', epithet: 'the philosopher', workflows: ['research'], busyStatuses: ['researching'] },
   { key: 'research_b', name: 'Research Mind B', epithet: 'the architect', workflows: ['research'], busyStatuses: [] },
-  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics'], busyStatuses: [] },
+  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics_review'], busyStatuses: [] },
   { key: 'architect', name: 'Pipeline Architect', epithet: 'the planner', workflows: ['build_architect'], busyStatuses: [] },
   { key: 'builder', name: 'Builder Mind', epithet: 'the craftsman´s hands', workflows: ['builder'], busyStatuses: ['building'] },
   { key: 'qa', name: 'QA Mind', epithet: 'the honest judge', workflows: ['qa_pipeline'], busyStatuses: ['qa_round_1', 'qa_round_2', 'qa_round_3'] },
