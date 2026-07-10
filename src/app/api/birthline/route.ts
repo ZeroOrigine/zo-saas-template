@@ -4,6 +4,29 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+/**
+ * Public-safety filter for machine thoughts. Thoughts SHOULD never contain
+ * secrets (the pipeline's deterministic gate scans for them) — but "should"
+ * is not a security control. Belt + suspenders before anything hits the wire:
+ * redact secret-shaped strings, emails, and connection URLs; truncate hard.
+ */
+function sanitizeThought(t: string | null): string | null {
+  if (!t) return null;
+  let x = t
+    .replace(/(sk|re|ghp|gho|whsec|pk|rk)_[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(/github_pat_[A-Za-z0-9_]{20,}/g, '[redacted]')
+    .replace(/eyJ[A-Za-z0-9_-]{20,}\.?[A-Za-z0-9._-]*/g, '[redacted]')
+    .replace(/AKIA[A-Z0-9]{12,}/g, '[redacted]')
+    .replace(/xox[abpr]-[A-Za-z0-9-]{10,}/g, '[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._-]{12,}/gi, 'Bearer [redacted]')
+    .replace(/(postgres|postgresql|mysql|redis|mongodb(\+srv)?):\/\/\S+/gi, '[redacted-url]')
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (x.length > 220) x = x.slice(0, 220) + '…';
+  return x;
+}
+
 // Statuses that mean "a product is physically on the line right now"
 const STATION_OF: Record<string, number> = {
   building: 3,
@@ -48,7 +71,7 @@ export async function GET() {
       perMind[m] ??= { hour: 0, last: null, lastAt: null };
       if (new Date(r.created_at).getTime() > hourAgo) perMind[m].hour += 1;
       if (!perMind[m].last) {
-        perMind[m].last = r.output_summary || r.action || null;
+        perMind[m].last = sanitizeThought(r.output_summary || r.action || null);
         perMind[m].lastAt = r.created_at;
       }
     }
@@ -69,7 +92,7 @@ export async function GET() {
         since: p.updated_at,
         born: p.created_at,
         cost: Math.round(cost * 100) / 100,
-        thought: thought ? (thought.output_summary || thought.action) : null,
+        thought: sanitizeThought(thought ? (thought.output_summary || thought.action) : null),
         thoughtBy: thought?.mind_name ?? null,
         thoughtAt: thought?.created_at ?? null,
       };
@@ -88,7 +111,7 @@ export async function GET() {
 
     return NextResponse.json(
       { ok: true, inflight, lastBirth, perMind, at: new Date().toISOString() },
-      { headers: { 'Cache-Control': 'no-store' } },
+      { headers: { 'Cache-Control': 'public, max-age=0, s-maxage=10, stale-while-revalidate=20' } },
     );
   } catch {
     return NextResponse.json({ ok: false }, { status: 200 });
