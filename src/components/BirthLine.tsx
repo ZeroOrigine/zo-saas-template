@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Inflight = {
   name: string; status: string; station: number; halted?: boolean; since: string; born: string;
@@ -61,14 +62,18 @@ export default function BirthLine() {
   const [data, setData] = useState<Payload | null>(null);
   const [now, setNow] = useState(Date.now());
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const load = () =>
       fetch('/api/birthline').then((r) => r.json()).then((d: Payload) => { if (d.ok) setData(d); }).catch(() => {});
     load();
     timer.current = setInterval(load, 12_000);
+    // The Mind cards are server-rendered; without this they freeze at page-load
+    // time while the rail updates live (founder saw WORKING NOW an hour late).
+    const refresh = setInterval(() => router.refresh(), 60_000);
     const tick = setInterval(() => setNow(Date.now()), 1000);
-    return () => { if (timer.current) clearInterval(timer.current); clearInterval(tick); };
+    return () => { if (timer.current) clearInterval(timer.current); clearInterval(tick); clearInterval(refresh); };
   }, []);
 
   const f = data?.inflight ?? null;
