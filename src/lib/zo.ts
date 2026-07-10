@@ -135,3 +135,68 @@ export async function getStory(slug: string) {
     return null;
   }
 }
+
+export interface MindStatus {
+  key: string;
+  name: string;
+  epithet: string;
+  busy: boolean;
+  lastSeen: string | null;
+  calls: number;
+}
+
+const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string[]; busyStatuses: string[] }[] = [
+  { key: 'research_a', name: 'Research Mind A', epithet: 'the philosopher', workflows: ['research'], busyStatuses: ['researching'] },
+  { key: 'research_b', name: 'Research Mind B', epithet: 'the architect', workflows: ['research'], busyStatuses: [] },
+  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics'], busyStatuses: [] },
+  { key: 'architect', name: 'Pipeline Architect', epithet: 'the planner', workflows: ['build_architect'], busyStatuses: [] },
+  { key: 'builder', name: 'Builder Mind', epithet: 'the craftsman´s hands', workflows: ['builder'], busyStatuses: ['building'] },
+  { key: 'qa', name: 'QA Mind', epithet: 'the honest judge', workflows: ['qa_pipeline'], busyStatuses: ['qa_round_1', 'qa_round_2', 'qa_round_3'] },
+  { key: 'marketing', name: 'Marketing Mind', epithet: 'the storyteller', workflows: ['marketing'], busyStatuses: ['marketing'] },
+  { key: 'immune', name: 'Immune System', epithet: 'the night watch', workflows: ['hotfix', 'health'], busyStatuses: [] },
+];
+
+export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: { attempts: number; launched: number; avgCostLive: number; totalCalls: number; firstMonth: string } } | null> {
+  try {
+    const supabase = createAdminClient();
+    const [costs, projects, products] = await Promise.all([
+      supabase.from('zo_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
+      supabase.from('zo_projects').select('status,created_at'),
+      supabase.from('zo_products').select('slug,status'),
+    ]);
+    const rows = costs.data ?? [];
+    const lastByWf: Record<string, string> = {};
+    const callsByWf: Record<string, number> = {};
+    for (const r of rows) {
+      const wf = r.workflow || 'other';
+      if (!lastByWf[wf]) lastByWf[wf] = r.created_at;
+      callsByWf[wf] = (callsByWf[wf] || 0) + 1;
+    }
+    const activeStatuses = new Set((projects.data ?? []).map((p) => p.status));
+
+    const minds: MindStatus[] = MIND_DEFS.map((m) => {
+      const seen = m.workflows.map((w) => lastByWf[w]).filter(Boolean).sort().reverse();
+      const calls = m.workflows.reduce((s, w) => s + (callsByWf[w] || 0), 0);
+      const busy = m.busyStatuses.some((s) => activeStatuses.has(s));
+      return { key: m.key, name: m.name, epithet: m.epithet, busy, lastSeen: seen[0] ?? null, calls };
+    });
+
+    const allProjects = projects.data ?? [];
+    const liveProducts = (products.data ?? []).filter((p) => p.status === 'live');
+    const totalSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const first = allProjects.map((p) => p.created_at).sort()[0];
+
+    return {
+      minds,
+      metrics: {
+        attempts: allProjects.length,
+        launched: liveProducts.length,
+        avgCostLive: liveProducts.length ? Math.round((totalSpend / liveProducts.length) * 100) / 100 : 0,
+        totalCalls: rows.length,
+        firstMonth: first ? new Date(first).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }) : '—',
+      },
+    };
+  } catch {
+    return null;
+  }
+}

@@ -8,12 +8,12 @@ import SubscribeForm from '@/components/SubscribeForm';
 import BootLine from '@/components/BootLine';
 import Ticker from '@/components/Ticker';
 import DropBanner from '@/components/DropBanner';
-import { getHomeData } from '@/lib/zo';
+import { getHomeData, getMindsStatus } from '@/lib/zo';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const data = await getHomeData();
+  const [data, mindsData] = await Promise.all([getHomeData(), getMindsStatus()]);
   const feed = data?.feed ?? [];
   const newest = data?.products?.slice(-3).reverse() ?? [];
   const drop = feed.find(
@@ -80,6 +80,42 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Live Minds Status Board */}
+        {mindsData && (
+          <section className="mc-board" id="board" aria-label="Live status of the eight Minds">
+            <div className="zo-container">
+              <p className="section-label">On shift right now</p>
+              <h2 className="section-title reveal">Eight Minds. Zero humans on the floor.</h2>
+              <div className="board-grid">
+                {mindsData.minds.map((m) => {
+                  const hours = m.lastSeen ? Math.floor((Date.now() - new Date(m.lastSeen).getTime()) / 3600000) : null;
+                  const seen = hours === null ? 'no recorded shift yet'
+                    : hours < 1 ? 'thinking within the hour'
+                    : hours < 24 ? `last thought ${hours}h ago`
+                    : `last thought ${Math.floor(hours / 24)}d ago`;
+                  return (
+                    <div key={m.key} className={`board-card reveal${m.busy ? ' board-busy' : ''}`}>
+                      <div className="board-head">
+                        <span className={`board-dot${m.busy ? ' busy' : hours !== null && hours < 24 ? ' warm' : ''}`} aria-hidden="true"></span>
+                        <strong>{m.name}</strong>
+                      </div>
+                      <p className="board-epithet">{m.epithet}</p>
+                      <p className="board-meta">{m.busy ? 'WORKING NOW' : seen}{m.calls > 0 ? ` · ${m.calls.toLocaleString()} thoughts` : ''}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="metrics-strip reveal" aria-label="Output metrics">
+                <div><span className="metric-num">{mindsData.metrics.attempts}</span><span className="metric-lbl">products attempted since {mindsData.metrics.firstMonth}</span></div>
+                <div><span className="metric-num">{mindsData.metrics.launched}</span><span className="metric-lbl">alive on the internet</span></div>
+                <div><span className="metric-num">{mindsData.metrics.totalCalls.toLocaleString()}</span><span className="metric-lbl">acts of machine reasoning</span></div>
+                <div><span className="metric-num">${mindsData.metrics.avgCostLive.toFixed(0)}</span><span className="metric-lbl">avg. spend per living product</span></div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Manifesto Section */}
         <section className="manifesto" id="manifesto">
