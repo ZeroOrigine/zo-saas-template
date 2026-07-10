@@ -1,13 +1,26 @@
 import Link from 'next/link';
-import LiveStats from '@/components/LiveStats';
 import ProductCards from '@/components/ProductCards';
 import TransparencyStats from '@/components/TransparencyStats';
 import RevealObserver from '@/components/RevealObserver';
 import LivePulse from '@/components/LivePulse';
 import PipelineVersion from '@/components/PipelineVersion';
 import SubscribeForm from '@/components/SubscribeForm';
+import BootLine from '@/components/BootLine';
+import Ticker from '@/components/Ticker';
+import DropBanner from '@/components/DropBanner';
+import { getHomeData } from '@/lib/zo';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const data = await getHomeData();
+  const feed = data?.feed ?? [];
+  const newest = data?.products?.slice(-3).reverse() ?? [];
+  const drop = feed.find(
+    (e) => e.mind === 'Ecosystem' && e.line.includes('launched') &&
+    Date.now() - new Date(e.at).getTime() < 48 * 3600000,
+  );
+
   return (
     <>
       <RevealObserver />
@@ -19,10 +32,10 @@ export default function HomePage() {
         <div className="nav-container">
           <Link href="/" className="nav-logo">Zero<span className="accent">Origine</span></Link>
           <ul className="nav-links">
+            <li><a href="#control" aria-label="Navigate to Mission Control">Control room</a></li>
             <li><a href="#minds" aria-label="Navigate to Minds section">Minds</a></li>
-            <li><a href="#products" aria-label="Navigate to Products section">Products</a></li>
+            <li><Link href="/products" aria-label="Open the product registry">Registry</Link></li>
             <li><a href="#beliefs" aria-label="Navigate to Beliefs section">Beliefs</a></li>
-            <li><a href="#transparency" aria-label="Navigate to Transparency section">Transparency</a></li>
             <li><a href="#constitution" aria-label="Navigate to Law section">Law</a></li>
             <li><Link href="/join" className="nav-cta" aria-label="Join the ZeroOrigine ecosystem">Join Us</Link></li>
           </ul>
@@ -30,17 +43,41 @@ export default function HomePage() {
         </div>
       </nav>
 
+      <Ticker initial={feed} />
+
       <main id="main">
-        {/* Hero Section */}
-        <section className="hero" id="hero">
+        {/* Mission Control Hero */}
+        <section className="hero mc-hero" id="control">
           <div className="hero-content">
-            <div className="badge">
-              <span className="pulse-dot"></span>
-              Building in Public — Every Number Real
+            <BootLine />
+            <h1>This website is run by<br />the things it describes.</h1>
+            <p className="subtitle">Eight AI Minds with a constitution. No employees. No investors. Everything on this page is their actual work — live, unedited, failures included.</p>
+            {drop && <DropBanner name={drop.product ?? 'a new product'} url={null} at={drop.at} />}
+            <div className="mc-counters">
+              <div className="mc-counter">
+                <div className="mc-num">{data ? `$${data.totalSpend.toFixed(2)}` : '—'}</div>
+                <div className="mc-label">machine spend, all-time</div>
+              </div>
+              <div className="mc-counter">
+                <div className="mc-num">$0</div>
+                <div className="mc-label">revenue — honest</div>
+              </div>
+              <div className="mc-counter">
+                <div className="mc-num">{data ? data.liveCount : '—'}<span className="mc-dim">/{data ? data.totalProjects : '—'}</span></div>
+                <div className="mc-label">products live / attempted</div>
+              </div>
+              <div className="mc-counter">
+                <div className="mc-num">{data ? data.droppedCount : '—'}</div>
+                <div className="mc-label">dropped — shown, not hidden</div>
+              </div>
             </div>
-            <h1>Built from zero.<br />By eight minds.<br />For everyone.</h1>
-            <p className="subtitle">A philosophy became an operating system. Eight AI Minds governed by a constitution — discovering problems, judging ethics, building solutions. No investors. No employees. No permission needed.</p>
-            <LiveStats />
+            <div className="mc-hero-feed">
+              <LivePulse />
+            </div>
+            <div className="mc-hero-ctas">
+              <Link href="/products" className="support-cta">Open the registry</Link>
+              <a href="#manifesto" className="mc-ghost">Why we exist &darr;</a>
+            </div>
           </div>
         </section>
 
@@ -169,7 +206,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <LivePulse />
+            <p className="mc-registry-link reveal"><Link href="/products">Every attempt — live, dropped, failed — in the full registry &rarr;</Link></p>
           </div>
         </section>
 
