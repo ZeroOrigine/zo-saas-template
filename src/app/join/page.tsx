@@ -56,6 +56,20 @@ export default function JoinPage() {
               <SupportButton amount={25} />
             </div>
 
+            <div className="onetime-block">
+              <p className="onetime-label">Prefer no commitment at all?</p>
+              <a
+                href="https://buy.stripe.com/3cI4gA6WQ4DW9YVazc6sw0a"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="onetime-button"
+                aria-label="Give a one-time amount of your choice"
+              >
+                Give once — any amount
+              </a>
+              <p className="onetime-note">You choose the number. $1 minimum. No account, no recurring anything.</p>
+            </div>
+
             <div className="support-note">
               <p>Every dollar funds the autonomous ecosystem — 8 AI Minds discovering problems, building solutions, and deploying them freely. No salaries. No overhead. Pure mission.</p>
             </div>

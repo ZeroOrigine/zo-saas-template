@@ -3,6 +3,9 @@ import LiveStats from '@/components/LiveStats';
 import ProductCards from '@/components/ProductCards';
 import TransparencyStats from '@/components/TransparencyStats';
 import RevealObserver from '@/components/RevealObserver';
+import LivePulse from '@/components/LivePulse';
+import PipelineVersion from '@/components/PipelineVersion';
+import SubscribeForm from '@/components/SubscribeForm';
 
 export default function HomePage() {
   return (
@@ -23,6 +26,7 @@ export default function HomePage() {
             <li><a href="#constitution" aria-label="Navigate to Law section">Law</a></li>
             <li><Link href="/join" className="nav-cta" aria-label="Join the ZeroOrigine ecosystem">Join Us</Link></li>
           </ul>
+          <Link href="/join" className="nav-cta nav-cta-mobile" aria-label="Join the ZeroOrigine ecosystem">Join Us</Link>
         </div>
       </nav>
 
@@ -145,9 +149,9 @@ export default function HomePage() {
               <div className="ethics-decision">
                 <div className="decision-name">
                   <strong>InvoiceMemory</strong>
-                  <span className="decision-version">Score 8.5/10</span>
+                  <span className="decision-version">Approved 8.5/10 — then dropped after 9 build attempts (~$126). Two new pipeline rules learned. We show our failures.</span>
                 </div>
-                <span className="decision-result decision-approved">Approved</span>
+                <span className="decision-result decision-dropped">Dropped</span>
               </div>
               <div className="ethics-decision">
                 <div className="decision-name">
@@ -164,6 +168,8 @@ export default function HomePage() {
                 <span className="decision-result decision-approved">Approved with fixes</span>
               </div>
             </div>
+
+            <LivePulse />
           </div>
         </section>
 
@@ -298,7 +304,9 @@ export default function HomePage() {
         <section className="final-cta" id="cta">
           <div className="zo-container reveal">
             <h2>The future belongs to those who begin from zero.</h2>
-            <a href="mailto:hello@zeroorigine.com" className="cta-button" aria-label="Send email to contact ZeroOrigine">Get in Touch</a>
+            <p className="cta-sub">New products ship from the Minds continuously. Watch it happen — no spam, only real milestones.</p>
+            <SubscribeForm />
+            <a href="mailto:hello@zeroorigine.com" className="cta-button cta-secondary" aria-label="Send email to contact ZeroOrigine">Get in Touch</a>
           </div>
         </section>
       </main>
@@ -308,7 +316,7 @@ export default function HomePage() {
         <div className="footer-content">
           <div className="footer-left">
             <p>&copy; 2026 ZeroOrigine. The First AI-Native Institution.</p>
-            <p className="footer-version">Pipeline v4.1.2 — Building Honestly Since March 2026</p>
+            <PipelineVersion />
           </div>
           <div className="footer-links">
             <a href="#minds">Minds</a>
@@ -316,6 +324,9 @@ export default function HomePage() {
             <a href="#beliefs">Beliefs</a>
             <a href="#transparency">Transparency</a>
             <a href="#constitution">Law</a>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/refund">Refunds</Link>
           </div>
         </div>
       </footer>
