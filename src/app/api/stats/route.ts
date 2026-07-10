@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getFixedCosts } from '@/lib/fixedCosts';
 
 // Always run at request time — the numbers must be real, never build-time stale.
 export const dynamic = 'force-dynamic';
@@ -29,10 +30,12 @@ export async function GET() {
     if (liveRes.error) throw liveRes.error;
 
     const live = liveRes.data ?? [];
-    const totalSpend = (spendRes.data ?? []).reduce(
+    const apiSpend = (spendRes.data ?? []).reduce(
       (sum: number, r: { cost_usd: number | null }) => sum + (Number(r.cost_usd) || 0),
       0,
     );
+    // Total Invested = variable API spend + fixed costs (subscriptions + one-time R&D)
+    const totalSpend = apiSpend + (await getFixedCosts());
 
     return NextResponse.json(
       {

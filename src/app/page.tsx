@@ -56,7 +56,7 @@ export default async function HomePage() {
             <div className="mc-counters">
               <div className="mc-counter">
                 <div className="mc-num">{data ? `$${data.totalSpend.toFixed(2)}` : '—'}</div>
-                <div className="mc-label">machine spend, all-time</div>
+                <div className="mc-label">total invested, all-time</div>
               </div>
               <div className="mc-counter">
                 <div className="mc-num">$0</div>

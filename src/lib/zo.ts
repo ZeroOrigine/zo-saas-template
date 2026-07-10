@@ -46,7 +46,9 @@ export async function getHomeData() {
         .in('event_type', Object.keys(FRIENDLY)).order('created_at', { ascending: false }).limit(10),
     ]);
     const costRows = costs.data ?? [];
-    const totalSpend = costRows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const { getFixedCosts } = await import('@/lib/fixedCosts');
+    const totalSpend =
+      costRows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0) + (await getFixedCosts());
     const live = (products.data ?? []).filter((p) => p.status === 'live');
     const allProjects = projects.data ?? [];
     const dropped = allProjects.filter((p) => p.status === 'dropped').length;

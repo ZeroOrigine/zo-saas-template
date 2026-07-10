@@ -39,7 +39,7 @@ export default function TransparencyStats() {
       </div>
       <div className="metric">
         <div className="metric-value">{money(totalSpend)}</div>
-        <div className="metric-label">Total API Spend</div>
+        <div className="metric-label">Total Invested</div>
       </div>
       <div className="metric">
         <div className="metric-value">$0</div>
