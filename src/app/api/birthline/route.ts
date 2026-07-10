@@ -44,6 +44,7 @@ const PUBLIC_MIND: Record<string, string> = {
 const STATION_OF: Record<string, number> = {
   building: 3,
   build_complete: 3,
+  self_correcting: 3,
   qa: 4,
   qa_round_1: 4,
   qa_round_2: 4,

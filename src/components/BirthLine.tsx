@@ -18,6 +18,7 @@ const STATIONS = ['Research', 'Evaluation', 'Ethics', 'Builder', 'QA', 'Launch']
 const VERB: Record<string, string> = {
   building: 'being built',
   build_complete: 'build complete — awaiting QA',
+  self_correcting: 'inspecting its own work before QA',
   qa: 'under inspection',
   qa_fix_needed: 'being repaired',
   qa_round_1: 'under inspection — round 1',
