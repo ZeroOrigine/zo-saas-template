@@ -49,8 +49,10 @@ const STATION_OF: Record<string, number> = {
   qa_round_2: 4,
   qa_round_3: 4,
   qa_fix_needed: 4,
+  qa_passed: 5,
   marketing: 5,
   deploying: 5,
+  launched: 5,
 };
 
 // Halted ≠ gone: a paused product stays visible on the line, honestly labeled.

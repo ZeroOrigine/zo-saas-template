@@ -26,7 +26,9 @@ const VERB: Record<string, string> = {
   qa_infra_error: 'halted — pipeline error, machine being repaired',
   qa_failed: 'halted at QA — awaiting resume',
   budget_halted: 'paused — budget cap reached',
+  qa_passed: 'PASSED inspection — getting its story',
   marketing: 'getting its story',
+  launched: 'LIVE ON THE INTERNET',
   deploying: 'going live',
   deploy_failed: 'launch blocked — machine investigating',
 };
