@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 type Inflight = {
-  name: string; status: string; station: number; since: string; born: string;
+  name: string; status: string; station: number; halted?: boolean; since: string; born: string;
   cost: number; thought: string | null; thoughtBy: string | null; thoughtAt: string | null;
 };
 type Payload = {
@@ -19,7 +19,12 @@ const VERB: Record<string, string> = {
   build_complete: 'build complete — awaiting QA',
   qa: 'under inspection',
   qa_fix_needed: 'being repaired',
-  qa_infra_error: 'inspection paused',
+  qa_round_1: 'under inspection — round 1',
+  qa_round_2: 'under inspection — round 2',
+  qa_round_3: 'under inspection — round 3',
+  qa_infra_error: 'halted — pipeline error, machine being repaired',
+  qa_failed: 'halted at QA — awaiting resume',
+  budget_halted: 'paused — budget cap reached',
   marketing: 'getting its story',
   deploying: 'going live',
   deploy_failed: 'launch blocked — machine investigating',
@@ -74,7 +79,7 @@ export default function BirthLine() {
       <div className="bl-rail" role="img" aria-label={f ? `${f.name} is at the ${STATIONS[f.station]} station` : 'Assembly line idle'}>
         {STATIONS.map((s, i) => (
           <div key={s} className={`bl-station${f && i === f.station ? ' bl-here' : ''}${f && i < f.station ? ' bl-done' : ''}`}>
-            <span className="bl-node">{f && i === f.station && <span className="bl-token" />}</span>
+            <span className="bl-node">{f && i === f.station && <span className={`bl-token${f.halted ? ' bl-token-halted' : ''}`} />}</span>
             <span className="bl-name">{s}</span>
           </div>
         ))}
@@ -86,7 +91,7 @@ export default function BirthLine() {
           <div className="bl-line1">
             <span className="bl-product">{f.name}</span>
             <span className="bl-verb"> is {VERB[f.status] ?? f.status} </span>
-            <span className="bl-live">LIVE</span>
+            <span className={f.halted ? "bl-paused" : "bl-live"}>{f.halted ? "PAUSED" : "LIVE"}</span>
           </div>
           <div className="bl-line2">
             on the line {age(f.born, now)} · ${f.cost.toFixed(2)} of compute converted into product

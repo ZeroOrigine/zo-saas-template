@@ -2250,3 +2250,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
   background-size: 34px 12px; clip-path: polygon(0 6px, 20% 6px, 30% 0, 45% 12px, 55% 3px, 70% 6px, 100% 6px, 100% 7.5px, 70% 7.5px, 55% 5px, 45% 13px, 30% 2px, 20% 7.5px, 0 7.5px);
   background-color: #ef9f27; animation: bl-ecg 1.2s linear infinite; opacity: 0.9; }
 @keyframes bl-ecg { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.bl-token-halted { animation: none; background: #ff7a7a; }
+.bl-here:has(.bl-token-halted) .bl-node { border-color: rgba(239,80,80,0.7); box-shadow: 0 0 14px 3px rgba(239,80,80,0.25); }
+.bl-paused { display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.45rem; border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.6); font-size: 0.62rem; letter-spacing: 0.14em; border-radius: 3px; vertical-align: middle; }

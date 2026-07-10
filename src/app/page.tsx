@@ -13,6 +13,8 @@ import { getHomeData, getMindsStatus } from '@/lib/zo';
 
 export const dynamic = 'force-dynamic';
 
+export const revalidate = 60; // mission control must not lie — refresh server data every 60s
+
 export default async function HomePage() {
   const [data, mindsData] = await Promise.all([getHomeData(), getMindsStatus()]);
   const feed = data?.feed ?? [];

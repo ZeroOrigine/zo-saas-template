@@ -45,11 +45,20 @@ const STATION_OF: Record<string, number> = {
   building: 3,
   build_complete: 3,
   qa: 4,
+  qa_round_1: 4,
+  qa_round_2: 4,
+  qa_round_3: 4,
   qa_fix_needed: 4,
-  qa_infra_error: 4,
   marketing: 5,
   deploying: 5,
+};
+
+// Halted ≠ gone: a paused product stays visible on the line, honestly labeled.
+const HALTED_OF: Record<string, number> = {
+  qa_infra_error: 4,
+  qa_failed: 4,
   deploy_failed: 5,
+  budget_halted: 3,
 };
 
 /**
@@ -60,7 +69,7 @@ const STATION_OF: Record<string, number> = {
 export async function GET() {
   try {
     const supabase = createAdminClient();
-    const active = Object.keys(STATION_OF);
+    const active = [...Object.keys(STATION_OF), ...Object.keys(HALTED_OF)];
 
     const [{ data: projs }, { data: mindRows }] = await Promise.all([
       supabase
@@ -90,7 +99,8 @@ export async function GET() {
       inflight = {
         name: p.name,
         status: p.status,
-        station: STATION_OF[p.status] ?? 3,
+        station: STATION_OF[p.status] ?? HALTED_OF[p.status] ?? 3,
+        halted: p.status in HALTED_OF,
         since: p.updated_at,
         born: p.created_at,
         cost: Math.round(cost * 100) / 100,
