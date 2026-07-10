@@ -27,6 +27,19 @@ function sanitizeThought(t: string | null): string | null {
   return x;
 }
 
+const PUBLIC_MIND: Record<string, string> = {
+  research_a: 'Research Mind A',
+  research_b: 'Research Mind B',
+  ethics: 'Ethics Mind',
+  'build-architect': 'Pipeline Architect',
+  builder: 'Builder Mind',
+  builder_opus: 'Builder Mind',
+  qa: 'QA Mind',
+  marketing: 'Marketing Mind',
+  immune_system: 'Immune System',
+  retrospective: 'Evolution Mind',
+};
+
 // Statuses that mean "a product is physically on the line right now"
 const STATION_OF: Record<string, number> = {
   building: 3,
@@ -64,17 +77,6 @@ export async function GET() {
     ]);
 
     const rows = mindRows ?? [];
-    const hourAgo = Date.now() - 3600_000;
-    const perMind: Record<string, { hour: number; last: string | null; lastAt: string | null }> = {};
-    for (const r of rows) {
-      const m = r.mind_name || 'unknown';
-      perMind[m] ??= { hour: 0, last: null, lastAt: null };
-      if (new Date(r.created_at).getTime() > hourAgo) perMind[m].hour += 1;
-      if (!perMind[m].last) {
-        perMind[m].last = sanitizeThought(r.output_summary || r.action || null);
-        perMind[m].lastAt = r.created_at;
-      }
-    }
 
     const p = (projs ?? [])[0] ?? null;
     let inflight = null;
@@ -93,7 +95,7 @@ export async function GET() {
         born: p.created_at,
         cost: Math.round(cost * 100) / 100,
         thought: sanitizeThought(thought ? (thought.output_summary || thought.action) : null),
-        thoughtBy: thought?.mind_name ?? null,
+        thoughtBy: thought?.mind_name ? (PUBLIC_MIND[thought.mind_name] ?? 'a Mind') : null,
         thoughtAt: thought?.created_at ?? null,
       };
     }
@@ -110,7 +112,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { ok: true, inflight, lastBirth, perMind, at: new Date().toISOString() },
+      { ok: true, inflight, lastBirth, at: new Date().toISOString() },
       { headers: { 'Cache-Control': 'public, max-age=0, s-maxage=10, stale-while-revalidate=20' } },
     );
   } catch {
