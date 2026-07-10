@@ -147,24 +147,25 @@ export interface MindStatus {
   calls: number;
 }
 
-const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string[]; busyStatuses: string[] }[] = [
-  { key: 'research_a', name: 'Research Mind A', epithet: 'the philosopher', workflows: ['research'], busyStatuses: ['researching'] },
-  { key: 'research_b', name: 'Research Mind B', epithet: 'the architect', workflows: ['research'], busyStatuses: [] },
-  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics_review'], busyStatuses: [] },
-  { key: 'architect', name: 'Pipeline Architect', epithet: 'the planner', workflows: ['build_architect'], busyStatuses: [] },
-  { key: 'builder', name: 'Builder Mind', epithet: 'the craftsman´s hands', workflows: ['builder'], busyStatuses: ['building'] },
-  { key: 'qa', name: 'QA Mind', epithet: 'the honest judge', workflows: ['qa_pipeline'], busyStatuses: ['qa_round_1', 'qa_round_2', 'qa_round_3'] },
-  { key: 'marketing', name: 'Marketing Mind', epithet: 'the storyteller', workflows: ['marketing'], busyStatuses: ['marketing'] },
-  { key: 'immune', name: 'Immune System', epithet: 'the night watch', workflows: ['hotfix', 'health'], busyStatuses: [] },
+const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string[]; busyStatuses: string[]; mindNames: string[] }[] = [
+  { key: 'research_a', name: 'Research Mind A', epithet: 'the philosopher', workflows: ['research'], busyStatuses: ['researching'], mindNames: ['research_a'] },
+  { key: 'research_b', name: 'Research Mind B', epithet: 'the architect', workflows: ['research'], busyStatuses: [], mindNames: ['research_b'] },
+  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics_review'], busyStatuses: [], mindNames: ['ethics'] },
+  { key: 'architect', name: 'Pipeline Architect', epithet: 'the planner', workflows: ['build_architect'], busyStatuses: [], mindNames: ['build-architect'] },
+  { key: 'builder', name: 'Builder Mind', epithet: 'the craftsman´s hands', workflows: ['builder'], busyStatuses: ['building', 'build_complete', 'qa_fix_needed'], mindNames: ['builder', 'builder_opus'] },
+  { key: 'qa', name: 'QA Mind', epithet: 'the honest judge', workflows: ['qa_pipeline'], busyStatuses: ['qa', 'qa_round_1', 'qa_round_2', 'qa_round_3'], mindNames: ['qa'] },
+  { key: 'marketing', name: 'Marketing Mind', epithet: 'the storyteller', workflows: ['marketing'], busyStatuses: ['marketing', 'deploying'], mindNames: ['marketing'] },
+  { key: 'immune', name: 'Immune System', epithet: 'the night watch', workflows: ['hotfix', 'health'], busyStatuses: [], mindNames: ['immune_system', 'retrospective'] },
 ];
 
 export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: { attempts: number; launched: number; avgCostLive: number; totalCalls: number; firstMonth: string } } | null> {
   try {
     const supabase = createAdminClient();
-    const [costs, projects, products] = await Promise.all([
+    const [costs, projects, products, recentThoughts] = await Promise.all([
       supabase.from('zo_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
       supabase.from('zo_projects').select('status,created_at'),
       supabase.from('zo_products').select('slug,status'),
+      supabase.from('zo_mind_logs').select('mind_name,created_at').order('created_at', { ascending: false }).limit(40),
     ]);
     const rows = costs.data ?? [];
     const lastByWf: Record<string, string> = {};
@@ -175,11 +176,20 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
       callsByWf[wf] = (callsByWf[wf] || 0) + 1;
     }
     const activeStatuses = new Set((projects.data ?? []).map((p) => p.status));
+    // Signal 2: a thought logged in the last 10 minutes = that Mind is at work.
+    // Covers research/ethics phases where no project status exists yet, and
+    // guarantees the glow follows WHOEVER is working — automatically.
+    const tenMinAgo = Date.now() - 10 * 60 * 1000;
+    const freshMinds = new Set(
+      (recentThoughts.data ?? [])
+        .filter((r) => new Date(r.created_at).getTime() > tenMinAgo)
+        .map((r) => r.mind_name),
+    );
 
     const minds: MindStatus[] = MIND_DEFS.map((m) => {
       const seen = m.workflows.map((w) => lastByWf[w]).filter(Boolean).sort().reverse();
       const calls = m.workflows.reduce((s, w) => s + (callsByWf[w] || 0), 0);
-      const busy = m.busyStatuses.some((s) => activeStatuses.has(s));
+      const busy = m.busyStatuses.some((s) => activeStatuses.has(s)) || m.mindNames.some((n) => freshMinds.has(n));
       return { key: m.key, name: m.name, epithet: m.epithet, busy, lastSeen: seen[0] ?? null, calls };
     });
 
