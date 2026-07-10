@@ -2208,3 +2208,45 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .board-card { padding: 0.8rem 0.9rem; }
   .metrics-strip { grid-template-columns: 1fr 1fr; }
 }
+
+/* ═══ THE BIRTH LINE — live assembly line ═══ */
+.birthline { margin: 2.2rem 0 2.8rem; }
+.bl-rail { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 0.5rem; }
+.bl-flow { position: absolute; top: 9px; left: 3%; right: 3%; height: 2px; z-index: 0;
+  background: repeating-linear-gradient(90deg, rgba(93,202,165,0.45) 0 14px, transparent 14px 26px);
+  animation: bl-drift 1.4s linear infinite; }
+@keyframes bl-drift { to { background-position: 26px 0; } }
+.bl-station { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 0.55rem; flex: 1; }
+.bl-node { width: 20px; height: 20px; border-radius: 50%; background: #0d0f0e; border: 2px solid rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center; transition: border-color 0.6s; }
+.bl-done .bl-node { border-color: rgba(93,202,165,0.55); background: rgba(93,202,165,0.12); }
+.bl-here .bl-node { border-color: #ef9f27; box-shadow: 0 0 18px 4px rgba(239,159,39,0.35); }
+.bl-token { width: 10px; height: 10px; border-radius: 50%; background: #ef9f27; animation: bl-beat 1.1s ease-in-out infinite; }
+@keyframes bl-beat { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.75; } }
+.bl-name { font-family: var(--font-mono, monospace); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45); }
+.bl-here .bl-name { color: #f5c069; }
+.bl-done .bl-name { color: rgba(93,202,165,0.75); }
+.bl-status { margin-top: 1.4rem; text-align: center; }
+.bl-line1 { font-size: 1.05rem; }
+.bl-product { color: #f5c069; font-weight: 700; }
+.bl-verb { color: rgba(255,255,255,0.82); }
+.bl-live { display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.45rem; border: 1px solid rgba(239,80,80,0.6);
+  color: #ff7a7a; font-size: 0.62rem; letter-spacing: 0.14em; border-radius: 3px; vertical-align: middle;
+  animation: mc-blink 1.4s infinite; }
+.bl-line2 { margin-top: 0.4rem; font-family: var(--font-mono, monospace); font-size: 0.78rem; color: rgba(93,202,165,0.85); }
+.bl-thought { margin: 0.9rem auto 0; max-width: 640px; font-family: var(--font-mono, monospace); font-size: 0.78rem;
+  color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.6rem 0.9rem;
+  background: rgba(255,255,255,0.02); text-align: left; overflow-wrap: anywhere; }
+.bl-mind { color: #5dcaa5; }
+.bl-caret { animation: mc-blink 0.9s infinite; color: #5dcaa5; }
+.bl-idle .bl-verb { color: rgba(255,255,255,0.5); }
+@media (max-width: 640px) { .bl-name { font-size: 0.55rem; } .bl-thought { font-size: 0.7rem; } }
+
+/* ═══ Cardiac cards — Minds breathe at their real activity rate ═══ */
+.board-dot.beat { background: #5dcaa5; animation: bl-beat var(--beat, 3s) ease-in-out infinite; }
+.board-busy .board-head strong::after { content: ''; display: inline-block; width: 34px; height: 12px; margin-left: 8px;
+  background: linear-gradient(90deg, transparent 0 4px, #ef9f27 4px 6px, transparent 6px 12px, #ef9f27 12px 14px, transparent 14px);
+  background-size: 34px 12px; clip-path: polygon(0 6px, 20% 6px, 30% 0, 45% 12px, 55% 3px, 70% 6px, 100% 6px, 100% 7.5px, 70% 7.5px, 55% 5px, 45% 13px, 30% 2px, 20% 7.5px, 0 7.5px);
+  background-color: #ef9f27; animation: bl-ecg 1.2s linear infinite; opacity: 0.9; }
+@keyframes bl-ecg { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }

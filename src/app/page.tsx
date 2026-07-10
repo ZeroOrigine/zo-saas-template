@@ -3,6 +3,7 @@ import ProductCards from '@/components/ProductCards';
 import TransparencyStats from '@/components/TransparencyStats';
 import RevealObserver from '@/components/RevealObserver';
 import LivePulse from '@/components/LivePulse';
+import BirthLine from '@/components/BirthLine';
 import PipelineVersion from '@/components/PipelineVersion';
 import SubscribeForm from '@/components/SubscribeForm';
 import BootLine from '@/components/BootLine';
@@ -87,6 +88,7 @@ export default async function HomePage() {
             <div className="zo-container">
               <p className="section-label">On shift right now</p>
               <h2 className="section-title reveal">Eight Minds. Zero humans on the floor.</h2>
+              <BirthLine />
               <div className="board-grid">
                 {mindsData.minds.map((m) => {
                   const hours = m.lastSeen ? Math.floor((Date.now() - new Date(m.lastSeen).getTime()) / 3600000) : null;
@@ -97,7 +99,11 @@ export default async function HomePage() {
                   return (
                     <div key={m.key} className={`board-card reveal${m.busy ? ' board-busy' : ''}`}>
                       <div className="board-head">
-                        <span className={`board-dot${m.busy ? ' busy' : hours !== null && hours < 24 ? ' warm' : ''}`} aria-hidden="true"></span>
+                        <span
+                          className={`board-dot${m.busy ? ' busy' : hours !== null && hours < 24 ? ' beat' : ''}`}
+                          style={!m.busy && hours !== null && hours < 24 ? ({ ['--beat' as string]: `${Math.min(6, Math.max(1.2, (hours + 1) * 0.9))}s` } as React.CSSProperties) : undefined}
+                          aria-hidden="true"
+                        ></span>
                         <strong>{m.name}</strong>
                       </div>
                       <p className="board-epithet">{m.epithet}</p>
