@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 
 export default function RefundPage() {
   return (
+    <>
+    <SubNav />
     <main className="legal-page">
       <div className="zo-container">
         <Link href="/" className="legal-back">&larr; Back to ZeroOrigine</Link>
@@ -29,5 +32,6 @@ export default function RefundPage() {
         your receipt. Refunds are processed through Stripe within 5 business days.</p>
       </div>
     </main>
+    </>
   );
 }

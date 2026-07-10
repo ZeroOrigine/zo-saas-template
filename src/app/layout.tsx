@@ -12,9 +12,6 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://zeroorigine.com'),
   themeColor: '#09090b',
-  icons: {
-    icon: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 import { getRegistry } from '@/lib/zo';
 
@@ -19,6 +20,8 @@ export default async function RegistryPage() {
   const rows = await getRegistry();
 
   return (
+    <>
+    <SubNav />
     <main className="legal-page mc-registry">
       <div className="zo-container">
         <Link href="/" className="legal-back">&larr; Back to mission control</Link>
@@ -58,5 +61,6 @@ export default async function RegistryPage() {
         <p className="reg-foot">Costs are the actual API spend recorded by the CFO Mind — not estimates. Dropped products stay listed forever: an institution that hides its failures is lying about its successes.</p>
       </div>
     </main>
+    </>
   );
 }

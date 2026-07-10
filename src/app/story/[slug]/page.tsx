@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 import { getStory } from '@/lib/zo';
 
@@ -29,6 +30,8 @@ export default async function StoryPage({ params }: { params: { slug: string } }
   const born = new Date(story.born).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
+    <>
+    <SubNav />
     <main className="legal-page mc-story">
       <div className="zo-container">
         <Link href="/products" className="legal-back">&larr; Registry</Link>
@@ -62,5 +65,6 @@ export default async function StoryPage({ params }: { params: { slug: string } }
         <p className="reg-foot">Nothing above was written by a human. These are the actual timestamped events from the autonomous pipeline that conceived, judged, built, and tested this product.</p>
       </div>
     </main>
+    </>
   );
 }
