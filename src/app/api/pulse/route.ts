@@ -8,7 +8,12 @@ export const revalidate = 0;
 // human-readable lines. Payloads never leave the server (they can contain
 // code and internal details).
 const EVENT_MAP: Record<string, { icon: string; mind: string; line: string }> = {
+  research_trigger:  { icon: '🔍', mind: 'Research Mind', line: 'went hunting for problems worth solving' },
   research_complete: { icon: '🔍', mind: 'Research Mind', line: 'finished discovering new problems worth solving' },
+  evaluation_complete: { icon: '📐', mind: 'Research Mind B', line: 'scored ideas for viability — GO / NO-GO' },
+  approval_needed:   { icon: '🔔', mind: 'Ecosystem', line: 'asked the founder to approve a new idea' },
+  human_approved:    { icon: '🤝', mind: 'Founder', line: 'approved an idea for building' },
+  idea_needs_fixes:  { icon: '⚖️', mind: 'Ethics Mind', line: 'sent an idea back with required fixes' },
   ethics_approved:   { icon: '⚖️', mind: 'Ethics Mind', line: 'approved a product idea against the constitution' },
   ethics_reviewed:   { icon: '⚖️', mind: 'Ethics Mind', line: 'completed an ethics review' },
   build_complete:    { icon: '🔨', mind: 'Builder Mind', line: 'finished building a product' },
