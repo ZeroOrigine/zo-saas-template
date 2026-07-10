@@ -99,7 +99,7 @@ export default async function HomePage() {
                     : hours < 24 ? `last thought ${hours}h ago`
                     : `last thought ${Math.floor(hours / 24)}d ago`;
                   return (
-                    <div key={m.key} className={`board-card reveal${m.busy ? ' board-busy' : ''}`}>
+                    <div key={m.key} className={`board-card${m.busy ? ' board-busy' : ''}`}>
                       <div className="board-head">
                         <span
                           className={`board-dot${m.busy ? ' busy' : hours !== null && hours < 24 ? ' beat' : ''}`}
