@@ -90,7 +90,13 @@ export async function GET() {
 
     const rows = mindRows ?? [];
 
-    const p = (projs ?? [])[0] ?? null;
+    let p: (NonNullable<typeof projs>[number]) | null = (projs ?? [])[0] ?? null;
+    // A launched product is DONE, not in-flight. Show it at LAUNCH only for a short
+    // celebration window (4h after it launched); after that the line is idle.
+    if (p && p.status === 'launched') {
+      const launchedAgeMs = Date.now() - new Date(p.updated_at).getTime();
+      if (launchedAgeMs > 4 * 60 * 60 * 1000) p = null;
+    }
     let inflight = null;
     if (p) {
       const { data: costRows } = await supabase
