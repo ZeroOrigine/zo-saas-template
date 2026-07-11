@@ -119,6 +119,37 @@ export async function GET() {
       };
     }
 
+    // A research batch runs BEFORE any product row exists — so the rail's first
+    // three stations never lit up. Detect a live research phase from recent mind
+    // logs and surface it so RESEARCH/EVALUATION/ETHICS glow during a run.
+    if (!inflight) {
+      const RESEARCH_MINDS: Record<string, { station: number; status: string }> = {
+        research_a: { station: 0, status: 'researching' },
+        research_b: { station: 1, status: 'evaluating' },
+        ethics: { station: 2, status: 'ethics_review' },
+        'build-architect': { station: 3, status: 'planning' },
+      };
+      const fresh = rows.find(
+        (r) => RESEARCH_MINDS[r.mind_name] &&
+          Date.now() - new Date(r.created_at).getTime() < 4 * 60 * 1000,
+      );
+      if (fresh) {
+        const meta = RESEARCH_MINDS[fresh.mind_name];
+        inflight = {
+          name: 'a new idea',
+          status: meta.status,
+          station: meta.station,
+          halted: false,
+          since: fresh.created_at,
+          born: fresh.created_at,
+          cost: 0,
+          thought: sanitizeThought(fresh.output_summary || fresh.action),
+          thoughtBy: PUBLIC_MIND[fresh.mind_name] ?? 'a Mind',
+          thoughtAt: fresh.created_at,
+        };
+      }
+    }
+
     let lastBirth = null;
     if (!inflight) {
       const { data: launched } = await supabase

@@ -16,6 +16,10 @@ type Payload = {
 
 const STATIONS = ['Research', 'Evaluation', 'Ethics', 'Builder', 'QA', 'Launch'];
 const VERB: Record<string, string> = {
+  researching: 'being researched — discovering problems worth solving',
+  evaluating: 'under evaluation — scored for GO / NO-GO',
+  ethics_review: 'under ethics review',
+  planning: 'being planned by the architect',
   building: 'being built',
   build_complete: 'build complete — awaiting QA',
   self_correcting: 'inspecting its own work before QA',
@@ -71,10 +75,10 @@ export default function BirthLine() {
     const load = () =>
       fetch('/api/birthline').then((r) => r.json()).then((d: Payload) => { if (d.ok) setData(d); }).catch(() => {});
     load();
-    timer.current = setInterval(load, 12_000);
+    timer.current = setInterval(load, 8_000);
     // The Mind cards are server-rendered; without this they freeze at page-load
     // time while the rail updates live (founder saw WORKING NOW an hour late).
-    const refresh = setInterval(() => router.refresh(), 60_000);
+    const refresh = setInterval(() => router.refresh(), 20_000);
     const tick = setInterval(() => setNow(Date.now()), 1000);
     return () => { if (timer.current) clearInterval(timer.current); clearInterval(tick); clearInterval(refresh); };
   }, []);
