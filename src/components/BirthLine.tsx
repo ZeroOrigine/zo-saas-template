@@ -78,7 +78,28 @@ export default function BirthLine() {
     timer.current = setInterval(load, 8_000);
     // The Mind cards are server-rendered; without this they freeze at page-load
     // time while the rail updates live (founder saw WORKING NOW an hour late).
-    const refresh = setInterval(() => router.refresh(), 20_000);
+    // The Mind cards are server-rendered, so refreshing them re-renders the whole
+    // page tree — which momentarily collapses Suspense/reveal boundaries and snaps
+    // the viewport back to the hero. Preserve the reader's scroll position across
+    // the refresh, and never fight them if they're actively scrolling.
+    const refresh = setInterval(() => {
+      const y = window.scrollY;
+      if (y < 4) { router.refresh(); return; } // already at top, nothing to preserve
+      let cancelled = false;
+      const onUserScroll = () => { cancelled = true; };
+      window.addEventListener('wheel', onUserScroll, { passive: true, once: true });
+      window.addEventListener('touchmove', onUserScroll, { passive: true, once: true });
+      router.refresh();
+      // Restore across the async re-render (a few frames), then stop.
+      let n = 0;
+      const restore = () => {
+        if (cancelled) return;
+        if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+        if (++n < 12) requestAnimationFrame(restore);
+        else { window.removeEventListener('wheel', onUserScroll); window.removeEventListener('touchmove', onUserScroll); }
+      };
+      requestAnimationFrame(restore);
+    }, 20_000);
     const tick = setInterval(() => setNow(Date.now()), 1000);
     return () => { if (timer.current) clearInterval(timer.current); clearInterval(tick); clearInterval(refresh); };
   }, []);
