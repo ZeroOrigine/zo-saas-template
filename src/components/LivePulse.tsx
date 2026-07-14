@@ -39,11 +39,16 @@ export default function LivePulse() {
 
   if (events.length === 0) return null; // no fake pulse, ever
 
+  // Honest header: only claim "working right now" when the newest event is
+  // fresh (<10 min). Otherwise say the line is idle — with the real age.
+  const newestAt = events[0].at;
+  const active = Date.now() - new Date(newestAt).getTime() < 10 * 60 * 1000;
+
   return (
     <div className="pulse-feed reveal" aria-label="Live activity of the AI Minds">
       <div className="pulse-header">
-        <span className="pulse-dot"></span>
-        <h4>The Minds — working right now</h4>
+        <span className="pulse-dot" style={active ? undefined : { animation: 'none', opacity: 0.35 }}></span>
+        <h4>{active ? 'The Minds — working right now' : `The Minds — line idle · last activity ${timeAgo(newestAt)}`}</h4>
         <span className="pulse-sub">real pipeline events, not a simulation</span>
       </div>
       <ul>

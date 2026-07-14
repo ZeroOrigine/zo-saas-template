@@ -47,7 +47,7 @@ export default async function RegistryPage() {
                           : r.name}
                         {r.category ? <span className="reg-cat"> · {r.category}</span> : null}
                       </td>
-                      <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{r.status.replace(/_/g, ' ')}</span></td>
+                      <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{(r.status === 'launched' ? 'live' : r.status).replace(/_/g, ' ')}</span></td>
                       <td>{new Date(r.created_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
                       <td className="reg-cost">{r.cost_usd > 0 ? `$${r.cost_usd.toFixed(2)}` : '—'}</td>
                       <td><Link href={`/story/${slug}`} className="reg-story">biography &rarr;</Link></td>
