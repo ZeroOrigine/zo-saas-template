@@ -48,13 +48,20 @@ export default function ProductCards() {
     return null; // Fallback handled by static content in page.tsx
   }
 
+  // The homepage is a SHOWCASE, not a database dump: show the 6 newest live
+  // products; everything else lives in the Registry. Scales to 500+ products
+  // without the homepage growing a single pixel.
+  const MAX_CARDS = 6;
+  const shown = products.slice(0, MAX_CARDS);
+  const more = Math.max(0, liveCount - shown.length);
+
   return (
     <>
       <h2 className="section-title" style={{ opacity: 1, transform: 'none' }}>
         {liveCount} Live. Building More. Zero Shortcuts.
       </h2>
       <div className="products-grid">
-        {products.map((product) => {
+        {shown.map((product) => {
           const CardTag = product.url ? 'a' : 'div';
           const linkProps = product.url
             ? { href: product.url, target: '_blank', rel: 'noopener noreferrer' }
@@ -78,6 +85,24 @@ export default function ProductCards() {
             </CardTag>
           );
         })}
+        {more > 0 && (
+          <a
+            key="__registry"
+            className="product-card"
+            href="/products"
+            style={{ textDecoration: 'none', color: 'inherit', opacity: 1, transform: 'none' }}
+          >
+            <div className="product-header">
+              <h3>&#128218; +{more} more live</h3>
+              <span className="status-badge status-live">Registry</span>
+            </div>
+            <p className="product-type">The homepage shows the {MAX_CARDS} newest</p>
+            <p className="product-description">
+              The full registry lists all {totalCount} attempts — live, building, failed and
+              dropped — with the true cost of each. Open the Registry &rarr;
+            </p>
+          </a>
+        )}
       </div>
     </>
   );

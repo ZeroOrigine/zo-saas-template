@@ -2,18 +2,13 @@ import Link from 'next/link';
 import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 import { getRegistry } from '@/lib/zo';
+import RegistryTable from '@/components/RegistryTable';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'The Registry — every product the Minds ever attempted | ZeroOrigine',
   description: 'Every attempt: live, building, failed, dropped. With the real cost of each. Radical transparency, machine-written.',
-};
-
-const STATUS_CLASS: Record<string, string> = {
-  live: 'reg-live', launched: 'reg-live', building: 'reg-busy',
-  dropped: 'reg-dead', qa_failed: 'reg-warn', build_failed: 'reg-warn',
-  budget_halted: 'reg-warn', approved: 'reg-idle', pending_approval: 'reg-idle',
 };
 
 export default async function RegistryPage() {
@@ -31,32 +26,7 @@ export default async function RegistryPage() {
         {!rows ? (
           <p>Registry temporarily unreachable. The database will answer again shortly.</p>
         ) : (
-          <div className="reg-table-wrap">
-            <table className="reg-table">
-              <thead>
-                <tr><th>Product</th><th>Status</th><th>Born</th><th>True cost</th><th>Story</th></tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => {
-                  const slug = r.project_id.replace(/^zo-/, '');
-                  return (
-                    <tr key={r.project_id}>
-                      <td>
-                        {r.url
-                          ? <a href={r.url} target="_blank" rel="noopener noreferrer">{r.name}</a>
-                          : r.name}
-                        {r.category ? <span className="reg-cat"> · {r.category}</span> : null}
-                      </td>
-                      <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{(r.status === 'launched' ? 'live' : r.status).replace(/_/g, ' ')}</span></td>
-                      <td>{new Date(r.created_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                      <td className="reg-cost">{r.cost_usd > 0 ? `$${r.cost_usd.toFixed(2)}` : '—'}</td>
-                      <td><Link href={`/story/${slug}`} className="reg-story">biography &rarr;</Link></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <RegistryTable rows={rows} />
         )}
         <p className="reg-foot">Costs are the actual API spend recorded by the CFO Mind — not estimates. Dropped products stay listed forever: an institution that hides its failures is lying about its successes.</p>
       </div>

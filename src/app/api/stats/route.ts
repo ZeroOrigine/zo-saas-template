@@ -17,13 +17,21 @@ export async function GET() {
   try {
     const supabase = createAdminClient();
 
-    const [{ count: totalCount }, liveRes, spendRes] = await Promise.all([
+    // SCALABLE BY DESIGN: liveCount is a COUNT query (never limited by the
+    // payload), the grid payload is capped at the 12 newest — at 500 products
+    // the homepage stays light and the count stays true. Ordering is
+    // launched_at (set by the pipeline), never manual sort_order (which the
+    // autonomous deploy never sets — every new product would collide at 0).
+    const [{ count: totalCount }, { count: liveTotal }, liveRes, spendRes] = await Promise.all([
       supabase.from('zo_products').select('id', { count: 'exact', head: true }),
+      supabase.from('zo_products').select('id', { count: 'exact', head: true }).eq('status', 'live'),
       supabase
         .from('zo_products')
         .select('slug, name, tagline, description, status, url, icon, sort_order')
         .eq('status', 'live')
-        .order('sort_order', { ascending: true }),
+        .order('launched_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(12),
       supabase.from('zo_cost_logs').select('cost_usd'),
     ]);
 
@@ -40,7 +48,7 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: true,
-        liveCount: live.length,
+        liveCount: liveTotal ?? live.length,
         totalCount: totalCount ?? live.length,
         totalSpend: Math.round(totalSpend * 100) / 100,
         products: live,
