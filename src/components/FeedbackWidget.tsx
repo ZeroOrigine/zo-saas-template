@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 
 const feedbackTypes = ['bug', 'feature', 'improvement', 'other'] as const;
@@ -10,11 +10,29 @@ export default function FeedbackWidget() {
   const [type, setType] = useState<string>('bug');
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
+  const [company, setCompany] = useState(''); // honeypot: must stay empty
   const [loading, setLoading] = useState(false);
+  const openedAt = useRef(0);
   const [result, setResult] = useState<'success' | 'error' | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Cheap bot filter #1: honeypot filled -> pretend success, write nothing.
+    if (company) {
+      setResult('success');
+      setMessage('');
+      setEmail('');
+      setTimeout(() => { setOpen(false); setResult(null); }, 2000);
+      return;
+    }
+    // Cheap bot filter #2: submitted faster than a human could read + type.
+    if (openedAt.current && Date.now() - openedAt.current < 2000) {
+      setResult('success');
+      setMessage('');
+      setEmail('');
+      setTimeout(() => { setOpen(false); setResult(null); }, 2000);
+      return;
+    }
     setLoading(true);
     setResult(null);
 
@@ -22,7 +40,7 @@ export default function FeedbackWidget() {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, message, email: email || undefined }),
+        body: JSON.stringify({ type, message, email: email || undefined, company }),
       });
 
       if (res.ok) {
@@ -47,7 +65,7 @@ export default function FeedbackWidget() {
     <>
       {/* Floating trigger button */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { openedAt.current = Date.now(); setOpen(true); }}
         className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-black text-white shadow-lg hover:bg-gray-800 transition-colors"
         aria-label="Send feedback"
       >
@@ -93,7 +111,21 @@ export default function FeedbackWidget() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <div>
+              {/* Honeypot: hidden from humans, catches bots. Turnstile would slot in here
+                as an invisible captcha once the founder provisions the secret key. */}
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+              <label htmlFor="fb-company">Company (leave blank)</label>
+              <input
+                id="fb-company"
+                type="text"
+                name="company"
+                tabIndex={-1}
+                autoComplete="off"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+            </div>
+            <div>
                 <label
                   htmlFor="feedback-type"
                   className="mb-1 block text-sm font-medium text-gray-700"

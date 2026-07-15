@@ -16,6 +16,14 @@ const feedbackSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // Honeypot: a real browser leaves `company` empty. If it is filled, a bot did it.
+    // Silently succeed and write nothing. (Turnstile verification would slot in here once
+    // the founder provisions the Turnstile secret key.)
+    if (typeof body?.company === 'string' && body.company.trim() !== '') {
+      return NextResponse.json(successResponse({ received: true }), { status: 201 });
+    }
+
     const parsed = feedbackSchema.safeParse(body);
 
     if (!parsed.success) {
