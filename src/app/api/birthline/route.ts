@@ -14,6 +14,8 @@ function sanitizeThought(t: string | null): string | null {
   if (!t) return null;
   let x = t
     .replace(/(sk|re|ghp|gho|whsec|pk|rk)_[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(/sk-ant-[A-Za-z0-9-]{10,}/g, '[redacted]')
+    .replace(/nfp_[A-Za-z0-9]{10,}/g, '[redacted]')
     .replace(/github_pat_[A-Za-z0-9_]{20,}/g, '[redacted]')
     .replace(/eyJ[A-Za-z0-9_-]{20,}\.?[A-Za-z0-9._-]*/g, '[redacted]')
     .replace(/AKIA[A-Z0-9]{12,}/g, '[redacted]')
