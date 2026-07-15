@@ -26,7 +26,7 @@ export default function SubscribeForm() {
       }
     } catch {
       setState('error');
-      setMsg('Network hiccup — try again.');
+      setMsg('Network hiccup. Try again.');
     }
   }
 

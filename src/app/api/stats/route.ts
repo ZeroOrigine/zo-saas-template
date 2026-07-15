@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getFixedCosts } from '@/lib/fixedCosts';
 
-// Always run at request time — the numbers must be real, never build-time stale.
+// Always run at request time. The numbers must be real, never build-time stale.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -18,10 +18,10 @@ export async function GET() {
     const supabase = createAdminClient();
 
     // SCALABLE BY DESIGN: liveCount is a COUNT query (never limited by the
-    // payload), the grid payload is capped at the 12 newest — at 500 products
+    // payload), the grid payload is capped at the 12 newest. At 500 products
     // the homepage stays light and the count stays true. Ordering is
     // launched_at (set by the pipeline), never manual sort_order (which the
-    // autonomous deploy never sets — every new product would collide at 0).
+    // autonomous deploy never sets. Every new product would collide at 0).
     const [{ count: totalCount }, { count: liveTotal }, liveRes, spendRes] = await Promise.all([
       supabase.from('zo_products').select('id', { count: 'exact', head: true }),
       supabase.from('zo_products').select('id', { count: 'exact', head: true }).eq('status', 'live'),

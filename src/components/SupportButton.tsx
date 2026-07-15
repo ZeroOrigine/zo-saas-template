@@ -1,4 +1,4 @@
-// Direct Stripe Payment Links — no API calls, just works
+// Direct Stripe Payment Links. No API calls, just works
 const PAYMENT_LINKS: Record<number, string> = {
   1: 'https://buy.stripe.com/aFaeVebd6eewefb36K6sw03',
   5: 'https://buy.stripe.com/28E28s4OI0nG1sp22G6sw04',

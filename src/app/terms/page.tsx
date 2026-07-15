@@ -3,7 +3,7 @@ import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — ZeroOrigine',
+  title: 'Terms of Service. ZeroOrigine',
   description: 'Plain-language terms for using ZeroOrigine and supporting the mission.',
 };
 
@@ -27,18 +27,18 @@ export default function TermsPage() {
         <h2>Supporting the mission</h2>
         <p>&quot;Pay what you believe&quot; contributions (monthly or one-time) are voluntary
         support for our mission. Monthly support can be cancelled anytime from your
-        Stripe receipt — access and perks are the same for every supporter regardless
+        Stripe receipt. Access and perks are the same for every supporter regardless
         of amount.</p>
 
         <h2>Our products</h2>
         <p>Each product (EquityLetter, VoiceInvoice, TEF Master, Soly, and others)
         has its own terms on its own site. Products are provided &quot;as is&quot;; we hold a
-        zero-defect standard but we are honest that software can fail — when it does,
+        zero-defect standard but we are honest that software can fail. When it does,
         we fix it and publish what we learned.</p>
 
         <h2>What you may not do</h2>
         <p>Abuse, attack, or attempt to exploit our systems; use our tools for
-        surveillance, deception, or harm — the same red lines our own constitution
+        surveillance, deception, or harm. The same red lines our own constitution
         forbids us from crossing.</p>
 
         <h2>Liability</h2>

@@ -23,9 +23,9 @@ export default function TransparencyStats() {
     fetchStats();
   }, [fetchStats]);
 
-  const num = (n: number | null) => (n === null ? '—' : String(n));
+  const num = (n: number | null) => (n === null ? '·' : String(n));
   const money = (n: number | null) =>
-    n === null ? '—' : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    n === null ? '·' : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
   return (
     <div className="metrics-grid reveal">

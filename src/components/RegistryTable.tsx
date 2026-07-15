@@ -25,7 +25,7 @@ const displayStatus = (s: string) => (s === 'launched' ? 'live' : s).replace(/_/
 const PAGE = 50;
 
 // Scales to 500+ products: instant client-side search + status filter over the
-// server-fetched rows, rendered in pages of 50 — the DOM never holds the whole
+// server-fetched rows, rendered in pages of 50. The DOM never holds the whole
 // registry at once, and the counts always speak the truth about the filter.
 export default function RegistryTable({ rows }: { rows: RegistryRowProps[] }) {
   const [q, setQ] = useState('');
@@ -93,7 +93,7 @@ export default function RegistryTable({ rows }: { rows: RegistryRowProps[] }) {
                   </td>
                   <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{displayStatus(r.status)}</span></td>
                   <td>{new Date(r.created_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                  <td className="reg-cost">{r.cost_usd > 0 ? `$${r.cost_usd.toFixed(2)}` : '—'}</td>
+                  <td className="reg-cost">{r.cost_usd > 0 ? `$${r.cost_usd.toFixed(2)}` : '·'}</td>
                   <td><Link href={`/story/${slug}`} className="reg-story">biography &rarr;</Link></td>
                 </tr>
               );

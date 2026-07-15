@@ -6,7 +6,7 @@ export const revalidate = 0;
 
 /**
  * Public-safety filter for machine thoughts. Thoughts SHOULD never contain
- * secrets (the pipeline's deterministic gate scans for them) — but "should"
+ * secrets (the pipeline's deterministic gate scans for them). But "should"
  * is not a security control. Belt + suspenders before anything hits the wire:
  * redact secret-shaped strings, emails, and connection URLs; truncate hard.
  */
@@ -65,7 +65,7 @@ const HALTED_OF: Record<string, number> = {
 };
 
 /**
- * The Birth Line — real-time position of the product currently being born.
+ * The Birth Line. Real-time position of the product currently being born.
  * Every number here is real: zo_projects (stage), zo_cost_logs (money),
  * zo_mind_logs (the machine's actual last thought).
  */
@@ -119,7 +119,7 @@ export async function GET() {
       };
     }
 
-    // A research batch runs BEFORE any product row exists — so the rail's first
+    // A research batch runs BEFORE any product row exists. So the rail's first
     // three stations never lit up. Detect a live research phase from recent mind
     // logs and surface it so RESEARCH/EVALUATION/ETHICS glow during a run.
     if (!inflight) {

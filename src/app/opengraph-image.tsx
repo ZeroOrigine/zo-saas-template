@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'ZeroOrigine — this website is run by the things it describes';
+export const alt = 'ZeroOrigine. This website is run by the things it describes';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -21,7 +21,7 @@ export default function OG() {
           This website is run by the things it describes.
         </div>
         <div style={{ fontSize: 28, color: '#8f8fa3', marginTop: 30, display: 'flex' }}>
-          Eight AI Minds · a constitution · every number real — zeroorigine.com
+          Eight AI Minds · a constitution · every number real. Zeroorigine.com
         </div>
       </div>
     ),

@@ -16,26 +16,26 @@ type Payload = {
 
 const STATIONS = ['Research', 'Evaluation', 'Ethics', 'Builder', 'QA', 'Launch'];
 const VERB: Record<string, string> = {
-  researching: 'being researched — discovering problems worth solving',
-  evaluating: 'under evaluation — scored for GO / NO-GO',
+  researching: 'being researched. Discovering problems worth solving',
+  evaluating: 'under evaluation. Scored for GO / NO-GO',
   ethics_review: 'under ethics review',
   planning: 'being planned by the architect',
   building: 'being built',
-  build_complete: 'build complete — awaiting QA',
+  build_complete: 'build complete. Awaiting QA',
   self_correcting: 'inspecting its own work before QA',
   qa: 'under inspection',
   qa_fix_needed: 'being repaired',
-  qa_round_1: 'under inspection — round 1',
-  qa_round_2: 'under inspection — round 2',
-  qa_round_3: 'under inspection — round 3',
-  qa_infra_error: 'halted — pipeline error, machine being repaired',
-  qa_failed: 'halted at QA — awaiting resume',
-  budget_halted: 'paused — budget cap reached',
-  qa_passed: 'PASSED inspection — getting its story',
+  qa_round_1: 'under inspection. Round 1',
+  qa_round_2: 'under inspection. Round 2',
+  qa_round_3: 'under inspection. Round 3',
+  qa_infra_error: 'halted. Pipeline error, machine being repaired',
+  qa_failed: 'halted at QA. Awaiting resume',
+  budget_halted: 'paused. Budget cap reached',
+  qa_passed: 'PASSED inspection. Getting its story',
   marketing: 'getting its story',
   launched: 'LIVE ON THE INTERNET',
   deploying: 'going live',
-  deploy_failed: 'launch blocked — machine investigating',
+  deploy_failed: 'launch blocked. Machine investigating',
 };
 
 function useTypewriter(text: string | null, speed = 28): string {
@@ -61,7 +61,7 @@ function age(from: string, nowMs: number): string {
 }
 
 /**
- * THE BIRTH LINE — the product currently being born, moving through real
+ * THE BIRTH LINE. The product currently being born, moving through real
  * stations, with its real age, real cost, and the machine's real last thought.
  * Polls /api/birthline every 12s. Every number is real (Rule 3).
  */
@@ -79,7 +79,7 @@ export default function BirthLine() {
     // The Mind cards are server-rendered; without this they freeze at page-load
     // time while the rail updates live (founder saw WORKING NOW an hour late).
     // The Mind cards are server-rendered, so refreshing them re-renders the whole
-    // page tree — which momentarily collapses Suspense/reveal boundaries and snaps
+    // page tree. Which momentarily collapses Suspense/reveal boundaries and snaps
     // the viewport back to the hero. Preserve the reader's scroll position across
     // the refresh, and never fight them if they're actively scrolling.
     const refresh = setInterval(() => {
@@ -138,7 +138,7 @@ export default function BirthLine() {
         </div>
       ) : (
         <div className="bl-status bl-idle">
-          <div className="bl-line1"><span className="bl-verb">line idle — the factory pulls its next idea when the backlog runs low</span></div>
+          <div className="bl-line1"><span className="bl-verb">line idle. The factory pulls its next idea when the backlog runs low</span></div>
           {data?.lastBirth && (
             <div className="bl-line2">last birth: {data.lastBirth.name}</div>
           )}

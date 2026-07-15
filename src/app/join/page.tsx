@@ -4,10 +4,10 @@ import DonateButton from '@/components/DonateButton';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Support ZeroOrigine — Fund the Future of Fair Intelligence',
+  title: 'Support ZeroOrigine. Fund the Future of Fair Intelligence',
   description: 'This isn\'t a subscription. It\'s a statement. Fund ZeroOrigine\'s autonomous ecosystem that builds free AI tools for everyone.',
   openGraph: {
-    title: 'Support ZeroOrigine — Pay What You Believe',
+    title: 'Support ZeroOrigine. Pay What You Believe',
     description: 'Intelligence is no longer scarce. But access is. Help us close the gap.',
     type: 'website',
     url: 'https://zeroorigine.com/join',
@@ -39,7 +39,7 @@ export default function JoinPage() {
         <section className="join-hero reveal">
           <div className="hero-content">
             <h1>This isn&apos;t a subscription.<br />It&apos;s a <span className="gradient-text">statement</span>.</h1>
-            <p>You believe AI should be built with ethics, transparency, and zero compromise. You believe intelligence tools should be accessible to everyone — not locked behind price tags. Put your name behind it.</p>
+            <p>You believe AI should be built with ethics, transparency, and zero compromise. You believe intelligence tools should be accessible to everyone. Not locked behind price tags. Put your name behind it.</p>
           </div>
         </section>
 
@@ -47,21 +47,21 @@ export default function JoinPage() {
         <section className="support-section join-container" id="support">
           <div className="support-card-main reveal">
             <h2>Fund a birth</h2>
-            <p className="support-intro">One-time. No subscription, no account, no recurring anything.<br />At checkout you can put a name on the birth certificate — or stay anonymous.<br />You get a permanent receipt URL that tracks exactly what your money becomes.</p>
+            <p className="support-intro">One-time. No subscription, no account, no recurring anything.<br />At checkout you can put a name on the birth certificate. Or stay anonymous.<br />You get a permanent receipt URL that tracks exactly what your money becomes.</p>
 
             <div className="amount-grid">
               <DonateButton amount={5} label="$5" />
               <DonateButton amount={25} label="$25" />
-              <DonateButton amount={58} label="$58 — births a product" />
-              <DonateButton amount={174} label="$174 — three births" />
+              <DonateButton amount={58} label="$58. Births a product" />
+              <DonateButton amount={174} label="$174. Three births" />
             </div>
 
             <div className="onetime-block">
-              <p className="onetime-note">$1 minimum, no ceiling. Everyone gets the same access — no tiers, no gatekeeping. The machine spends the oldest money first, and your receipt page names the product your dollars became.</p>
+              <p className="onetime-note">$1 minimum, no ceiling. Everyone gets the same access. No tiers, no gatekeeping. The machine spends the oldest money first, and your receipt page names the product your dollars became.</p>
             </div>
 
             <div className="support-note">
-              <p>Every dollar funds the autonomous ecosystem — 8 AI Minds discovering problems, building solutions, and deploying them freely. No salaries. No overhead. Pure mission.</p>
+              <p>Every dollar funds the autonomous ecosystem. 8 AI Minds discovering problems, building solutions, and deploying them freely. No salaries. No overhead. Pure mission.</p>
             </div>
           </div>
         </section>
@@ -103,7 +103,7 @@ export default function JoinPage() {
             <div className="promise-item">We will never guilt-trip you for canceling.</div>
             <div className="promise-item">We will never hide how we spend your money.</div>
           </div>
-          <p className="promise-closing">If we fail — if the ecosystem produces nothing of value — we&apos;ll tell you. Because honesty is Article III of our constitution.</p>
+          <p className="promise-closing">If we fail. If the ecosystem produces nothing of value. We&apos;ll tell you. Because honesty is Article III of our constitution.</p>
         </section>
 
         {/* Final CTA */}

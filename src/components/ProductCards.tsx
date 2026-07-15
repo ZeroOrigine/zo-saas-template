@@ -98,8 +98,8 @@ export default function ProductCards() {
             </div>
             <p className="product-type">The homepage shows the {MAX_CARDS} newest</p>
             <p className="product-description">
-              The full registry lists all {totalCount} attempts — live, building, failed and
-              dropped — with the true cost of each. Open the Registry &rarr;
+              The full registry lists all {totalCount} attempts. Live, building, failed and
+              dropped. With the true cost of each. Open the Registry &rarr;
             </p>
           </a>
         )}

@@ -7,7 +7,7 @@ export interface GridProduct {
   category?: string | null; launched_at?: string | null;
 }
 
-/** The registry grid — generated from the database; chips actually filter. */
+/** The registry grid. Generated from the database; chips actually filter. */
 export default function RegistryGridV4({ products, costs }: {
   products: GridProduct[];
   costs: Record<string, number>;
@@ -39,8 +39,8 @@ export default function RegistryGridV4({ products, costs }: {
               <h3>{p.name}</h3>
               <div className="tag">{p.tagline}</div>
               <div className="num">
-                <span>{p.category ?? '—'}</span>
-                <span style={{ color: cost ? 'var(--alive)' : undefined }}>{cost ? `$${cost.toFixed(2)}` : '—'}</span>
+                <span>{p.category ?? '·'}</span>
+                <span style={{ color: cost ? 'var(--alive)' : undefined }}>{cost ? `$${cost.toFixed(2)}` : '·'}</span>
               </div>
             </a>
           );

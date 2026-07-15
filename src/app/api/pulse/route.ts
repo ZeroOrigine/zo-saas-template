@@ -10,7 +10,7 @@ export const revalidate = 0;
 const EVENT_MAP: Record<string, { icon: string; mind: string; line: string }> = {
   research_trigger:  { icon: '🔍', mind: 'Research Mind', line: 'went hunting for problems worth solving' },
   research_complete: { icon: '🔍', mind: 'Research Mind', line: 'finished discovering new problems worth solving' },
-  evaluation_complete: { icon: '📐', mind: 'Research Mind B', line: 'scored ideas for viability — GO / NO-GO' },
+  evaluation_complete: { icon: '📐', mind: 'Research Mind B', line: 'scored ideas for viability. GO / NO-GO' },
   approval_needed:   { icon: '🔔', mind: 'Ecosystem', line: 'asked the founder to approve a new idea' },
   human_approved:    { icon: '🤝', mind: 'Founder', line: 'approved an idea for building' },
   idea_needs_fixes:  { icon: '⚖️', mind: 'Ethics Mind', line: 'sent an idea back with required fixes' },
@@ -19,7 +19,7 @@ const EVENT_MAP: Record<string, { icon: string; mind: string; line: string }> = 
   build_complete:    { icon: '🔨', mind: 'Builder Mind', line: 'finished building a product' },
   qa_passed:         { icon: '✅', mind: 'QA Mind', line: 'passed a product through quality review' },
   qa_fix_needed:     { icon: '🔬', mind: 'QA Mind', line: 'found issues and sent them back to the Builder' },
-  qa_failed:         { icon: '📋', mind: 'QA Mind', line: 'rejected a build — quality bar not met (we show failures too)' },
+  qa_failed:         { icon: '📋', mind: 'QA Mind', line: 'rejected a build. Quality bar not met (we show failures too)' },
   marketing_complete:{ icon: '📣', mind: 'Marketing Mind', line: 'prepared launch content' },
   deploy_complete:   { icon: '🚀', mind: 'Deploy', line: 'shipped a product to production' },
   product_launched:  { icon: '🎉', mind: 'Ecosystem', line: 'launched a new product' },

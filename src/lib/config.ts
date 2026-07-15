@@ -10,7 +10,7 @@ function optionalEnv(name: string, fallback: string = ''): string {
   return process.env[name] ?? fallback;
 }
 
-/** Public config — safe to expose to the browser */
+/** Public config. Safe to expose to the browser */
 export const PROJECT_CONFIG = {
   projectId: requireEnv('NEXT_PUBLIC_PROJECT_ID'),
   projectName: requireEnv('NEXT_PUBLIC_PROJECT_NAME'),
@@ -21,7 +21,7 @@ export const PROJECT_CONFIG = {
   siteUrl: optionalEnv('NEXT_PUBLIC_SITE_URL', 'http://localhost:3000'),
 } as const;
 
-/** Server-only config — never import from client components */
+/** Server-only config. Never import from client components */
 export const SERVER_CONFIG = {
   supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
   stripeSecretKey: requireEnv('STRIPE_SECRET_KEY'),

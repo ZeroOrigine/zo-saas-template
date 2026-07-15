@@ -27,7 +27,7 @@ export function useBirthline(): Birthline | null {
         const r = await fetch('/api/birthline', { cache: 'no-store' });
         const j = (await r.json()) as Birthline;
         if (j?.ok) setD(j);
-      } catch { /* keep last known — never invent activity */ }
+      } catch { /* keep last known. Never invent activity */ }
     };
     load();
     const t = setInterval(load, 25000);
@@ -73,13 +73,13 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
             ))
           ) : (
             <div className="ln idle">
-              {f.name} is on the line — the Mind at work is emitting source code, not sentences, at
+              {f.name} is on the line. The Mind at work is emitting source code, not sentences, at
               this exact second. The stage and the money below are real.
             </div>
           )
         ) : (
           <div className="ln idle">
-            The line is idle — the factory pulls its next idea when the backlog runs low.
+            The line is idle. The factory pulls its next idea when the backlog runs low.
             {d?.lastBirth ? ` Last birth: ${d.lastBirth.name}.` : ''} When a Mind starts thinking,
             its actual thoughts stream here, unedited.
           </div>
@@ -94,8 +94,8 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
           </>
         ) : (
           <>
-            <div><div className="k">Last birth</div><div className="v time">{last?.name ?? d?.lastBirth?.name ?? '—'}</div></div>
-            <div><div className="k">It cost</div><div className="v money">{last ? `$${last.cost.toFixed(2)}` : '—'}</div></div>
+            <div><div className="k">Last birth</div><div className="v time">{last?.name ?? d?.lastBirth?.name ?? '·'}</div></div>
+            <div><div className="k">It cost</div><div className="v money">{last ? `$${last.cost.toFixed(2)}` : '·'}</div></div>
             <div><div className="k">Humans involved</div><div className="v">0</div></div>
           </>
         )}
@@ -106,7 +106,7 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
 
 const STATIONS = ['Research', 'Evaluation', 'Ethics', 'Builder', 'QA', 'Launch'];
 
-/** The birth rail — where the current product physically is on the line. */
+/** The birth rail. Where the current product physically is on the line. */
 export function BirthRail() {
   const d = useBirthline();
   const f = d?.inflight ?? null;
@@ -123,12 +123,12 @@ export function BirthRail() {
       <div className="railcap">
         {f ? (
           f.halted ? (
-            <><b>{f.name}</b> <span>is halted at {STATIONS[f.station] ?? 'the line'} — status {f.status}. Shown, not hidden.</span></>
+            <><b>{f.name}</b> <span>is halted at {STATIONS[f.station] ?? 'the line'}. Status {f.status}. Shown, not hidden.</span></>
           ) : (
             <><b>{f.name}</b> <span>is being born.</span></>
           )
         ) : (
-          <span>The line is idle{d?.lastBirth ? <> — last birth: <b>{d.lastBirth.name}</b></> : ''}. The next idea starts here.</span>
+          <span>The line is idle{d?.lastBirth ? <>. Last birth: <b>{d.lastBirth.name}</b></> : ''}. The next idea starts here.</span>
         )}
       </div>
     </div>

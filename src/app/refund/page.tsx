@@ -3,7 +3,7 @@ import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Refund Policy — ZeroOrigine',
+  title: 'Refund Policy. ZeroOrigine',
   description: 'Simple, honest refunds.',
 };
 
@@ -19,7 +19,7 @@ export default function RefundPage() {
 
         <h2>Mission support (Pay What You Believe)</h2>
         <p>If you supported us and regret it for any reason, tell us within 30 days
-        and we refund it in full — no questions, no friction. Monthly support can be
+        and we refund it in full. No questions, no friction. Monthly support can be
         cancelled anytime and stops immediately.</p>
 
         <h2>Product purchases</h2>

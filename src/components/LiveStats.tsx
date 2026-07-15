@@ -33,7 +33,7 @@ export default function LiveStats() {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  const show = (n: number | null) => (n === null ? '—' : String(n));
+  const show = (n: number | null) => (n === null ? '·' : String(n));
 
   return (
     <div className="hero-stats">

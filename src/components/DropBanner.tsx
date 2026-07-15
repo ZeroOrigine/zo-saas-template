@@ -6,7 +6,7 @@ export default function DropBanner({ name, url, at }: { name: string; url: strin
   return (
     <div className="mc-drop reveal">
       <span className="mc-drop-pulse" aria-hidden="true"></span>
-      <span>A product was born {hours < 1 ? 'less than an hour' : `${hours}h`} ago — <strong>{name}</strong></span>
+      <span>A product was born {hours < 1 ? 'less than an hour' : `${hours}h`} ago · <strong>{name}</strong></span>
       {url ? <a href={url} target="_blank" rel="noopener noreferrer">see it live &rarr;</a> : <Link href="/products">registry &rarr;</Link>}
     </div>
   );

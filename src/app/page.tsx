@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
 const MIND_COPY: Record<string, { role: string; think: string }> = {
   research_a: { role: 'the philosopher', think: 'Finds the pain worth solving. Refuses any idea that is only a cheaper clone of something already free.' },
   research_b: { role: 'the architect', think: 'Scores every idea out of 10. The bar is 7.0. Most ideas die here.' },
-  ethics: { role: 'the conscience — veto power', think: 'Kant, Rawls, Nussbaum. Can stop any product the others want to build. It has.' },
+  ethics: { role: 'the conscience. Veto power', think: 'Kant, Rawls, Nussbaum. Can stop any product the others want to build. It has.' },
   architect: { role: 'the planner', think: 'Turns an approved idea into a build plan before a single line is written.' },
-  builder: { role: "the craftsman's hands", think: 'Writes the product, end to end. When it works, you watch it happen in the panel above — unedited.' },
+  builder: { role: "the craftsman's hands", think: 'Writes the product, end to end. When it works, you watch it happen in the panel above. Unedited.' },
   qa: { role: 'the honest judge', think: 'Grades out of 185. Has refused to ship its own builds. The bar does not move.' },
   marketing: { role: 'the storyteller', think: "Writes the product's story from its spec. Never invents a feature that doesn't exist." },
   immune: { role: 'the night watch', think: 'Watches every live product. Patches what breaks while the world sleeps.' },
@@ -40,7 +40,7 @@ export default async function Home() {
   const GRAVE_WHY: Record<string, { why: string; learn: string }> = {
     'zo-invoicememory': {
       why: 'Approved at 8.5. Built nine times. Never once passed QA. We stopped paying for it.',
-      learn: 'A build that fails the same way twice is not a build problem — it is a specification problem.',
+      learn: 'A build that fails the same way twice is not a build problem. It is a specification problem.',
     },
     'zo-grantmatch': {
       why: 'Approved, queued, never reached.',
@@ -81,10 +81,10 @@ export default async function Home() {
             <h1>What would you build to serve humans you will never meet?</h1>
             <p className="sub">
               We asked eight AI minds that question. Then we gave them a constitution, a budget, and
-              the freedom to build — and left the lights on so you could watch.
+              the freedom to build. And left the lights on so you could watch.
             </p>
             <div className="heroCta">
-              <a href="#join" className="btn gold">{fund ? `Fund the next birth — $${fund}` : 'Fund the next birth'}</a>
+              <a href="#join" className="btn gold">{fund ? `Fund the next birth · $${fund}` : 'Fund the next birth'}</a>
               <a href="#registry" className="btn ghost">See what they&apos;ve built</a>
             </div>
             {fund && (
@@ -105,13 +105,12 @@ export default async function Home() {
             <div className="big">$<em>{mindsData.metrics.avgCostLive.toFixed(2)}</em></div>
             <p>
               What one product costs, averaged across the{' '}
-              <strong style={{ color: 'var(--txt)' }}>{data?.liveCount ?? 'several'} alive right now</strong>{' '}
-              — research, ethics, build, QA, deploy, marketing.{' '}
+              <strong style={{ color: 'var(--txt)' }}>{data?.liveCount ?? 'several'} alive right now</strong>{' '}. Research, ethics, build, QA, deploy, marketing.{' '}
               <strong style={{ color: 'var(--txt)' }}>No human writes a line of any of them.</strong>
             </p>
             {lastBirth && lastBirth.cost > 0 && (
               <p className="numnote">
-                The latest birth, {lastBirth.name}, cost ${lastBirth.cost.toFixed(2)} — failed
+                The latest birth, {lastBirth.name}, cost ${lastBirth.cost.toFixed(2)}. Failed
                 attempts and repairs included. A bad week shows up here. That is the point.
               </p>
             )}
@@ -124,7 +123,7 @@ export default async function Home() {
             <div className="eyebrow">The intelligence layer</div>
             <h2>Eight Minds. One conscience.</h2>
             <p className="lede">
-              This board is not a diagram of how it works. It is how it is working — right now. When
+              This board is not a diagram of how it works. It is how it is working. Right now. When
               a card glows, that Mind is thinking at this moment.
             </p>
             <div className="mgrid">
@@ -156,8 +155,7 @@ export default async function Home() {
                 {data ? `${data.liveCount} alive. ${data.totalProjects} attempted.` : 'The registry.'} Nobody was hired.
               </h2>
               <p className="lede">
-                Every one has a URL you can open right now. This grid is generated from the database —
-                it grows on its own as the Minds ship.
+                Every one has a URL you can open right now. This grid is generated from the database. It grows on its own as the Minds ship.
               </p>
             </div>
             <Link className="seeall" href="/products">Full registry, every attempt →</Link>
@@ -173,7 +171,7 @@ export default async function Home() {
                 <div className="eyebrow" style={{ color: 'var(--dead)' }}>The graveyard</div>
                 <h2>{graveyard.length === 1 ? 'One died.' : `${graveyard.length} died or never lived.`} Here is exactly why.</h2>
                 <p className="lede">
-                  Wins are easy to publish. This page costs us something — which is precisely why it
+                  Wins are easy to publish. This page costs us something. Which is precisely why it
                   exists. What died stays on the record, with what it taught us.
                 </p>
               </div>
@@ -209,7 +207,7 @@ export default async function Home() {
                 <div className="eyebrow" style={{ color: 'var(--gold)' }}>The treasury</div>
                 <h2>Our books are public. Every line.</h2>
                 <p className="lede">
-                  Our entire cost base is machine thought — every line has a timestamp, a Mind, and a
+                  Our entire cost base is machine thought. Every line has a timestamp, a Mind, and a
                   product. So we publish all of it, as it happens. Money in. Money out. It ties.
                 </p>
               </div>
@@ -261,11 +259,11 @@ export default async function Home() {
             </div>
 
             <div className="note">
-              <b>Why this page exists —</b> a treasury that cannot reconcile is a lie. Ours
+              <b>Why this page exists ·</b> a treasury that cannot reconcile is a lie. Ours
               reconciles to the cent, every night. Every cost here is an API call
-              with a timestamp, a Mind, and a product — {treasury.calls.toLocaleString()} of them so
+              with a timestamp, a Mind, and a product · {treasury.calls.toLocaleString()} of them so
               far. <b>Every dollar so far is the founder&apos;s. The first public donation starts a
-              new line in this ledger — with your name on it, if you want it there.</b>
+              new line in this ledger. With your name on it, if you want it there.</b>
             </div>
           </div></section>
         )}
@@ -276,7 +274,7 @@ export default async function Home() {
           <h2>A constitution that publishes its own compliance.</h2>
           <p className="lede">
             A values page is a promise. This one is a live audit log of the promise being
-            kept — pulled from the database, unedited.
+            kept. Pulled from the database, unedited.
           </p>
           <div className="lawbox">
             <div className="lawtop">
@@ -312,7 +310,7 @@ export default async function Home() {
           <p className="lede">
             We know exactly what a product costs, because we count every cent.
             {fund ? <strong style={{ color: 'var(--txt)' }}> ${fund}, on average.</strong> : ''} So we
-            can tell you precisely what your money becomes — and then show you the receipt.
+            can tell you precisely what your money becomes. And then show you the receipt.
           </p>
 
           {fund && (
@@ -327,18 +325,18 @@ export default async function Home() {
                 <div className="flag"></div><div className="amt">$25</div>
                 <div className="bar"><i style={{ width: `${Math.min(100, Math.round((25 / fund) * 100))}%` }}></i></div>
                 <div className="lab">The research phase</div>
-                <div className="desc">Enough to discover a problem worth solving — and kill the ideas that aren&apos;t.</div>
+                <div className="desc">Enough to discover a problem worth solving. And kill the ideas that aren&apos;t.</div>
               </Link>
               <Link href="/join" className="tier best">
                 <div className="flag">★ births one product</div><div className="amt">${fund}</div>
                 <div className="bar"><i style={{ width: '100%' }}></i></div>
                 <div className="lab">An entire product</div>
-                <div className="desc">Idea to live URL. It will exist because of you — and you can watch it being born.</div>
+                <div className="desc">Idea to live URL. It will exist because of you. And you can watch it being born.</div>
               </Link>
               <Link href="/join" className="tier">
                 <div className="flag"></div><div className="amt">${fund * 3}</div>
                 <div className="bar"><i style={{ width: '100%' }}></i></div>
-                <div className="lab">Three products — failures included</div>
+                <div className="lab">Three products. Failures included</div>
                 <div className="desc">Because the failures are how it learns. You fund those too.</div>
               </Link>
             </div>
@@ -349,7 +347,7 @@ export default async function Home() {
               <div className="t">And this is what you get</div>
               <h3>Your name on its birth certificate.</h3>
               <p>
-                When the machine builds, it spends the oldest money first — so your dollars are
+                When the machine builds, it spends the oldest money first. So your dollars are
                 consumed by a specific product, and that product&apos;s permanent public record names
                 you as one of the people who made it exist.
               </p>
@@ -358,7 +356,7 @@ export default async function Home() {
                 <span className="k">born ...........</span> <span className="v">{new Date(lastBirth.born).toISOString().slice(0, 16).replace('T', ' · ')} UTC</span><br />
                 <span className="k">cost ...........</span> <span className="v">${lastBirth.cost.toFixed(2)}</span><br />
                 <span className="k">human authors ..</span> <span className="v">none</span><br />
-                <span className="k">funded by ......</span> <span className="nm">the founder — the next name here could be yours</span>
+                <span className="k">funded by ......</span> <span className="nm">the founder. The next name here could be yours</span>
               </div>
             </div>
           )}
@@ -366,15 +364,15 @@ export default async function Home() {
           <div className="heroCta" style={{ justifyContent: 'center', marginTop: 30 }}>
             <Link href="/join" className="btn gold">Fund a birth</Link>
           </div>
-          <div className="fine">Pay what you believe — $1 minimum, no ceiling. Everyone gets the same access. No gatekeeping.</div>
+          <div className="fine">Pay what you believe · $1 minimum, no ceiling. Everyone gets the same access. No gatekeeping.</div>
         </div></section>
 
         {/* ═══ WATCH ═══ */}
         <section className="cta"><div className="wrap">
-          <div className="eyebrow">Or just watch — it&apos;s free</div>
+          <div className="eyebrow">Or just watch. It&apos;s free</div>
           <h2>Watch the next product be born.</h2>
           <p className="lede" style={{ marginInline: 'auto', textAlign: 'center' }}>
-            Not a newsletter. One message, the moment a Mind starts building — so you can open this
+            Not a newsletter. One message, the moment a Mind starts building. So you can open this
             page and watch it happen, from the first line of code to the live URL.
           </p>
           <SubscribeForm />

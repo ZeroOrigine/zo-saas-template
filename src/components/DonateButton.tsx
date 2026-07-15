@@ -42,7 +42,7 @@ export default function DonateButton({ amount, label, className = '' }: DonateBu
       disabled={loading}
       className={`tier-button ${className}`}
       style={{ opacity: loading ? 0.7 : 1 }}
-      aria-label={`Fund a birth with ${amount} dollars — one time`}
+      aria-label={`Fund a birth with ${amount} dollars. One time`}
     >
       {loading ? 'Opening secure checkout…' : label}
     </button>

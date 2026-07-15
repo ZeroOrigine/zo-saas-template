@@ -2,10 +2,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Fixed costs of running the ecosystem, folded into the public total.
- * All three values live in zo_config — editable anytime, no redeploy:
- *   website_fixed_onetime_usd  — lifetime one-time investment (founder R&D)
- *   website_fixed_monthly_usd  — monthly subscriptions (Supabase, Railway, n8n, domains)
- *   website_fixed_start_date   — when monthly accrual starts (YYYY-MM-DD)
+ * All three values live in zo_config. Editable anytime, no redeploy:
+ *   website_fixed_onetime_usd. Lifetime one-time investment (founder R&D)
+ *   website_fixed_monthly_usd. Monthly subscriptions (Supabase, Railway, n8n, domains)
+ *   website_fixed_start_date. When monthly accrual starts (YYYY-MM-DD)
  * Accrual: onetime + monthly * fractional months elapsed. Fail-soft to 0.
  */
 export async function getFixedCosts(): Promise<number> {

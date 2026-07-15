@@ -36,13 +36,13 @@ export default function Ticker({ initial }: { initial: Item[] }) {
   // "BUILDER FINISHED" from two days ago must not read like it happened now.
   const text = items
     .map((e) =>
-      `${e.mind.toUpperCase()} ${e.line.toUpperCase()}${e.product ? ' · ' + e.product.toUpperCase() : ''}${mounted ? ' — ' + age(e.at) : ''}`)
+      `${e.mind.toUpperCase()} ${e.line.toUpperCase()}${e.product ? ' · ' + e.product.toUpperCase() : ''}${mounted ? ' · ' + age(e.at) : ''}`)
     .join('  ···  ');
 
   const newest = items[0]?.at;
   const idleChip =
     mounted && newest && Date.now() - new Date(newest).getTime() > 3600_000
-      ? `LINE IDLE — LAST ACTIVITY ${age(newest)}  ···  `
+      ? `LINE IDLE. LAST ACTIVITY ${age(newest)}  ···  `
       : '';
 
   return (

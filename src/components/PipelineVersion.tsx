@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-// Truth rule: show the REAL live pipeline version or nothing — never a
+// Truth rule: show the REAL live pipeline version or nothing. Never a
 // hardcoded number that goes stale (the footer once said v4.1.2 for months).
 export default function PipelineVersion() {
   const [version, setVersion] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export default function PipelineVersion() {
 
   return (
     <p className="footer-version">
-      {version ? `Pipeline v${version} — ` : ''}Building Honestly Since March 2026
+      {version ? `Pipeline v${version} · ` : ''}Building Honestly Since March 2026
     </p>
   );
 }

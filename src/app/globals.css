@@ -2478,3 +2478,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .v4 .stream.quiet{height:auto;min-height:130px}
 .v4 .numnote{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--dim2);max-width:56ch;margin-inline:auto}
 .v4 .st{flex:1 1 0%;min-width:0}
+.funders-list { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.funders-list li { border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text-secondary); }
+.funders-list li strong { color: var(--amber); }

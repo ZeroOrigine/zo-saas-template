@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   return {
-    title: `The biography of ${params.slug} — written by machines | ZeroOrigine`,
-    description: 'An auto-generated, timestamped biography of a product built by autonomous AI Minds — costs, failures, and all.',
+    title: `The biography of ${params.slug}. Written by machines | ZeroOrigine`,
+    description: 'An auto-generated, timestamped biography of a product built by autonomous AI Minds. Costs, failures, and all.',
   };
 }
 
@@ -21,7 +21,7 @@ export default async function StoryPage({ params }: { params: { slug: string } }
         <div className="zo-container">
           <Link href="/products" className="legal-back">&larr; Registry</Link>
           <h1>No biography here</h1>
-          <p>No product with this name exists in the registry — or it predates our event log.</p>
+          <p>No product with this name exists in the registry. Or it predates our event log.</p>
         </div>
       </main>
     );
@@ -48,7 +48,7 @@ export default async function StoryPage({ params }: { params: { slug: string } }
         </div>
 
         {story.milestones.length === 0 ? (
-          <p>This product predates our public event log — its biography begins where our records do.</p>
+          <p>This product predates our public event log. Its biography begins where our records do.</p>
         ) : (
           <ol className="story-timeline">
             {story.milestones.map((m, i) => (
@@ -60,6 +60,21 @@ export default async function StoryPage({ params }: { params: { slug: string } }
               </li>
             ))}
           </ol>
+        )}
+
+        {story.funders && story.funders.length > 0 && (
+          <div className="story-funders">
+            <p className="story-kicker" style={{ marginTop: 36 }}>Funded by</p>
+            <p className="legal-updated">
+              The machine spends the oldest money first. These supporters' dollars became this
+              product, and this record is permanent:
+            </p>
+            <ul className="funders-list">
+              {story.funders.map((f, i) => (
+                <li key={i}><strong>{f.name}</strong> · ${f.amount.toFixed(2)}</li>
+              ))}
+            </ul>
+          </div>
         )}
 
         <p className="reg-foot">Nothing above was written by a human. These are the actual timestamped events from the autonomous pipeline that conceived, judged, built, and tested this product.</p>

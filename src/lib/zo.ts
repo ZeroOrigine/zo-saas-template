@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // Server-side data layer for Mission Control. Every number on the site comes
-// through here — from the same database the Minds write to. No number is ever
+// through here. From the same database the Minds write to. No number is ever
 // invented; if a query fails we return null and the UI renders nothing.
 
 export interface RegistryRow {
@@ -17,15 +17,15 @@ export interface RegistryRow {
 const FRIENDLY: Record<string, { mind: string; line: string }> = {
   research_trigger: { mind: 'Research Mind', line: 'went hunting for problems worth solving' },
   research_complete: { mind: 'Research Mind', line: 'finished discovering problems worth solving' },
-  evaluation_complete: { mind: 'Research Mind B', line: 'scored ideas for viability — GO / NO-GO' },
+  evaluation_complete: { mind: 'Research Mind B', line: 'scored ideas for viability. GO / NO-GO' },
   idea_needs_fixes: { mind: 'Ethics Mind', line: 'sent an idea back with required fixes' },
   approval_needed: { mind: 'Ecosystem', line: 'asked the founder to approve a new idea' },
   human_approved: { mind: 'Founder', line: 'approved an idea for building' },
-  build_complete: { mind: 'Builder Mind', line: 'finished building — all steps complete' },
-  build_failed: { mind: 'Builder Mind', line: 'hit a wall — build failed, learnings stored' },
+  build_complete: { mind: 'Builder Mind', line: 'finished building. All steps complete' },
+  build_failed: { mind: 'Builder Mind', line: 'hit a wall. Build failed, learnings stored' },
   qa_fix_needed: { mind: 'QA Mind', line: 'found issues and sent them back to the Builder' },
   qa_passed: { mind: 'QA Mind', line: 'passed the product through quality review' },
-  qa_failed: { mind: 'QA Mind', line: 'rejected the build — quality bar not met' },
+  qa_failed: { mind: 'QA Mind', line: 'rejected the build. Quality bar not met' },
   marketing_complete: { mind: 'Marketing Mind', line: 'prepared the launch story' },
   deploy_complete: { mind: 'Deploy', line: 'shipped to production' },
   product_launched: { mind: 'Ecosystem', line: 'launched a new product' },
@@ -88,7 +88,7 @@ export interface TreasuryData {
 }
 
 // The public general ledger. Every figure from zo_cost_logs + declared fixed
-// costs — nothing invented, no imaginary donors. Revenue rows will appear here
+// costs. Nothing invented, no imaginary donors. Revenue rows will appear here
 // the day the first dollar arrives, and not a day before.
 export async function getTreasury(): Promise<TreasuryData | null> {
   try {
@@ -125,7 +125,7 @@ export async function getTreasury(): Promise<TreasuryData | null> {
     const dailyBudget = budgetRow?.[0]?.value ? Number(budgetRow[0].value) : null;
     const donRows = donations.data ?? [];
     const donationsTotal = donRows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
-    // Money in and money out interleave in ONE ledger, newest first — a donor's
+    // Money in and money out interleave in ONE ledger, newest first. A donor's
     // row appears here the moment the webhook records it.
     const outs = (recent.data ?? []).map((r) => ({
       created_at: r.created_at, workflow: r.workflow, project_id: r.project_id,
@@ -188,11 +188,13 @@ export async function getStory(slug: string) {
   try {
     const supabase = createAdminClient();
     const pid = `zo-${slug}`;
-    const [proj, events, costs] = await Promise.all([
+    const [proj, events, costs, funders] = await Promise.all([
       supabase.from('zo_projects').select('project_id,name,status,category,created_at,research_score').eq('project_id', pid).limit(1),
       supabase.from('pipeline_events').select('event_type,created_at').eq('project_id', pid)
         .in('event_type', Object.keys(FRIENDLY)).order('created_at', { ascending: true }).limit(200),
       supabase.from('zo_cost_logs').select('cost_usd,workflow').eq('project_id', pid),
+      supabase.from('zo_donations').select('donor_name,amount,allocated_at').eq('allocated_project_id', pid)
+        .order('created_at', { ascending: true }).limit(100),
     ]);
     if (!proj.data?.length) return null;
     const p = proj.data[0];
@@ -210,6 +212,10 @@ export async function getStory(slug: string) {
       born: p.created_at,
       score: p.research_score,
       totalCost: Math.round(totalCost * 100) / 100,
+      funders: (funders.data ?? []).map((f) => ({
+        name: (f.donor_name as string | null) || 'anonymous',
+        amount: Number(f.amount) || 0,
+      })),
       calls: costRows.length,
       milestones,
     };
@@ -230,7 +236,7 @@ export interface MindStatus {
 const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string[]; busyStatuses: string[]; mindNames: string[] }[] = [
   { key: 'research_a', name: 'Research Mind A', epithet: 'the philosopher', workflows: ['research'], busyStatuses: ['researching'], mindNames: ['research_a'] },
   { key: 'research_b', name: 'Research Mind B', epithet: 'the architect', workflows: ['research'], busyStatuses: [], mindNames: ['research_b'] },
-  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience — veto power', workflows: ['ethics_review'], busyStatuses: [], mindNames: ['ethics'] },
+  { key: 'ethics', name: 'Ethics Mind', epithet: 'the conscience. Veto power', workflows: ['ethics_review'], busyStatuses: [], mindNames: ['ethics'] },
   { key: 'architect', name: 'Pipeline Architect', epithet: 'the planner', workflows: ['build_architect'], busyStatuses: [], mindNames: ['build-architect'] },
   { key: 'builder', name: 'Builder Mind', epithet: 'the craftsman´s hands', workflows: ['builder'], busyStatuses: ['building', 'build_complete', 'qa_fix_needed'], mindNames: ['builder', 'builder_opus'] },
   { key: 'qa', name: 'QA Mind', epithet: 'the honest judge', workflows: ['qa_pipeline'], busyStatuses: ['qa', 'qa_round_1', 'qa_round_2', 'qa_round_3'], mindNames: ['qa'] },
@@ -258,7 +264,7 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
     const activeStatuses = new Set((projects.data ?? []).map((p) => p.status));
     // Signal 2: a thought logged in the last 10 minutes = that Mind is at work.
     // Covers research/ethics phases where no project status exists yet, and
-    // guarantees the glow follows WHOEVER is working — automatically.
+    // guarantees the glow follows WHOEVER is working. Automatically.
     const tenMinAgo = Date.now() - 10 * 60 * 1000;
     const freshMinds = new Set(
       (recentThoughts.data ?? [])
@@ -285,7 +291,7 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
         launched: liveProducts.length,
         avgCostLive: liveProducts.length ? Math.round((totalSpend / liveProducts.length) * 100) / 100 : 0,
         totalCalls: rows.length,
-        firstMonth: first ? new Date(first).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }) : '—',
+        firstMonth: first ? new Date(first).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }) : '·',
       },
     };
   } catch {
@@ -294,7 +300,7 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
 }
 
 
-// The last product actually born, with its true all-in cost — the number the
+// The last product actually born, with its true all-in cost. The number the
 // prototype hardcoded as $66.63. We compute it; we never type it.
 export async function getLastBirth(): Promise<{ name: string; cost: number; born: string } | null> {
   try {
@@ -318,7 +324,7 @@ export async function getLastBirth(): Promise<{ name: string; cost: number; born
   }
 }
 
-// The Ethics Mind's latest REAL verdict — the Law section is a receipt, not a
+// The Ethics Mind's latest REAL verdict. The Law section is a receipt, not a
 // values statement. Pulled from ethics_reviews, unedited (concerns truncated).
 export async function getEthicsLatest(): Promise<{
   idea: string; verdict: string; score: string; concerns: string[]; at: string;
@@ -337,7 +343,7 @@ export async function getEthicsLatest(): Promise<{
       const raw = typeof r.concerns === 'string' ? JSON.parse(r.concerns) : r.concerns;
       const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (Array.isArray(arr)) concerns = arr.filter((x) => typeof x === 'string').slice(0, 2);
-    } catch { /* concerns stay empty — show the verdict alone */ }
+    } catch { /* concerns stay empty. Show the verdict alone */ }
     return {
       idea: r.idea_name,
       verdict: r.verdict,

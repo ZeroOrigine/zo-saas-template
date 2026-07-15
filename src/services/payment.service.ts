@@ -109,7 +109,7 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
     }
 
     default:
-      // Unhandled event type — no action needed
+      // Unhandled event type. No action needed
       break;
   }
 }
