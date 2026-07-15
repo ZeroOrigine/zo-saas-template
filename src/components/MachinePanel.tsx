@@ -37,7 +37,7 @@ export function useBirthline(): Birthline | null {
 }
 
 /** The terminal: the machine's actual thoughts, sanitized server-side, unedited. */
-export default function MachinePanel() {
+export default function MachinePanel({ last }: { last?: { name: string; cost: number } | null }) {
   const d = useBirthline();
   const [lines, setLines] = useState<{ by: string; text: string }[]>([]);
   const [, tick] = useState(0);
@@ -63,7 +63,7 @@ export default function MachinePanel() {
         <span className="l"><span className={`dot${f && !f.halted ? '' : ' off'}`}></span>The machine is thinking</span>
         <span className="r">unedited · live</span>
       </div>
-      <div className="stream">
+      <div className={`stream${f ? '' : ' quiet'}`}>
         {f ? (
           lines.length ? (
             lines.map((l, i) => (
@@ -86,9 +86,19 @@ export default function MachinePanel() {
         )}
       </div>
       <div className="mFoot">
-        <div><div className="k">On the line</div><div className="v time">{f ? elapsed(f.born) : '—'}</div></div>
-        <div><div className="k">Compute spent</div><div className="v money">{f ? `$${f.cost.toFixed(2)}` : '—'}</div></div>
-        <div><div className="k">Humans involved</div><div className="v">0</div></div>
+        {f ? (
+          <>
+            <div><div className="k">On the line</div><div className="v time">{elapsed(f.born)}</div></div>
+            <div><div className="k">Compute spent</div><div className="v money">${f.cost.toFixed(2)}</div></div>
+            <div><div className="k">Humans involved</div><div className="v">0</div></div>
+          </>
+        ) : (
+          <>
+            <div><div className="k">Last birth</div><div className="v time">{last?.name ?? d?.lastBirth?.name ?? '—'}</div></div>
+            <div><div className="k">It cost</div><div className="v money">{last ? `$${last.cost.toFixed(2)}` : '—'}</div></div>
+            <div><div className="k">Humans involved</div><div className="v">0</div></div>
+          </>
+        )}
       </div>
     </div>
   );

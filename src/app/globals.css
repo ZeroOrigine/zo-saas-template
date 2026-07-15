@@ -2475,3 +2475,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .v4 .fr{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .v4 .conf b{color:var(--alive);font-weight:500}
 .v4 .subscribe-form{max-width:460px;margin:28px auto 0}
+.v4 .stream.quiet{height:auto;min-height:130px}
+.v4 .numnote{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--dim2);max-width:56ch;margin-inline:auto}
+.v4 .st{flex:1 1 0%;min-width:0}

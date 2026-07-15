@@ -94,22 +94,29 @@ export default async function Home() {
               </div>
             )}
           </div>
-          <MachinePanel />
+          <MachinePanel last={lastBirth ? { name: lastBirth.name, cost: lastBirth.cost } : null} />
         </div>
 
         <div className="wrap"><BirthRail /></div>
 
         {/* ═══ NUMBER ═══ */}
-        {lastBirth && lastBirth.cost > 0 && (
+        {mindsData?.metrics.avgCostLive ? (
           <section className="numsec"><div className="wrap">
-            <div className="big">$<em>{lastBirth.cost.toFixed(2)}</em></div>
+            <div className="big">$<em>{mindsData.metrics.avgCostLive.toFixed(2)}</em></div>
             <p>
-              What it cost to take <strong style={{ color: 'var(--txt)' }}>{lastBirth.name}</strong> from
-              a question to a live URL — research, ethics, build, QA, deploy, marketing, and every
-              failed attempt along the way. <strong style={{ color: 'var(--txt)' }}>No human wrote a line of it.</strong>
+              What one product costs, averaged across the{' '}
+              <strong style={{ color: 'var(--txt)' }}>{data?.liveCount ?? 'several'} alive right now</strong>{' '}
+              — research, ethics, build, QA, deploy, marketing.{' '}
+              <strong style={{ color: 'var(--txt)' }}>No human writes a line of any of them.</strong>
             </p>
+            {lastBirth && lastBirth.cost > 0 && (
+              <p className="numnote">
+                The latest birth, {lastBirth.name}, cost ${lastBirth.cost.toFixed(2)} — failed
+                attempts and repairs included. A bad week shows up here. That is the point.
+              </p>
+            )}
           </div></section>
-        )}
+        ) : null}
 
         {/* ═══ MINDS ═══ */}
         {mindsData && (
