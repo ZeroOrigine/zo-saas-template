@@ -243,18 +243,19 @@ export default async function Home() {
               {treasury.recent.map((r, i) => (
                 <div key={i} className="lrow">
                   <span>{new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>
-                  <span className="out">↑ {r.workflow ?? 'pipeline'}</span>
-                  <span className="who">{(r.project_id ?? 'ecosystem').replace(/^zo-/, '')}</span>
-                  <span style={{ textAlign: 'right' }} className="out">−${r.cost_usd.toFixed(4)}</span>
+                  <span className={r.kind === 'in' ? 'in' : 'out'}>{r.kind === 'in' ? '↓ donation' : `↑ ${r.workflow ?? 'pipeline'}`}</span>
+                  <span className="who">{r.kind === 'in' ? (r.who ?? 'anonymous') : (r.project_id ?? 'ecosystem').replace(/^zo-/, '')}</span>
+                  <span style={{ textAlign: 'right' }} className={r.kind === 'in' ? 'in' : 'out'}>{r.kind === 'in' ? `+$${r.cost_usd.toFixed(2)}` : `−$${r.cost_usd.toFixed(4)}`}</span>
                 </div>
               ))}
             </div>
 
             <div className="tie">
               <span>
-                all-time · founder-funded <b>${treasury.total.toFixed(2)}</b> − spent{' '}
-                <b>${treasury.total.toFixed(2)}</b> (compute ${treasury.apiSpend.toFixed(2)} +
-                infrastructure ${treasury.fixed.toFixed(2)}) = balance <b>$0.00</b>
+                all-time · founder <b>${(treasury.total - treasury.donationsTotal).toFixed(2)}</b>
+                {treasury.donationsTotal > 0 ? <> + supporters <b>${treasury.donationsTotal.toFixed(2)}</b></> : null}
+                {' '}− spent <b>${treasury.total.toFixed(2)}</b> (compute ${treasury.apiSpend.toFixed(2)} +
+                infrastructure ${treasury.fixed.toFixed(2)}) = balance <b>${treasury.donationsTotal.toFixed(2)}</b>
               </span>
               <span style={{ color: 'var(--alive)' }}>✓ it ties, to the cent</span>
             </div>

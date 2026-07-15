@@ -80,7 +80,11 @@ export interface TreasuryData {
   calls: number;
   todaySpend: number;
   dailyBudget: number | null;
-  recent: { created_at: string; workflow: string | null; project_id: string | null; cost_usd: number }[];
+  donationsTotal: number;
+  recent: {
+    created_at: string; workflow: string | null; project_id: string | null;
+    cost_usd: number; kind: 'in' | 'out'; who?: string | null;
+  }[];
 }
 
 // The public general ledger. Every figure from zo_cost_logs + declared fixed
@@ -89,13 +93,18 @@ export interface TreasuryData {
 export async function getTreasury(): Promise<TreasuryData | null> {
   try {
     const supabase = createAdminClient();
-    const [costs, recent] = await Promise.all([
+    const [costs, recent, donations] = await Promise.all([
       supabase.from('zo_cost_logs').select('cost_usd'),
       supabase
         .from('zo_cost_logs')
         .select('created_at,workflow,project_id,cost_usd')
         .order('created_at', { ascending: false })
         .limit(6),
+      supabase
+        .from('zo_donations')
+        .select('created_at,amount,donor_name,allocated_project_id')
+        .order('created_at', { ascending: false })
+        .limit(200),
     ]);
     const rows = costs.data ?? [];
     const apiSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
@@ -114,6 +123,21 @@ export async function getTreasury(): Promise<TreasuryData | null> {
       .eq('key', 'daily_budget_usd')
       .limit(1);
     const dailyBudget = budgetRow?.[0]?.value ? Number(budgetRow[0].value) : null;
+    const donRows = donations.data ?? [];
+    const donationsTotal = donRows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    // Money in and money out interleave in ONE ledger, newest first — a donor's
+    // row appears here the moment the webhook records it.
+    const outs = (recent.data ?? []).map((r) => ({
+      created_at: r.created_at, workflow: r.workflow, project_id: r.project_id,
+      cost_usd: Number(r.cost_usd) || 0, kind: 'out' as const,
+    }));
+    const ins = donRows.slice(0, 3).map((r) => ({
+      created_at: r.created_at, workflow: 'donation', project_id: r.allocated_project_id,
+      cost_usd: Number(r.amount) || 0, kind: 'in' as const, who: r.donor_name ?? 'anonymous',
+    }));
+    const merged = [...outs, ...ins]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 7);
     return {
       apiSpend: Math.round(apiSpend * 100) / 100,
       fixed: Math.round(fixed * 100) / 100,
@@ -121,7 +145,8 @@ export async function getTreasury(): Promise<TreasuryData | null> {
       calls: rows.length,
       todaySpend: Math.round(todaySpend * 100) / 100,
       dailyBudget: dailyBudget && !Number.isNaN(dailyBudget) ? dailyBudget : null,
-      recent: (recent.data ?? []).map((r) => ({ ...r, cost_usd: Number(r.cost_usd) || 0 })),
+      donationsTotal: Math.round(donationsTotal * 100) / 100,
+      recent: merged,
     };
   } catch {
     return null;
