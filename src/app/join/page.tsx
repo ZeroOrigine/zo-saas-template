@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import JoinRevealObserver from '@/components/JoinRevealObserver';
-import SupportButton from '@/components/SupportButton';
+import DonateButton from '@/components/DonateButton';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -46,28 +46,18 @@ export default function JoinPage() {
         {/* Pay What You Believe */}
         <section className="support-section join-container" id="support">
           <div className="support-card-main reveal">
-            <h2>Pay What You Believe</h2>
-            <p className="support-intro">One membership. Everyone equal. No tiers. No gatekeeping.<br />$1 minimum. No maximum. Cancel anytime.</p>
+            <h2>Fund a birth</h2>
+            <p className="support-intro">One-time. No subscription, no account, no recurring anything.<br />At checkout you can put a name on the birth certificate — or stay anonymous.<br />You get a permanent receipt URL that tracks exactly what your money becomes.</p>
 
             <div className="amount-grid">
-              <SupportButton amount={1} />
-              <SupportButton amount={5} />
-              <SupportButton amount={10} />
-              <SupportButton amount={25} />
+              <DonateButton amount={5} label="$5" />
+              <DonateButton amount={25} label="$25" />
+              <DonateButton amount={58} label="$58 — births a product" />
+              <DonateButton amount={174} label="$174 — three births" />
             </div>
 
             <div className="onetime-block">
-              <p className="onetime-label">Prefer no commitment at all?</p>
-              <a
-                href="https://buy.stripe.com/3cI4gA6WQ4DW9YVazc6sw0a"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="onetime-button"
-                aria-label="Give a one-time amount of your choice"
-              >
-                Give once — any amount
-              </a>
-              <p className="onetime-note">You choose the number. $1 minimum. No account, no recurring anything.</p>
+              <p className="onetime-note">$1 minimum, no ceiling. Everyone gets the same access — no tiers, no gatekeeping. The machine spends the oldest money first, and your receipt page names the product your dollars became.</p>
             </div>
 
             <div className="support-note">
