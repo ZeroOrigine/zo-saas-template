@@ -73,6 +73,44 @@ export async function getHomeData() {
   }
 }
 
+export interface TreasuryData {
+  apiSpend: number;
+  fixed: number;
+  total: number;
+  calls: number;
+  recent: { created_at: string; workflow: string | null; project_id: string | null; cost_usd: number }[];
+}
+
+// The public general ledger. Every figure from zo_cost_logs + declared fixed
+// costs — nothing invented, no imaginary donors. Revenue rows will appear here
+// the day the first dollar arrives, and not a day before.
+export async function getTreasury(): Promise<TreasuryData | null> {
+  try {
+    const supabase = createAdminClient();
+    const [costs, recent] = await Promise.all([
+      supabase.from('zo_cost_logs').select('cost_usd'),
+      supabase
+        .from('zo_cost_logs')
+        .select('created_at,workflow,project_id,cost_usd')
+        .order('created_at', { ascending: false })
+        .limit(6),
+    ]);
+    const rows = costs.data ?? [];
+    const apiSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const { getFixedCosts } = await import('@/lib/fixedCosts');
+    const fixed = await getFixedCosts();
+    return {
+      apiSpend: Math.round(apiSpend * 100) / 100,
+      fixed: Math.round(fixed * 100) / 100,
+      total: Math.round((apiSpend + fixed) * 100) / 100,
+      calls: rows.length,
+      recent: (recent.data ?? []).map((r) => ({ ...r, cost_usd: Number(r.cost_usd) || 0 })),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getRegistry(): Promise<RegistryRow[] | null> {
   try {
     const supabase = createAdminClient();

@@ -2255,3 +2255,66 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .bl-here:has(.bl-token-halted) .bl-node { border-color: rgba(239,80,80,0.7); box-shadow: 0 0 14px 3px rgba(239,80,80,0.25); }
 .bl-paused { display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.45rem; border: 1px solid rgba(255,255,255,0.3);
   color: rgba(255,255,255,0.6); font-size: 0.62rem; letter-spacing: 0.14em; border-radius: 3px; vertical-align: middle; }
+
+/* ═══ v4 prototype — the machine is thinking ═══ */
+.mth-wrap { margin: 28px 0 8px; text-align: left; }
+.mth { border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,0.02); overflow: hidden; }
+.mth-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--amber); }
+.mth-tag { color: var(--text-dim); }
+.mth-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); margin-right: 8px; vertical-align: 1px; }
+.mth-dot.on { background: #3ddc84; box-shadow: 0 0 10px rgba(61,220,132,0.7); animation: mthpulse 1.6s infinite; }
+@keyframes mthpulse { 50% { opacity: 0.45; } }
+.mth-body { padding: 16px 18px; min-height: 96px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12.5px; line-height: 1.75; color: var(--text-secondary); }
+.mth-body p { margin: 0 0 6px; }
+.mth-body b { color: var(--amber); font-weight: 600; }
+.mth-idle { color: var(--text-muted); }
+.mth-foot { display: flex; gap: 34px; padding: 13px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.mth-foot span { display: flex; flex-direction: column; gap: 3px; }
+.mth-foot i { font-style: normal; font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.13em; color: var(--text-dim); }
+.mth-mono { font-family: ui-monospace, Menlo, monospace; font-size: 17px; color: #3ddc84; font-variant-numeric: tabular-nums; }
+.rail-box { margin-top: 14px; border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px 16px; background: rgba(255,255,255,0.015); }
+.rail { display: flex; align-items: center; }
+.rl { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; }
+.rl::before { content: ''; position: absolute; top: 5px; left: -50%; width: 100%; height: 2px; background: var(--border); }
+.rl:first-child::before { display: none; }
+.rl.done::before, .rl.now::before { background: #3ddc84; }
+.rl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--black); border: 2px solid var(--text-dim); z-index: 1; }
+.rl.done .rl-dot { background: #3ddc84; border-color: #3ddc84; }
+.rl.now .rl-dot { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 12px rgba(226,179,64,0.8); }
+.rl.halt .rl-dot { background: #e0525f; border-color: #e0525f; }
+.rl-name { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; }
+.rail-cap { margin-top: 14px; text-align: center; font-size: 14px; color: var(--text-secondary); }
+.rail-cap b { color: var(--amber); }
+.fund-note { margin-top: 18px; padding-left: 14px; border-left: 2px solid var(--amber); font-family: ui-monospace, Menlo, monospace; font-size: 12px; line-height: 1.8; color: var(--text-muted); text-align: left; max-width: 560px; margin-left: auto; margin-right: auto; }
+.fund-note b { color: var(--amber); }
+
+/* ═══ graveyard ═══ */
+.grave { padding: 96px 0; }
+.grave-grid { display: grid; gap: 14px; margin-top: 36px; }
+.grave-card { border: 1px solid rgba(224,82,96,0.22); border-radius: 14px; background: rgba(224,82,96,0.03); padding: 24px 26px; }
+.grave-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.grave-head h3 { font-size: 19px; }
+.grave-cost { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: #e0525f; }
+.grave-why { margin-top: 10px; color: var(--text-secondary); font-size: 14.5px; }
+.grave-learn { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(224,82,96,0.2); color: var(--text-muted); font-size: 13.5px; }
+.grave-learn b { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: #e0525f; margin-bottom: 5px; }
+
+/* ═══ treasury ═══ */
+.trez { padding: 96px 0; background: linear-gradient(180deg, rgba(226,179,64,0.03), transparent 45%); }
+.trez-gauge { margin-top: 36px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 28px; }
+.trez-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 14px; }
+.trez-bal { font-size: 40px; font-weight: 700; line-height: 1; }
+.trez-bal em { font-style: normal; font-size: 14px; font-weight: 400; color: var(--text-muted); }
+.trez-run { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--text-dim); text-align: right; }
+.trez-run b { color: var(--text-secondary); display: block; font-size: 13px; margin-bottom: 4px; }
+.trez-ledger { margin-top: 24px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.trez-lhead, .trez-lrow { display: grid; grid-template-columns: 0.7fr 1.4fr 1.2fr 0.9fr; gap: 10px; padding: 11px 18px; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; }
+.trez-lhead { border-bottom: 1px solid var(--border); font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--text-dim); }
+.trez-lrow { color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.03); }
+.trez-lrow:last-child { border-bottom: 0; }
+.trez-lrow .who { color: var(--text-secondary); }
+.trez-lrow .out { color: var(--amber); text-align: right; }
+.trez-lhead span:last-child { text-align: right; }
+.trez-tie { margin-top: 16px; padding: 14px 18px; border: 1px dashed var(--border); border-radius: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--text-muted); }
+.section-sub { max-width: 620px; margin: 14px auto 0; color: var(--text-muted); text-align: center; }
+@media (max-width: 640px) { .trez-lhead, .trez-lrow { grid-template-columns: 0.7fr 1.2fr 0.9fr; } .trez-lhead span:nth-child(3), .trez-lrow span:nth-child(3) { display: none; } }

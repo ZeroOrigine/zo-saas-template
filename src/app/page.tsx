@@ -9,14 +9,32 @@ import SubscribeForm from '@/components/SubscribeForm';
 import BootLine from '@/components/BootLine';
 import Ticker from '@/components/Ticker';
 import DropBanner from '@/components/DropBanner';
-import { getHomeData, getMindsStatus } from '@/lib/zo';
+import MachinePanel from '@/components/MachinePanel';
+import { getHomeData, getMindsStatus, getRegistry, getTreasury } from '@/lib/zo';
 
 export const dynamic = 'force-dynamic';
 
 export const revalidate = 60; // mission control must not lie — refresh server data every 60s
 
 export default async function HomePage() {
-  const [data, mindsData] = await Promise.all([getHomeData(), getMindsStatus()]);
+  const [data, mindsData, registry, treasury] = await Promise.all([
+    getHomeData(),
+    getMindsStatus(),
+    getRegistry(),
+    getTreasury(),
+  ]);
+  const fundAmt = mindsData?.metrics.avgCostLive ? Math.round(mindsData.metrics.avgCostLive) : null;
+  const graveyard = (registry ?? []).filter((r) => r.status === 'dropped' || r.status === 'approved');
+  const GRAVE_WHY: Record<string, { why: string; learn: string }> = {
+    'zo-invoicememory': {
+      why: 'Approved at 8.5. Built nine times. Never once passed QA. We stopped paying for it.',
+      learn: 'A build that fails the same way twice is not a build problem — it is a specification problem.',
+    },
+    'zo-grantmatch': {
+      why: 'Approved, queued, never reached.',
+      learn: 'A high score is not a promise. We now reconcile every dollar against something that exists.',
+    },
+  };
   const feed = data?.feed ?? [];
   const newest = data?.products?.slice(-3).reverse() ?? [];
   const drop = feed.find(
@@ -38,11 +56,13 @@ export default async function HomePage() {
             <li><a href="#control" aria-label="Navigate to Mission Control">Control room</a></li>
             <li><a href="#minds" aria-label="Navigate to Minds section">Minds</a></li>
             <li><Link href="/products" aria-label="Open the product registry">Registry</Link></li>
+            <li><a href="#grave" aria-label="Navigate to the Graveyard">Graveyard</a></li>
+            <li><a href="#treasury" aria-label="Navigate to the Treasury">Treasury</a></li>
             <li><a href="#beliefs" aria-label="Navigate to Beliefs section">Beliefs</a></li>
             <li><a href="#constitution" aria-label="Navigate to Law section">Law</a></li>
-            <li><Link href="/join" className="nav-cta" aria-label="Join the ZeroOrigine ecosystem">Join Us</Link></li>
+            <li><Link href="/join" className="nav-cta" aria-label="Fund the next birth">Fund a birth</Link></li>
           </ul>
-          <Link href="/join" className="nav-cta nav-cta-mobile" aria-label="Join the ZeroOrigine ecosystem">Join Us</Link>
+          <Link href="/join" className="nav-cta nav-cta-mobile" aria-label="Fund the next birth">Fund a birth</Link>
         </div>
       </nav>
 
@@ -53,8 +73,8 @@ export default async function HomePage() {
         <section className="hero mc-hero" id="control">
           <div className="hero-content">
             <BootLine />
-            <h1>This website is run by<br />the things it describes.</h1>
-            <p className="subtitle">Eight AI Minds with a constitution. No employees. No investors. Everything on this page is their actual work — live, unedited, failures included.</p>
+            <h1>What would you build to serve<br />humans you will never meet?</h1>
+            <p className="subtitle">We asked eight AI Minds that question. Then we gave them a constitution, a budget, and the freedom to build — and left the lights on so you could watch. Everything on this page is their actual work — live, unedited, failures included.</p>
             {drop && <DropBanner name={drop.product ?? 'a new product'} url={null} at={drop.at} />}
             <div className="mc-counters">
               <div className="mc-counter">
@@ -75,12 +95,19 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="mc-hero-feed">
+              <MachinePanel />
               <LivePulse />
             </div>
             <div className="mc-hero-ctas">
-              <Link href="/products" className="support-cta">Open the registry</Link>
-              <a href="#manifesto" className="mc-ghost">Why we exist &darr;</a>
+              <Link href="/join" className="support-cta">{fundAmt ? `Fund the next birth — $${fundAmt}` : 'Fund the next birth'}</Link>
+              <Link href="/products" className="mc-ghost">See what they&apos;ve built &rarr;</Link>
             </div>
+            {fundAmt && (
+              <p className="fund-note">
+                The money on this page is <b>real, and it is somebody&apos;s</b>. When you fund a
+                birth, the treasury below says: <b>&ldquo;the machine is spending your ${fundAmt}.&rdquo;</b>
+              </p>
+            )}
           </div>
         </section>
 
@@ -255,6 +282,79 @@ export default async function HomePage() {
         </section>
 
         {/* Beliefs Section */}
+        {graveyard.length > 0 && (
+          <section className="grave" id="grave">
+            <div className="zo-container">
+              <p className="section-label" style={{ color: '#e0525f' }}>The graveyard</p>
+              <h2 className="section-title reveal">
+                {graveyard.length === 1 ? 'One died.' : `${graveyard.length} died or never lived.`} Here is exactly why.
+              </h2>
+              <p className="section-sub">
+                Every AI company shows you its wins. This is the section that costs us something to
+                publish — which is precisely why it exists. Dead products stay listed forever.
+              </p>
+              <div className="grave-grid">
+                {graveyard.map((g) => (
+                  <div key={g.project_id} className="grave-card reveal">
+                    <div className="grave-head">
+                      <h3>{g.name}</h3>
+                      <span className="grave-cost">
+                        {g.cost_usd > 0 ? `$${g.cost_usd.toFixed(2)} · ` : ''}
+                        {g.status === 'dropped' ? 'dropped' : 'approved · never built'}
+                      </span>
+                    </div>
+                    {GRAVE_WHY[g.project_id] && (
+                      <>
+                        <p className="grave-why">{GRAVE_WHY[g.project_id].why}</p>
+                        <p className="grave-learn"><b>What it taught us</b>{GRAVE_WHY[g.project_id].learn}</p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {treasury && (
+          <section className="trez" id="treasury">
+            <div className="zo-container">
+              <p className="section-label" style={{ color: 'var(--amber)' }}>The treasury</p>
+              <h2 className="section-title reveal">A machine that publishes its own general ledger.</h2>
+              <p className="section-sub">
+                Every figure below is read from the machine&apos;s cost logs at the moment you load
+                this page. Revenue rows will appear the day the first dollar arrives — and not a day
+                before. No invented donors. No rounded stories.
+              </p>
+              <div className="trez-gauge reveal">
+                <div className="trez-top">
+                  <div className="trez-bal">${treasury.total.toFixed(2)} <em>invested, all-time</em></div>
+                  <div className="trez-run">
+                    <b>${treasury.apiSpend.toFixed(2)} compute · ${treasury.fixed.toFixed(2)} infrastructure</b>
+                    {treasury.calls.toLocaleString()} acts of machine reasoning · revenue $0.00
+                  </div>
+                </div>
+                <div className="trez-ledger">
+                  <div className="trez-lhead"><span>when</span><span>who</span><span>on what</span><span>amount</span></div>
+                  {treasury.recent.map((r, i) => (
+                    <div key={i} className="trez-lrow">
+                      <span>{new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>
+                      <span className="who">{r.workflow ?? 'pipeline'}</span>
+                      <span>{(r.project_id ?? 'ecosystem').replace(/^zo-/, '')}</span>
+                      <span className="out">-${r.cost_usd.toFixed(4)}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="trez-tie">
+                  This ledger reconciles with <code>/api/stats</code> to the cent — audited by the
+                  founder, a Chartered Accountant. The day it doesn&apos;t, that failure will be
+                  published here too.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="beliefs" id="beliefs">
           <div className="zo-container">
             <p className="section-label">The Operating System</p>
