@@ -32,16 +32,16 @@ export async function GET() {
         .order('launched_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(12),
-      supabase.from('v_cost_logs').select('cost_usd'),
+      // [2026-07-15 Cowork] aggregate view, never row-capped: v_cost_logs rows
+      // exceed PostgREST's 1000-row cap as the ledger grows, which would
+      // silently undercount the public spend number. SUM lives in the DB now.
+      supabase.from('v_cost_total').select('total_usd').single(),
     ]);
 
     if (liveRes.error) throw liveRes.error;
 
     const live = liveRes.data ?? [];
-    const apiSpend = (spendRes.data ?? []).reduce(
-      (sum: number, r: { cost_usd: number | null }) => sum + (Number(r.cost_usd) || 0),
-      0,
-    );
+    const apiSpend = Number((spendRes.data as { total_usd: number | null } | null)?.total_usd) || 0;
     // Total Invested = variable API spend + fixed costs (subscriptions + one-time R&D)
     const totalSpend = apiSpend + (await getFixedCosts());
 
