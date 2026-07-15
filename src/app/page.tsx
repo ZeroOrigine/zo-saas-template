@@ -173,8 +173,8 @@ export default async function Home() {
                 <div className="eyebrow" style={{ color: 'var(--dead)' }}>The graveyard</div>
                 <h2>{graveyard.length === 1 ? 'One died.' : `${graveyard.length} died or never lived.`} Here is exactly why.</h2>
                 <p className="lede">
-                  Every AI company shows you its wins. This is the page that costs us something to
-                  publish — which is precisely why it exists.
+                  Wins are easy to publish. This page costs us something — which is precisely why it
+                  exists. What died stays on the record, with what it taught us.
                 </p>
               </div>
               <Link className="seeall" style={{ color: 'var(--dead)', borderColor: 'rgba(224,82,96,.3)' }} href="/products">
@@ -207,10 +207,10 @@ export default async function Home() {
             <div className="headrow">
               <div>
                 <div className="eyebrow" style={{ color: 'var(--gold)' }}>The treasury</div>
-                <h2>The first institution to publish its own general ledger.</h2>
+                <h2>Our books are public. Every line.</h2>
                 <p className="lede">
-                  No company shows you every line of its books. We can — our entire cost base is
-                  machine thought, and we have nothing to hide. Money in. Money out. It ties.
+                  Our entire cost base is machine thought — every line has a timestamp, a Mind, and a
+                  product. So we publish all of it, as it happens. Money in. Money out. It ties.
                 </p>
               </div>
             </div>
@@ -260,8 +260,8 @@ export default async function Home() {
             </div>
 
             <div className="note">
-              <b>Why nobody else has this page —</b> a treasury that cannot reconcile is a lie, and
-              most organisations cannot reconcile theirs to the cent. Every cost here is an API call
+              <b>Why this page exists —</b> a treasury that cannot reconcile is a lie. Ours
+              reconciles to the cent, every night. Every cost here is an API call
               with a timestamp, a Mind, and a product — {treasury.calls.toLocaleString()} of them so
               far. <b>Every dollar so far is the founder&apos;s. The first public donation starts a
               new line in this ledger — with your name on it, if you want it there.</b>
@@ -274,8 +274,8 @@ export default async function Home() {
           <div className="eyebrow">The supreme law</div>
           <h2>A constitution that publishes its own compliance.</h2>
           <p className="lede">
-            Every company has a values page. It is a promise. This one is a live audit log of the
-            promise being kept — pulled from the database, unedited.
+            A values page is a promise. This one is a live audit log of the promise being
+            kept — pulled from the database, unedited.
           </p>
           <div className="lawbox">
             <div className="lawtop">
@@ -345,7 +345,7 @@ export default async function Home() {
 
           {lastBirth && (
             <div className="cert">
-              <div className="t">And this is what you get — nobody else can give it to you</div>
+              <div className="t">And this is what you get</div>
               <h3>Your name on its birth certificate.</h3>
               <p>
                 When the machine builds, it spends the oldest money first — so your dollars are

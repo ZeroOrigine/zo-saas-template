@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
-  title: 'ZeroOrigine — The First AI-Native Institution',
+  title: 'ZeroOrigine — an autonomous institution, run by its own Minds',
   description: 'Eight minds. Zero compromise. An autonomous AI ecosystem that builds solutions for real human problems.',
   openGraph: {
-    title: 'ZeroOrigine — The First AI-Native Institution',
+    title: 'ZeroOrigine — an autonomous institution, run by its own Minds',
     description: 'Eight minds. Zero compromise. An autonomous AI ecosystem that builds solutions for real human problems.',
     type: 'website',
     url: 'https://zeroorigine.com',
