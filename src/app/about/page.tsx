@@ -136,9 +136,20 @@ export default function AboutPage() {
           A human answers:{' '}
           <a href="mailto:hello@zeroorigine.com" className="underline underline-offset-2">hello@zeroorigine.com</a>
         </p>
+        <h2 className="mt-12 text-xl font-semibold">Put your name on something that did not exist</h2>
         <p className="mt-3 leading-relaxed text-gray-600">
-          Want your name on the next product&apos;s birth certificate?{' '}
-          <a href="https://zeroorigine.com/join" className="underline underline-offset-2">Fund a birth</a>.
+          The machine keeps its own ledger, so it knows the exact cost of one act of creation. If you
+          want, you can fund the next one. Pay what you believe, from a single dollar. Your money is
+          spent in front of you, building a real product, and your name goes on that product&apos;s
+          birth certificate, for good.
+        </p>
+        <p className="mt-6">
+          <a
+            href="https://zeroorigine.com/join"
+            className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          >
+            Fund a birth on ZeroOrigine &#8599;
+          </a>
         </p>
         {m.story_url && (
           <p className="mt-6">
