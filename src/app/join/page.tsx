@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import JoinRevealObserver from '@/components/JoinRevealObserver';
 import DonateButton from '@/components/DonateButton';
+import FundCustom from '@/components/FundCustom';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -55,6 +56,8 @@ export default function JoinPage() {
               <DonateButton amount={58} label="$58. Births a product" />
               <DonateButton amount={174} label="$174. Three births" />
             </div>
+
+            <FundCustom />
 
             <div className="onetime-block">
               <p className="onetime-note">$1 minimum, no ceiling. Everyone gets the same access. No tiers, no gatekeeping. The machine spends the oldest money first, and your receipt page names the product your dollars became.</p>

@@ -8,43 +8,43 @@ interface DonateButtonProps {
   className?: string;
 }
 
-const RAILWAY_URL = process.env.NEXT_PUBLIC_RAILWAY_URL || 'https://zo-langgraph-production-3c96.up.railway.app';
-
 export default function DonateButton({ amount, label, className = '' }: DonateButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleClick = async () => {
     setLoading(true);
+    setError('');
     try {
-      const res = await fetch(`${RAILWAY_URL}/donations/create-checkout`, {
+      const res = await fetch('/api/fund', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount }),
       });
-
-      if (!res.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
       const data = await res.json();
-      if (data.checkout_url) {
+      if (data?.ok && data.checkout_url) {
         window.location.href = data.checkout_url;
+        return;
       }
-    } catch (err) {
-      console.error('Checkout error:', err);
-      setLoading(false);
+      setError(data?.error || 'Checkout failed. Nothing was charged.');
+    } catch {
+      setError('Checkout failed. Nothing was charged. Please try again.');
     }
+    setLoading(false);
   };
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className={`tier-button ${className}`}
-      style={{ opacity: loading ? 0.7 : 1 }}
-      aria-label={`Fund a birth with ${amount} dollars. One time`}
-    >
-      {loading ? 'Opening secure checkout…' : label}
-    </button>
+    <>
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className={`tier-button ${className}`}
+        style={{ opacity: loading ? 0.7 : 1 }}
+        aria-label={`Fund a birth with ${amount} dollars, one time`}
+      >
+        {loading ? 'Opening secure checkout…' : label}
+      </button>
+      {error && <p role="alert" style={{ color: '#e0525f', fontSize: 13, marginTop: 8 }}>{error}</p>}
+    </>
   );
 }
