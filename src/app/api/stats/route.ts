@@ -27,7 +27,7 @@ export async function GET() {
       supabase.from('zo_products').select('id', { count: 'exact', head: true }).eq('status', 'live'),
       supabase
         .from('zo_products')
-        .select('slug, name, tagline, description, status, url, icon, sort_order')
+        .select('slug, name, tagline, description, status, url, icon, sort_order, category, launched_at')
         .eq('status', 'live')
         .order('launched_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })

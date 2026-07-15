@@ -39,7 +39,7 @@ export async function getHomeData() {
   try {
     const supabase = createAdminClient();
     const [products, projects, costs, events] = await Promise.all([
-      supabase.from('zo_products').select('slug,name,tagline,status,url,icon,sort_order').order('sort_order'),
+      supabase.from('zo_products').select('slug,name,tagline,status,url,icon,sort_order,category,launched_at,created_at').order('launched_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }),
       supabase.from('zo_projects').select('project_id,name,status,created_at'),
       supabase.from('zo_cost_logs').select('cost_usd,project_id,created_at'),
       supabase.from('pipeline_events').select('event_type,project_id,created_at')
@@ -78,6 +78,8 @@ export interface TreasuryData {
   fixed: number;
   total: number;
   calls: number;
+  todaySpend: number;
+  dailyBudget: number | null;
   recent: { created_at: string; workflow: string | null; project_id: string | null; cost_usd: number }[];
 }
 
@@ -99,11 +101,26 @@ export async function getTreasury(): Promise<TreasuryData | null> {
     const apiSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
     const { getFixedCosts } = await import('@/lib/fixedCosts');
     const fixed = await getFixedCosts();
+    const dayStart = new Date();
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const { data: todayRows } = await supabase
+      .from('zo_cost_logs')
+      .select('cost_usd')
+      .gte('created_at', dayStart.toISOString());
+    const todaySpend = (todayRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const { data: budgetRow } = await supabase
+      .from('zo_config')
+      .select('value')
+      .eq('key', 'daily_budget_usd')
+      .limit(1);
+    const dailyBudget = budgetRow?.[0]?.value ? Number(budgetRow[0].value) : null;
     return {
       apiSpend: Math.round(apiSpend * 100) / 100,
       fixed: Math.round(fixed * 100) / 100,
       total: Math.round((apiSpend + fixed) * 100) / 100,
       calls: rows.length,
+      todaySpend: Math.round(todaySpend * 100) / 100,
+      dailyBudget: dailyBudget && !Number.isNaN(dailyBudget) ? dailyBudget : null,
       recent: (recent.data ?? []).map((r) => ({ ...r, cost_usd: Number(r.cost_usd) || 0 })),
     };
   } catch {
@@ -245,6 +262,63 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
         totalCalls: rows.length,
         firstMonth: first ? new Date(first).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }) : '—',
       },
+    };
+  } catch {
+    return null;
+  }
+}
+
+
+// The last product actually born, with its true all-in cost — the number the
+// prototype hardcoded as $66.63. We compute it; we never type it.
+export async function getLastBirth(): Promise<{ name: string; cost: number; born: string } | null> {
+  try {
+    const supabase = createAdminClient();
+    const { data: projs } = await supabase
+      .from('zo_projects')
+      .select('project_id,name,status,updated_at')
+      .in('status', ['launched', 'live'])
+      .order('updated_at', { ascending: false })
+      .limit(1);
+    const p = projs?.[0];
+    if (!p) return null;
+    const { data: costRows } = await supabase
+      .from('zo_cost_logs')
+      .select('cost_usd')
+      .eq('project_id', p.project_id);
+    const cost = (costRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    return { name: p.name, cost: Math.round(cost * 100) / 100, born: p.updated_at };
+  } catch {
+    return null;
+  }
+}
+
+// The Ethics Mind's latest REAL verdict — the Law section is a receipt, not a
+// values statement. Pulled from ethics_reviews, unedited (concerns truncated).
+export async function getEthicsLatest(): Promise<{
+  idea: string; verdict: string; score: string; concerns: string[]; at: string;
+} | null> {
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from('ethics_reviews')
+      .select('idea_name,verdict,ethical_score,concerns,reviewed_at')
+      .order('reviewed_at', { ascending: false })
+      .limit(1);
+    const r = data?.[0];
+    if (!r) return null;
+    let concerns: string[] = [];
+    try {
+      const raw = typeof r.concerns === 'string' ? JSON.parse(r.concerns) : r.concerns;
+      const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (Array.isArray(arr)) concerns = arr.filter((x) => typeof x === 'string').slice(0, 2);
+    } catch { /* concerns stay empty — show the verdict alone */ }
+    return {
+      idea: r.idea_name,
+      verdict: r.verdict,
+      score: String(r.ethical_score),
+      concerns,
+      at: r.reviewed_at,
     };
   } catch {
     return null;

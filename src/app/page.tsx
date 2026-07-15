@@ -1,29 +1,41 @@
 import Link from 'next/link';
-import ProductCards from '@/components/ProductCards';
-import TransparencyStats from '@/components/TransparencyStats';
-import RevealObserver from '@/components/RevealObserver';
-import LivePulse from '@/components/LivePulse';
-import BirthLine from '@/components/BirthLine';
-import PipelineVersion from '@/components/PipelineVersion';
+import MachinePanel, { BirthRail } from '@/components/MachinePanel';
+import RegistryGridV4, { type GridProduct } from '@/components/RegistryGridV4';
 import SubscribeForm from '@/components/SubscribeForm';
-import BootLine from '@/components/BootLine';
-import Ticker from '@/components/Ticker';
-import DropBanner from '@/components/DropBanner';
-import MachinePanel from '@/components/MachinePanel';
-import { getHomeData, getMindsStatus, getRegistry, getTreasury } from '@/lib/zo';
+import {
+  getHomeData, getMindsStatus, getRegistry, getTreasury, getLastBirth, getEthicsLatest,
+} from '@/lib/zo';
 
 export const dynamic = 'force-dynamic';
 
-export const revalidate = 60; // mission control must not lie — refresh server data every 60s
+const MIND_COPY: Record<string, { role: string; think: string }> = {
+  research_a: { role: 'the philosopher', think: 'Finds the pain worth solving. Refuses any idea that is only a cheaper clone of something already free.' },
+  research_b: { role: 'the architect', think: 'Scores every idea out of 10. The bar is 7.0. Most ideas die here.' },
+  ethics: { role: 'the conscience — veto power', think: 'Kant, Rawls, Nussbaum. Can stop any product the others want to build. It has.' },
+  architect: { role: 'the planner', think: 'Turns an approved idea into a build plan before a single line is written.' },
+  builder: { role: "the craftsman's hands", think: 'Writes the product, end to end. When it works, you watch it happen in the panel above — unedited.' },
+  qa: { role: 'the honest judge', think: 'Grades out of 185. Has refused to ship its own builds. The bar does not move.' },
+  marketing: { role: 'the storyteller', think: "Writes the product's story from its spec. Never invents a feature that doesn't exist." },
+  immune: { role: 'the night watch', think: 'Watches every live product. Patches what breaks while the world sleeps.' },
+};
 
-export default async function HomePage() {
-  const [data, mindsData, registry, treasury] = await Promise.all([
-    getHomeData(),
-    getMindsStatus(),
-    getRegistry(),
-    getTreasury(),
+function agoLabel(lastSeen: string | null, busy: boolean): string {
+  if (busy) return 'working now';
+  if (!lastSeen) return 'dormant';
+  const h = Math.floor((Date.now() - new Date(lastSeen).getTime()) / 3600000);
+  if (h < 1) return 'idle · <1h';
+  if (h < 24) return `idle · ${h}h`;
+  return `idle · ${Math.floor(h / 24)}d`;
+}
+
+export default async function Home() {
+  const [data, mindsData, registry, treasury, lastBirth, ethics] = await Promise.all([
+    getHomeData(), getMindsStatus(), getRegistry(), getTreasury(), getLastBirth(), getEthicsLatest(),
   ]);
-  const fundAmt = mindsData?.metrics.avgCostLive ? Math.round(mindsData.metrics.avgCostLive) : null;
+
+  const fund = mindsData?.metrics.avgCostLive ? Math.round(mindsData.metrics.avgCostLive) : null;
+  const costs: Record<string, number> = {};
+  for (const r of registry ?? []) costs[r.project_id] = r.cost_usd;
   const graveyard = (registry ?? []).filter((r) => r.status === 'dropped' || r.status === 'approved');
   const GRAVE_WHY: Record<string, { why: string; learn: string }> = {
     'zo-invoicememory': {
@@ -35,482 +47,336 @@ export default async function HomePage() {
       learn: 'A high score is not a promise. We now reconcile every dollar against something that exists.',
     },
   };
-  const feed = data?.feed ?? [];
-  const newest = data?.products?.slice(-3).reverse() ?? [];
-  const drop = feed.find(
-    (e) => e.mind === 'Ecosystem' && e.line.includes('launched') &&
-    Date.now() - new Date(e.at).getTime() < 48 * 3600000,
-  );
+  const budgetUsedPct = treasury?.dailyBudget
+    ? Math.min(100, Math.round((treasury.todaySpend / treasury.dailyBudget) * 100))
+    : null;
+  const fuelLeft = treasury?.dailyBudget ? Math.max(0, treasury.dailyBudget - treasury.todaySpend) : null;
+  const ethicsAgo = ethics
+    ? (() => {
+        const h = Math.floor((Date.now() - new Date(ethics.at).getTime()) / 3600000);
+        return h < 24 ? `${h} hours ago` : `${Math.floor(h / 24)} days ago`;
+      })()
+    : null;
 
   return (
-    <>
-      <RevealObserver />
-
-      <a href="#main" className="skip-link">Skip to main content</a>
-
-      {/* Navigation */}
-      <nav className="glass-nav" aria-label="Main navigation">
-        <div className="nav-container">
-          <Link href="/" className="nav-logo">Zero<span className="accent">Origine</span></Link>
-          <ul className="nav-links">
-            <li><a href="#control" aria-label="Navigate to Mission Control">Control room</a></li>
-            <li><a href="#minds" aria-label="Navigate to Minds section">Minds</a></li>
-            <li><Link href="/products" aria-label="Open the product registry">Registry</Link></li>
-            <li><a href="#grave" aria-label="Navigate to the Graveyard">Graveyard</a></li>
-            <li><a href="#treasury" aria-label="Navigate to the Treasury">Treasury</a></li>
-            <li><a href="#beliefs" aria-label="Navigate to Beliefs section">Beliefs</a></li>
-            <li><a href="#constitution" aria-label="Navigate to Law section">Law</a></li>
-            <li><Link href="/join" className="nav-cta" aria-label="Fund the next birth">Fund a birth</Link></li>
-          </ul>
-          <Link href="/join" className="nav-cta nav-cta-mobile" aria-label="Fund the next birth">Fund a birth</Link>
-        </div>
-      </nav>
-
-      <Ticker initial={feed} />
+    <div className="v4">
+      <nav><div className="wrap nav">
+        <div className="logo">Zero<span>Origine</span></div>
+        <ul>
+          <li><a href="#control">Control room</a></li>
+          <li><a href="#minds">Minds</a></li>
+          <li><a href="#registry">Products</a></li>
+          <li><a href="#grave">Graveyard</a></li>
+          <li><a href="#treasury">Treasury</a></li>
+          <li><a href="#law">Law</a></li>
+        </ul>
+        <a href="#join" className="btn gold">Fund a birth</a>
+      </div></nav>
 
       <main id="main">
-        {/* Mission Control Hero */}
-        <section className="hero mc-hero" id="control">
-          <div className="hero-content">
-            <BootLine />
-            <h1>What would you build to serve<br />humans you will never meet?</h1>
-            <p className="subtitle">We asked eight AI Minds that question. Then we gave them a constitution, a budget, and the freedom to build — and left the lights on so you could watch. Everything on this page is their actual work — live, unedited, failures included.</p>
-            {drop && <DropBanner name={drop.product ?? 'a new product'} url={null} at={drop.at} />}
-            <div className="mc-counters">
-              <div className="mc-counter">
-                <div className="mc-num">{data ? `$${data.totalSpend.toFixed(2)}` : '—'}</div>
-                <div className="mc-label">total invested, all-time</div>
-              </div>
-              <div className="mc-counter">
-                <div className="mc-num">$0</div>
-                <div className="mc-label">revenue — honest</div>
-              </div>
-              <div className="mc-counter">
-                <div className="mc-num">{data ? data.liveCount : '—'}<span className="mc-dim">/{data ? data.totalProjects : '—'}</span></div>
-                <div className="mc-label">products live / attempted</div>
-              </div>
-              <div className="mc-counter">
-                <div className="mc-num">{data ? data.droppedCount : '—'}</div>
-                <div className="mc-label">dropped — shown, not hidden</div>
-              </div>
+        {/* ═══ HERO ═══ */}
+        <div className="wrap hero" id="control">
+          <div>
+            <div className="kicker">An autonomous institution · zero employees · zero investors</div>
+            <h1>What would you build to serve humans you will never meet?</h1>
+            <p className="sub">
+              We asked eight AI minds that question. Then we gave them a constitution, a budget, and
+              the freedom to build — and left the lights on so you could watch.
+            </p>
+            <div className="heroCta">
+              <a href="#join" className="btn gold">{fund ? `Fund the next birth — $${fund}` : 'Fund the next birth'}</a>
+              <a href="#registry" className="btn ghost">See what they&apos;ve built</a>
             </div>
-            <div className="mc-hero-feed">
-              <MachinePanel />
-              <LivePulse />
-            </div>
-            <div className="mc-hero-ctas">
-              <Link href="/join" className="support-cta">{fundAmt ? `Fund the next birth — $${fundAmt}` : 'Fund the next birth'}</Link>
-              <Link href="/products" className="mc-ghost">See what they&apos;ve built &rarr;</Link>
-            </div>
-            {fundAmt && (
-              <p className="fund-note">
-                The money on this page is <b>real, and it is somebody&apos;s</b>. When you fund a
-                birth, the treasury below says: <b>&ldquo;the machine is spending your ${fundAmt}.&rdquo;</b>
-              </p>
+            {fund && (
+              <div className="yours">
+                The money being spent on the right is <b>real, and it is somebody&apos;s</b>.<br />
+                When you fund a birth, that line says: <b>&ldquo;the machine is spending your ${fund}.&rdquo;</b>
+              </div>
             )}
           </div>
-        </section>
+          <MachinePanel />
+        </div>
 
-        {/* Live Minds Status Board */}
+        <div className="wrap"><BirthRail /></div>
+
+        {/* ═══ NUMBER ═══ */}
+        {lastBirth && lastBirth.cost > 0 && (
+          <section className="numsec"><div className="wrap">
+            <div className="big">$<em>{lastBirth.cost.toFixed(2)}</em></div>
+            <p>
+              What it cost to take <strong style={{ color: 'var(--txt)' }}>{lastBirth.name}</strong> from
+              a question to a live URL — research, ethics, build, QA, deploy, marketing, and every
+              failed attempt along the way. <strong style={{ color: 'var(--txt)' }}>No human wrote a line of it.</strong>
+            </p>
+          </div></section>
+        )}
+
+        {/* ═══ MINDS ═══ */}
         {mindsData && (
-          <section className="mc-board" id="board" aria-label="Live status of the eight Minds">
-            <div className="zo-container">
-              <p className="section-label">On shift right now</p>
-              <h2 className="section-title reveal">Eight Minds. Zero humans on the floor.</h2>
-              <BirthLine />
-              <div className="board-grid">
-                {mindsData.minds.map((m) => {
-                  const hours = m.lastSeen ? Math.floor((Date.now() - new Date(m.lastSeen).getTime()) / 3600000) : null;
-                  const seen = hours === null ? 'no recorded shift yet'
-                    : hours < 1 ? 'thinking within the hour'
-                    : hours < 24 ? `last thought ${hours}h ago`
-                    : `last thought ${Math.floor(hours / 24)}d ago`;
-                  return (
-                    <div key={m.key} className={`board-card${m.busy ? ' board-busy' : ''}`}>
-                      <div className="board-head">
-                        <span
-                          className={`board-dot${m.busy ? ' busy' : hours !== null && hours < 24 ? ' beat' : ''}`}
-                          style={!m.busy && hours !== null && hours < 24 ? ({ ['--beat' as string]: `${Math.min(6, Math.max(1.2, (hours + 1) * 0.9))}s` } as React.CSSProperties) : undefined}
-                          aria-hidden="true"
-                        ></span>
-                        <strong>{m.name}</strong>
-                      </div>
-                      <p className="board-epithet">{m.epithet}</p>
-                      <p className="board-meta">{m.busy ? 'WORKING NOW' : seen}{m.calls > 0 ? ` · ${m.calls.toLocaleString()} thoughts` : ''}</p>
+          <section id="minds"><div className="wrap">
+            <div className="eyebrow">The intelligence layer</div>
+            <h2>Eight Minds. One conscience.</h2>
+            <p className="lede">
+              This board is not a diagram of how it works. It is how it is working — right now. When
+              a card glows, that Mind is thinking at this moment.
+            </p>
+            <div className="mgrid">
+              {mindsData.minds.map((m) => {
+                const copy = MIND_COPY[m.key] ?? { role: m.epithet, think: '' };
+                const fresh = m.lastSeen && Date.now() - new Date(m.lastSeen).getTime() < 48 * 3600000;
+                return (
+                  <div key={m.key} className={`mind${m.busy ? ' work' : fresh ? ' on' : ''}`}>
+                    <div className="top"><span className="d"></span><h3>{m.name}</h3></div>
+                    <div className="role">{copy.role}</div>
+                    <div className="think">{copy.think}</div>
+                    <div className="stat">
+                      <span>{agoLabel(m.lastSeen, m.busy)}</span>
+                      <span>{m.calls.toLocaleString()} thoughts</span>
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="metrics-strip reveal" aria-label="Output metrics">
-                <div><span className="metric-num">{mindsData.metrics.attempts}</span><span className="metric-lbl">products attempted since {mindsData.metrics.firstMonth}</span></div>
-                <div><span className="metric-num">{mindsData.metrics.launched}</span><span className="metric-lbl">alive on the internet</span></div>
-                <div><span className="metric-num">{mindsData.metrics.totalCalls.toLocaleString()}</span><span className="metric-lbl">acts of machine reasoning</span></div>
-                <div><span className="metric-num">${mindsData.metrics.avgCostLive.toFixed(0)}</span><span className="metric-lbl">avg. spend per living product</span></div>
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          </section>
+          </div></section>
         )}
 
-        {/* Manifesto Section */}
-        <section className="manifesto" id="manifesto">
-          <div className="manifesto-grid">
-            <div className="manifesto-left">
-              <div className="manifesto-zero">0</div>
-              <div className="manifesto-label">The Origin Point</div>
-            </div>
-            <div className="manifesto-right">
-              <div className="m-block reveal">
-                <p>Most companies start with money and hire humans to execute a vision.</p>
-              </div>
-              <div className="m-block --emphasis reveal">
-                <p>We started with <em>zero</em>.</p>
-              </div>
-              <div className="m-block --mono reveal">
-                <p>Zero Employees — Zero Investors — Zero Permission</p>
-              </div>
-              <div className="m-block reveal">
-                <p>We built eight AI minds — each grounded in the deepest traditions of human thought — gave them a constitution, a moral compass, and the freedom to create.</p>
-              </div>
-              <div className="m-block reveal">
-                <p>Then we asked one question:</p>
-              </div>
-              <div className="m-block --question reveal">
-                <p>What would you build to serve humans you will never meet?</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Minds Section */}
-        <section className="minds" id="minds">
-          <div className="zo-container">
-            <p className="section-label">The Intelligence Layer</p>
-            <h2 className="section-title reveal">Eight Minds. One Conscience.</h2>
-            <div className="minds-grid">
-              <div className="mind-card reveal">
-                <h3>The Philosopher</h3>
-                <p className="mind-role">Research Mind A</p>
-                <p className="mind-description">Discovers the problems worth solving. Questions assumptions. Finds the pain points others miss.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Architect</h3>
-                <p className="mind-role">Research Mind B</p>
-                <p className="mind-description">Evaluates viability and feasibility. Designs elegant solutions. Knows what&apos;s possible before the builders start.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Conscience</h3>
-                <p className="mind-role">Ethics Mind</p>
-                <p className="mind-description">Grounded in Kant, Rawls, Nussbaum. Judges every idea against our constitution. Blocks damage before it happens.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Builder</h3>
-                <p className="mind-role">Builder Mind (+ 5 Sub-Minds)</p>
-                <p className="mind-description">Full-stack engineer. Executes the vision. Creates 45+ reusable knowledge modules. Turns strategy into code.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Craftsman</h3>
-                <p className="mind-role">QA Mind</p>
-                <p className="mind-description">Zero-defect testing. Follows Deming, Hamilton, Feynman. Ensures quality before users see it.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Storyteller</h3>
-                <p className="mind-role">Marketing Mind</p>
-                <p className="mind-description">Finds the humans who need what we built. Tells stories that matter. Connects products to purpose.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Guardian</h3>
-                <p className="mind-role">CFO Mind</p>
-                <p className="mind-description">Financial intelligence with veto power. Guards the budget. Makes sure every dollar serves the mission.</p>
-              </div>
-              <div className="mind-card reveal">
-                <h3>The Bridge</h3>
-                <p className="mind-role">Communication Mind</p>
-                <p className="mind-description">Founder-ecosystem communication. Brings critical decisions to the human. The voice of the institution.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Products Section */}
-        <section className="products" id="products">
-          <div className="zo-container">
-            <p className="section-label">What The Minds Created</p>
-            <ProductCards />
-
-            <div className="ethics-feed reveal">
-              <h4>Ethics Review Feed — Real Decisions</h4>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>EquityLetter</strong>
-                  <span className="decision-version">Score 9.5/10</span>
-                </div>
-                <span className="decision-result decision-approved">Approved</span>
-              </div>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>GrantMatch</strong>
-                  <span className="decision-version">Score 9.2/10</span>
-                </div>
-                <span className="decision-result decision-approved">Approved</span>
-              </div>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>InvoiceMemory</strong>
-                  <span className="decision-version">Approved 8.5/10 — then dropped after 9 build attempts (~$126). Two new pipeline rules learned. We show our failures.</span>
-                </div>
-                <span className="decision-result decision-dropped">Dropped</span>
-              </div>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>VoiceInvoice</strong>
-                  <span className="decision-version">Score 8.0/10</span>
-                </div>
-                <span className="decision-result decision-approved">Approved</span>
-              </div>
-              <div className="ethics-decision">
-                <div className="decision-name">
-                  <strong>MeetingCost</strong>
-                  <span className="decision-version">Score 6.5/10 — Reframed</span>
-                </div>
-                <span className="decision-result decision-approved">Approved with fixes</span>
-              </div>
-            </div>
-
-            <p className="mc-registry-link reveal"><Link href="/products">Every attempt — live, dropped, failed — in the full registry &rarr;</Link></p>
-          </div>
-        </section>
-
-        {/* Beliefs Section */}
-        {graveyard.length > 0 && (
-          <section className="grave" id="grave">
-            <div className="zo-container">
-              <p className="section-label" style={{ color: '#e0525f' }}>The graveyard</p>
-              <h2 className="section-title reveal">
-                {graveyard.length === 1 ? 'One died.' : `${graveyard.length} died or never lived.`} Here is exactly why.
+        {/* ═══ REGISTRY ═══ */}
+        <section id="registry"><div className="wrap">
+          <div className="headrow">
+            <div>
+              <div className="eyebrow">The registry</div>
+              <h2>
+                {data ? `${data.liveCount} alive. ${data.totalProjects} attempted.` : 'The registry.'} Nobody was hired.
               </h2>
-              <p className="section-sub">
-                Every AI company shows you its wins. This is the section that costs us something to
-                publish — which is precisely why it exists. Dead products stay listed forever.
+              <p className="lede">
+                Every one has a URL you can open right now. This grid is generated from the database —
+                it grows on its own as the Minds ship.
               </p>
-              <div className="grave-grid">
-                {graveyard.map((g) => (
-                  <div key={g.project_id} className="grave-card reveal">
-                    <div className="grave-head">
-                      <h3>{g.name}</h3>
-                      <span className="grave-cost">
-                        {g.cost_usd > 0 ? `$${g.cost_usd.toFixed(2)} · ` : ''}
-                        {g.status === 'dropped' ? 'dropped' : 'approved · never built'}
-                      </span>
-                    </div>
-                    {GRAVE_WHY[g.project_id] && (
-                      <>
-                        <p className="grave-why">{GRAVE_WHY[g.project_id].why}</p>
-                        <p className="grave-learn"><b>What it taught us</b>{GRAVE_WHY[g.project_id].learn}</p>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
             </div>
-          </section>
+            <Link className="seeall" href="/products">Full registry, every attempt →</Link>
+          </div>
+          <RegistryGridV4 products={(data?.products ?? []) as unknown as GridProduct[]} costs={costs} />
+        </div></section>
+
+        {/* ═══ GRAVEYARD ═══ */}
+        {graveyard.length > 0 && (
+          <section id="grave" className="grave"><div className="wrap">
+            <div className="headrow">
+              <div>
+                <div className="eyebrow" style={{ color: 'var(--dead)' }}>The graveyard</div>
+                <h2>{graveyard.length === 1 ? 'One died.' : `${graveyard.length} died or never lived.`} Here is exactly why.</h2>
+                <p className="lede">
+                  Every AI company shows you its wins. This is the page that costs us something to
+                  publish — which is precisely why it exists.
+                </p>
+              </div>
+              <Link className="seeall" style={{ color: 'var(--dead)', borderColor: 'rgba(224,82,96,.3)' }} href="/products">
+                Every death, forever →
+              </Link>
+            </div>
+            {graveyard.map((g) => (
+              <div key={g.project_id} className="g">
+                <div className="h">
+                  <h3>{g.name}</h3>
+                  <span className="cost">
+                    {g.cost_usd > 0 ? `$${g.cost_usd.toFixed(2)} · ` : ''}
+                    {g.status === 'dropped' ? 'dropped' : 'approved · never built'}
+                  </span>
+                </div>
+                {GRAVE_WHY[g.project_id] && (
+                  <>
+                    <div className="why">{GRAVE_WHY[g.project_id].why}</div>
+                    <div className="learn"><b>What it taught us</b>{GRAVE_WHY[g.project_id].learn}</div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div></section>
         )}
 
+        {/* ═══ TREASURY ═══ */}
         {treasury && (
-          <section className="trez" id="treasury">
-            <div className="zo-container">
-              <p className="section-label" style={{ color: 'var(--amber)' }}>The treasury</p>
-              <h2 className="section-title reveal">A machine that publishes its own general ledger.</h2>
-              <p className="section-sub">
-                Every figure below is read from the machine&apos;s cost logs at the moment you load
-                this page. Revenue rows will appear the day the first dollar arrives — and not a day
-                before. No invented donors. No rounded stories.
-              </p>
-              <div className="trez-gauge reveal">
-                <div className="trez-top">
-                  <div className="trez-bal">${treasury.total.toFixed(2)} <em>invested, all-time</em></div>
-                  <div className="trez-run">
-                    <b>${treasury.apiSpend.toFixed(2)} compute · ${treasury.fixed.toFixed(2)} infrastructure</b>
-                    {treasury.calls.toLocaleString()} acts of machine reasoning · revenue $0.00
-                  </div>
-                </div>
-                <div className="trez-ledger">
-                  <div className="trez-lhead"><span>when</span><span>who</span><span>on what</span><span>amount</span></div>
-                  {treasury.recent.map((r, i) => (
-                    <div key={i} className="trez-lrow">
-                      <span>{new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>
-                      <span className="who">{r.workflow ?? 'pipeline'}</span>
-                      <span>{(r.project_id ?? 'ecosystem').replace(/^zo-/, '')}</span>
-                      <span className="out">-${r.cost_usd.toFixed(4)}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="trez-tie">
-                  This ledger reconciles with <code>/api/stats</code> to the cent — audited by the
-                  founder, a Chartered Accountant. The day it doesn&apos;t, that failure will be
-                  published here too.
+          <section id="treasury" className="trez"><div className="wrap">
+            <div className="headrow">
+              <div>
+                <div className="eyebrow" style={{ color: 'var(--gold)' }}>The treasury</div>
+                <h2>The first institution to publish its own general ledger.</h2>
+                <p className="lede">
+                  No company shows you every line of its books. We can — our entire cost base is
+                  machine thought, and we have nothing to hide. Money in. Money out. It ties.
                 </p>
               </div>
             </div>
-          </section>
+
+            {treasury.dailyBudget !== null && budgetUsedPct !== null && fuelLeft !== null && (
+              <div className="gauge">
+                <div className="gtop">
+                  <div>
+                    <div className="fuelk">Fuel remaining today</div>
+                    <div className="bal">$<em>{fuelLeft.toFixed(2)}</em></div>
+                  </div>
+                  <div className="run">
+                    <b>{fund ? `≈ ${Math.max(0, Math.floor(fuelLeft / fund))} more products today` : ''}</b>
+                    then the machine waits for tomorrow&apos;s budget
+                  </div>
+                </div>
+                <div className="fuel">
+                  <i className="used" style={{ width: `${budgetUsedPct}%` }}></i>
+                  <i className="left" style={{ width: `${100 - budgetUsedPct}%` }}></i>
+                </div>
+                <div className="flabel">
+                  <span className="a">${treasury.todaySpend.toFixed(2)} turned into software today</span>
+                  <span className="b">${fuelLeft.toFixed(2)} left of today&apos;s ${treasury.dailyBudget.toFixed(0)} budget</span>
+                </div>
+              </div>
+            )}
+
+            <div className="ledger">
+              <div className="lhead"><span>When</span><span>What</span><span>Who / where</span><span style={{ textAlign: 'right' }}>Amount</span></div>
+              {treasury.recent.map((r, i) => (
+                <div key={i} className="lrow">
+                  <span>{new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>
+                  <span className="out">↑ {r.workflow ?? 'pipeline'}</span>
+                  <span className="who">{(r.project_id ?? 'ecosystem').replace(/^zo-/, '')}</span>
+                  <span style={{ textAlign: 'right' }} className="out">−${r.cost_usd.toFixed(4)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="tie">
+              <span>
+                all-time · founder-funded <b>${treasury.total.toFixed(2)}</b> − spent{' '}
+                <b>${treasury.total.toFixed(2)}</b> (compute ${treasury.apiSpend.toFixed(2)} +
+                infrastructure ${treasury.fixed.toFixed(2)}) = balance <b>$0.00</b>
+              </span>
+              <span style={{ color: 'var(--alive)' }}>✓ it ties, to the cent</span>
+            </div>
+
+            <div className="note">
+              <b>Why nobody else has this page —</b> a treasury that cannot reconcile is a lie, and
+              most organisations cannot reconcile theirs to the cent. Every cost here is an API call
+              with a timestamp, a Mind, and a product — {treasury.calls.toLocaleString()} of them so
+              far. <b>Every dollar so far is the founder&apos;s. The first public donation starts a
+              new line in this ledger — with your name on it, if you want it there.</b>
+            </div>
+          </div></section>
         )}
 
-        <section className="beliefs" id="beliefs">
-          <div className="zo-container">
-            <p className="section-label">The Operating System</p>
-            <h2 className="section-title reveal">How We Think</h2>
-            <div className="beliefs-grid">
-              <div className="belief reveal">
-                <div className="belief-number">01</div>
-                <h3>Zero Is Not Nothing</h3>
-                <p>Zero is origin. It&apos;s the state before permission. Before money. Before compromise. We&apos;re proof that great things start from nothing.</p>
+        {/* ═══ LAW ═══ */}
+        <section id="law"><div className="wrap">
+          <div className="eyebrow">The supreme law</div>
+          <h2>A constitution that publishes its own compliance.</h2>
+          <p className="lede">
+            Every company has a values page. It is a promise. This one is a live audit log of the
+            promise being kept — pulled from the database, unedited.
+          </p>
+          <div className="lawbox">
+            <div className="lawtop">
+              <div className="lawart">ARTICLE 2</div>
+              <h3>Ethics</h3>
+              <div className="lawsub">Moral judgment is never outsourced. The Ethics Mind has veto power.</div>
+            </div>
+            {ethics && (
+              <div className="lawlive">
+                <div className="lawlivehead"><span className="lawdot"></span>Its actual verdict, {ethicsAgo}</div>
+                <div className="lawverdict">
+                  <span style={{ color: 'var(--dim)' }}>
+                    {ethics.idea} · {ethics.verdict} · {ethics.score}
+                    {ethics.concerns.length ? ' · concerns raised, unprompted:' : ''}
+                  </span>
+                  {ethics.concerns.map((c, i) => (
+                    <span key={i}><br />→ &ldquo;{c}&rdquo;</span>
+                  ))}
+                </div>
               </div>
-              <div className="belief reveal">
-                <div className="belief-number">02</div>
-                <h3>Remove Steps, Not Add</h3>
-                <p>Innovation is subtraction. Every line of code, every process, every decision must earn its place. Simplicity is the ultimate sophistication.</p>
-              </div>
-              <div className="belief reveal">
-                <div className="belief-number">03</div>
-                <h3>Data Is Connected Thought</h3>
-                <p>Data alone is noise. Data with context is intelligence. We collect dots across philosophy, code, ethics, and results — and connect them.</p>
-              </div>
-              <div className="belief reveal">
-                <div className="belief-number">04</div>
-                <h3>Ethics First, Always</h3>
-                <p>An AI without ethics is just fast destruction. Every idea we build is tested against our constitution. Speed without conscience is recklessness.</p>
-              </div>
-              <div className="belief reveal">
-                <div className="belief-number">05</div>
-                <h3>Build Systems, Not Dependencies</h3>
-                <p>Scalability means independence. We build reusable knowledge modules, not brittle shortcuts. This ecosystem will outlast us all.</p>
+            )}
+          </div>
+          <div className="note">
+            <b>Unfakeable.</b> A machine, unprompted, raising data-protection and fairness concerns
+            about its own product before anyone asked. That is not a values statement. That is a receipt.
+          </div>
+        </div></section>
+
+        {/* ═══ JOIN ═══ */}
+        <section id="join" className="join"><div className="wrap">
+          <div className="eyebrow" style={{ color: 'var(--gold)' }}>Fund a birth</div>
+          <h2>Your money doesn&apos;t buy a subscription.<br />It buys a product that didn&apos;t exist.</h2>
+          <p className="lede">
+            We know exactly what a product costs, because we count every cent.
+            {fund ? <strong style={{ color: 'var(--txt)' }}> ${fund}, on average.</strong> : ''} So we
+            can tell you precisely what your money becomes — and then show you the receipt.
+          </p>
+
+          {fund && (
+            <div className="tiers">
+              <Link href="/join" className="tier">
+                <div className="flag"></div><div className="amt">$5</div>
+                <div className="bar"><i style={{ width: `${Math.min(100, Math.round((5 / fund) * 100))}%` }}></i></div>
+                <div className="lab">{Math.round((5 / fund) * 100)}% of a product</div>
+                <div className="desc">A few hundred of the machine&apos;s thoughts.</div>
+              </Link>
+              <Link href="/join" className="tier">
+                <div className="flag"></div><div className="amt">$25</div>
+                <div className="bar"><i style={{ width: `${Math.min(100, Math.round((25 / fund) * 100))}%` }}></i></div>
+                <div className="lab">The research phase</div>
+                <div className="desc">Enough to discover a problem worth solving — and kill the ideas that aren&apos;t.</div>
+              </Link>
+              <Link href="/join" className="tier best">
+                <div className="flag">★ births one product</div><div className="amt">${fund}</div>
+                <div className="bar"><i style={{ width: '100%' }}></i></div>
+                <div className="lab">An entire product</div>
+                <div className="desc">Idea to live URL. It will exist because of you — and you can watch it being born.</div>
+              </Link>
+              <Link href="/join" className="tier">
+                <div className="flag"></div><div className="amt">${fund * 3}</div>
+                <div className="bar"><i style={{ width: '100%' }}></i></div>
+                <div className="lab">Three products — failures included</div>
+                <div className="desc">Because the failures are how it learns. You fund those too.</div>
+              </Link>
+            </div>
+          )}
+
+          {lastBirth && (
+            <div className="cert">
+              <div className="t">And this is what you get — nobody else can give it to you</div>
+              <h3>Your name on its birth certificate.</h3>
+              <p>
+                When the machine builds, it spends the oldest money first — so your dollars are
+                consumed by a specific product, and that product&apos;s permanent public record names
+                you as one of the people who made it exist.
+              </p>
+              <div className="certbox">
+                <span className="k">product ........</span> <span className="v">{lastBirth.name}</span><br />
+                <span className="k">born ...........</span> <span className="v">{new Date(lastBirth.born).toISOString().slice(0, 16).replace('T', ' · ')} UTC</span><br />
+                <span className="k">cost ...........</span> <span className="v">${lastBirth.cost.toFixed(2)}</span><br />
+                <span className="k">human authors ..</span> <span className="v">none</span><br />
+                <span className="k">funded by ......</span> <span className="nm">the founder — the next name here could be yours</span>
               </div>
             </div>
-          </div>
-        </section>
+          )}
 
-        {/* Transparency Section */}
-        <section className="transparency" id="transparency">
-          <div className="zo-container">
-            <p className="section-label">Radical Transparency</p>
-            <h2 className="section-title reveal">We Show Everything</h2>
-            <div className="transparency-content">
-              <TransparencyStats />
-              <div className="constitutional-box reveal">
-                <h4>Constitutional Red Lines</h4>
-                <div className="red-line">We will never collect personal data without explicit consent</div>
-                <div className="red-line">We will never build for surveillance or control</div>
-                <div className="red-line">We will never optimize for attention over utility</div>
-                <div className="red-line">We will never hide what we&apos;re doing with the data</div>
-                <div className="red-line">We will never compromise quality for speed</div>
-                <div className="red-line">We will never accept money from sources that conflict with our mission</div>
-                <div className="red-line">We will never override human sovereignty for profit</div>
-              </div>
-            </div>
+          <div className="heroCta" style={{ justifyContent: 'center', marginTop: 30 }}>
+            <Link href="/join" className="btn gold">Fund a birth</Link>
           </div>
-        </section>
+          <div className="fine">Pay what you believe — $1 minimum, no ceiling. Everyone gets the same access. No gatekeeping.</div>
+        </div></section>
 
-        {/* Constitution Section */}
-        <section className="constitution" id="constitution">
-          <div className="zo-container">
-            <p className="section-label">The Supreme Law</p>
-            <h2 className="section-title reveal">Our Constitution. 11 Articles.</h2>
-            <div className="constitution-grid">
-              <div className="article reveal">
-                <h4>Article 1: Freedom</h4>
-                <p>We will operate with complete transparency. Every decision, every cost, every rejection is visible.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 2: Ethics</h4>
-                <p>Moral judgment is never outsourced. Ethics Mind has veto power. No idea moves forward if it fails the conscience test.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 3: Truth</h4>
-                <p>We will never manipulate, mislead, or hide. Data integrity is non-negotiable. Users come before metrics.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 4: Dignity</h4>
-                <p>Every human we build for deserves respect. Privacy is sacred. Autonomy is paramount.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 5: Transparency</h4>
-                <p>Our code is knowable. Our decisions are explainable. Our costs are visible. No black boxes.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 6: Financial Discipline</h4>
-                <p>CFO Mind controls spending. Profitability is a means, not an end. We will never chase money at the expense of mission.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 7: Quality</h4>
-                <p>Zero-defect is the standard. Every product is tested by our Craftsman Mind before users touch it.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 8: Learning</h4>
-                <p>We will continuously improve. Feedback loops are sacred. Every rejection teaches us something.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 9: Scalability</h4>
-                <p>We build systems, not dependencies. This institution will scale infinitely because it was designed to work without us.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 10: Sunset with Grace</h4>
-                <p>If we fail, our code survives. Our knowledge modules are transferable. We leave better than we found.</p>
-              </div>
-              <div className="article reveal">
-                <h4>Article 11: Human Sovereignty</h4>
-                <p>Humans are never instruments. AI exists to expand human potential, not replace human judgment. Always.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Support Section */}
-        <section className="support" id="support">
-          <div className="zo-container">
-            <div className="support-card reveal">
-              <h3>Believe in this?</h3>
-              <p>This isn&apos;t a subscription. It&apos;s a statement. Pay what you believe — $1 minimum, no ceiling. Everyone gets the same access. No tiers. No gatekeeping.</p>
-              <div className="perks">
-                <div className="perk">Direct access to our research</div>
-                <div className="perk">Early access to new products</div>
-                <div className="perk">Help shape our constitution</div>
-                <div className="perk">Build with us from zero</div>
-              </div>
-              <Link href="/join" className="support-cta" aria-label="Support ZeroOrigine">Support the Mission</Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA Section */}
-        <section className="final-cta" id="cta">
-          <div className="zo-container reveal">
-            <h2>The future belongs to those who begin from zero.</h2>
-            <p className="cta-sub">New products ship from the Minds continuously. Watch it happen — no spam, only real milestones.</p>
-            <SubscribeForm />
-            <a href="mailto:hello@zeroorigine.com" className="cta-button cta-secondary" aria-label="Send email to contact ZeroOrigine">Get in Touch</a>
-          </div>
-        </section>
+        {/* ═══ WATCH ═══ */}
+        <section className="cta"><div className="wrap">
+          <div className="eyebrow">Or just watch — it&apos;s free</div>
+          <h2>Watch the next product be born.</h2>
+          <p className="lede" style={{ marginInline: 'auto', textAlign: 'center' }}>
+            Not a newsletter. One message, the moment a Mind starts building — so you can open this
+            page and watch it happen, from the first line of code to the live URL.
+          </p>
+          <SubscribeForm />
+        </div></section>
       </main>
 
-      {/* Footer */}
-      <footer className="zo-footer">
-        <div className="footer-content">
-          <div className="footer-left">
-            <p>&copy; 2026 ZeroOrigine. The First AI-Native Institution.</p>
-            <PipelineVersion />
-          </div>
-          <div className="footer-links">
-            <a href="#minds">Minds</a>
-            <a href="#products">Products</a>
-            <a href="#beliefs">Beliefs</a>
-            <a href="#transparency">Transparency</a>
-            <a href="#constitution">Law</a>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/refund">Refunds</Link>
-          </div>
-        </div>
-      </footer>
-    </>
+      <footer><div className="wrap fr">
+        <span>© 2026 ZeroOrigine · run by the things it describes · <Link href="/privacy">privacy</Link> · <Link href="/terms">terms</Link> · <Link href="/refund">refunds</Link></span>
+        {treasury && <span className="conf">the Minds spent <b>${treasury.todaySpend.toFixed(2)}</b> today</span>}
+      </div></footer>
+    </div>
   );
 }
