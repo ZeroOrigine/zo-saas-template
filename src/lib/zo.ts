@@ -355,3 +355,64 @@ export async function getEthicsLatest(): Promise<{
     return null;
   }
 }
+
+// The Logbook. The machine's own public journal, assembled from the organs it
+// already writes: births and deaths from v_projects, the rules it learned the
+// hard way from v_postmortems, the reflexes that healed it from v_reflex_log,
+// and the self-improvement proposals it drafts for the founder's one tap from
+// v_proposals. Nothing authored by a human; every entry is a thing the machine
+// did or decided. Founder essays live on jagdishlade.com and never appear here.
+export interface LogEntry {
+  kind: 'birth' | 'death' | 'lesson' | 'reflex' | 'proposal';
+  title: string;
+  detail: string;
+  at: string;
+  meta?: string;
+}
+export async function getLogbook(): Promise<LogEntry[] | null> {
+  try {
+    const supabase = createPublicClient();
+    const [projects, costs, postmortems, reflexes, proposals] = await Promise.all([
+      supabase.from('v_projects').select('project_id,name,status,created_at'),
+      supabase.from('v_cost_logs').select('project_id,cost_usd'),
+      supabase.from('v_postmortems').select('project_id,kind,error,cost_usd_at_halt,created_at').order('created_at', { ascending: false }).limit(40),
+      supabase.from('v_reflex_log').select('reflex,action,detail,created_at').order('created_at', { ascending: false }).limit(40),
+      supabase.from('v_proposals').select('kind,title,status,created_at,decided_at').order('created_at', { ascending: false }).limit(40),
+    ]);
+
+    const costByProject = new Map<string, number>();
+    for (const c of costs.data ?? []) {
+      const k = c.project_id || '';
+      costByProject.set(k, (costByProject.get(k) || 0) + (Number(c.cost_usd) || 0));
+    }
+    const nameOf = (pid: string) => (pid || '').replace(/^zo-/, '').replace(/^RA-.*/, 'a research run') || 'the machine';
+    const money = (n: number) => '$' + (Math.round(n * 100) / 100).toFixed(2);
+
+    const entries: LogEntry[] = [];
+
+    for (const p of projects.data ?? []) {
+      const cost = costByProject.get(p.project_id) || 0;
+      if (p.status === 'live' || p.status === 'launched') {
+        entries.push({ kind: 'birth', title: `${p.name} was born`, detail: `A product that did not exist now does. It cost ${money(cost)} of machine reasoning to bring into the world, failures included.`, at: p.created_at, meta: money(cost) });
+      } else if (p.status === 'dropped' || p.status === 'sunset' || p.status === 'archived') {
+        entries.push({ kind: 'death', title: `${p.name} was let go`, detail: `The machine spent ${money(cost)} and chose not to ship it. A death recorded in daylight is worth more than a success in the dark.`, at: p.created_at, meta: money(cost) });
+      }
+    }
+    for (const pm of postmortems.data ?? []) {
+      const halt = money(Number(pm.cost_usd_at_halt) || 0);
+      entries.push({ kind: 'lesson', title: `A build halted on ${nameOf(pm.project_id)}`, detail: `The line stopped itself at ${halt} rather than ship something wrong. Reason recorded: ${String(pm.error || pm.kind).slice(0, 180)}.`, at: pm.created_at, meta: pm.kind });
+    }
+    for (const rx of reflexes.data ?? []) {
+      entries.push({ kind: 'reflex', title: `The machine healed itself: ${rx.reflex}`, detail: `${String(rx.detail || rx.action || 'A reflex fired and fixed a problem before a human saw it.').slice(0, 200)}`, at: rx.created_at, meta: rx.action });
+    }
+    for (const pr of proposals.data ?? []) {
+      const st = pr.status === 'adopted' ? 'the founder adopted it' : pr.status === 'rejected' ? 'the founder declined it' : 'it awaits the founder’s one tap';
+      entries.push({ kind: 'proposal', title: `The machine proposed a change to itself`, detail: `${String(pr.title || '').slice(0, 180)} · ${st}. The machine may draft its own improvements; it may never adopt them alone.`, at: pr.created_at, meta: pr.status });
+    }
+
+    entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+    return entries.slice(0, 60);
+  } catch {
+    return null;
+  }
+}
