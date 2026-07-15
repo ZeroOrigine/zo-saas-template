@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createPublicClient } from '@/lib/supabase/public';
 
 // Server-side data layer for Mission Control. Every number on the site comes
 // through here. From the same database the Minds write to. No number is ever
@@ -37,12 +37,12 @@ export function friendlyEvent(type: string) {
 
 export async function getHomeData() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const [products, projects, costs, events] = await Promise.all([
-      supabase.from('zo_products').select('slug,name,tagline,status,url,icon,sort_order,category,launched_at,created_at').order('launched_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }),
-      supabase.from('zo_projects').select('project_id,name,status,created_at'),
-      supabase.from('zo_cost_logs').select('cost_usd,project_id,created_at'),
-      supabase.from('pipeline_events').select('event_type,project_id,created_at')
+      supabase.from('v_products').select('slug,name,tagline,status,url,icon,sort_order,category,launched_at,created_at').order('launched_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }),
+      supabase.from('v_projects').select('project_id,name,status,created_at'),
+      supabase.from('v_cost_logs').select('cost_usd,project_id,created_at'),
+      supabase.from('v_pipeline_events').select('event_type,project_id,created_at')
         .in('event_type', Object.keys(FRIENDLY)).order('created_at', { ascending: false }).limit(10),
     ]);
     const costRows = costs.data ?? [];
@@ -92,16 +92,16 @@ export interface TreasuryData {
 // the day the first dollar arrives, and not a day before.
 export async function getTreasury(): Promise<TreasuryData | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const [costs, recent, donations] = await Promise.all([
-      supabase.from('zo_cost_logs').select('cost_usd'),
+      supabase.from('v_cost_logs').select('cost_usd'),
       supabase
-        .from('zo_cost_logs')
+        .from('v_cost_logs')
         .select('created_at,workflow,project_id,cost_usd')
         .order('created_at', { ascending: false })
         .limit(6),
       supabase
-        .from('zo_donations')
+        .from('v_donations_public')
         .select('created_at,amount,donor_name,allocated_project_id')
         .order('created_at', { ascending: false })
         .limit(200),
@@ -113,12 +113,12 @@ export async function getTreasury(): Promise<TreasuryData | null> {
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
     const { data: todayRows } = await supabase
-      .from('zo_cost_logs')
+      .from('v_cost_logs')
       .select('cost_usd')
       .gte('created_at', dayStart.toISOString());
     const todaySpend = (todayRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
     const { data: budgetRow } = await supabase
-      .from('zo_config')
+      .from('v_config_public')
       .select('value')
       .eq('key', 'daily_budget_usd')
       .limit(1);
@@ -155,11 +155,11 @@ export async function getTreasury(): Promise<TreasuryData | null> {
 
 export async function getRegistry(): Promise<RegistryRow[] | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const [projects, costs, products] = await Promise.all([
-      supabase.from('zo_projects').select('project_id,name,status,category,created_at').order('created_at', { ascending: false }),
-      supabase.from('zo_cost_logs').select('project_id,cost_usd'),
-      supabase.from('zo_products').select('slug,url,status'),
+      supabase.from('v_projects').select('project_id,name,status,category,created_at').order('created_at', { ascending: false }),
+      supabase.from('v_cost_logs').select('project_id,cost_usd'),
+      supabase.from('v_products').select('slug,url,status'),
     ]);
     const costBy: Record<string, number> = {};
     for (const r of costs.data ?? []) {
@@ -186,14 +186,14 @@ export async function getRegistry(): Promise<RegistryRow[] | null> {
 
 export async function getStory(slug: string) {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const pid = `zo-${slug}`;
     const [proj, events, costs, funders] = await Promise.all([
-      supabase.from('zo_projects').select('project_id,name,status,category,created_at,research_score').eq('project_id', pid).limit(1),
-      supabase.from('pipeline_events').select('event_type,created_at').eq('project_id', pid)
+      supabase.from('v_projects').select('project_id,name,status,category,created_at,research_score').eq('project_id', pid).limit(1),
+      supabase.from('v_pipeline_events').select('event_type,created_at').eq('project_id', pid)
         .in('event_type', Object.keys(FRIENDLY)).order('created_at', { ascending: true }).limit(200),
-      supabase.from('zo_cost_logs').select('cost_usd,workflow').eq('project_id', pid),
-      supabase.from('zo_donations').select('donor_name,amount,allocated_at').eq('allocated_project_id', pid)
+      supabase.from('v_cost_logs').select('cost_usd,workflow').eq('project_id', pid),
+      supabase.from('v_donations_public').select('donor_name,amount,allocated_at').eq('allocated_project_id', pid)
         .order('created_at', { ascending: true }).limit(100),
     ]);
     if (!proj.data?.length) return null;
@@ -246,12 +246,12 @@ const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string
 
 export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: { attempts: number; launched: number; avgCostLive: number; totalCalls: number; firstMonth: string } } | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const [costs, projects, products, recentThoughts] = await Promise.all([
-      supabase.from('zo_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
-      supabase.from('zo_projects').select('status,created_at'),
-      supabase.from('zo_products').select('slug,status'),
-      supabase.from('zo_mind_logs').select('mind_name,created_at').order('created_at', { ascending: false }).limit(40),
+      supabase.from('v_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
+      supabase.from('v_projects').select('status,created_at'),
+      supabase.from('v_products').select('slug,status'),
+      supabase.from('v_mind_logs').select('mind_name,created_at').order('created_at', { ascending: false }).limit(40),
     ]);
     const rows = costs.data ?? [];
     const lastByWf: Record<string, string> = {};
@@ -304,9 +304,9 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
 // prototype hardcoded as $66.63. We compute it; we never type it.
 export async function getLastBirth(): Promise<{ name: string; cost: number; born: string } | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const { data: projs } = await supabase
-      .from('zo_projects')
+      .from('v_projects')
       .select('project_id,name,status,updated_at')
       .in('status', ['launched', 'live'])
       .order('updated_at', { ascending: false })
@@ -314,7 +314,7 @@ export async function getLastBirth(): Promise<{ name: string; cost: number; born
     const p = projs?.[0];
     if (!p) return null;
     const { data: costRows } = await supabase
-      .from('zo_cost_logs')
+      .from('v_cost_logs')
       .select('cost_usd')
       .eq('project_id', p.project_id);
     const cost = (costRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
@@ -330,9 +330,9 @@ export async function getEthicsLatest(): Promise<{
   idea: string; verdict: string; score: string; concerns: string[]; at: string;
 } | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
-      .from('ethics_reviews')
+      .from('v_ethics_reviews')
       .select('idea_name,verdict,ethical_score,concerns,reviewed_at')
       .order('reviewed_at', { ascending: false })
       .limit(1);

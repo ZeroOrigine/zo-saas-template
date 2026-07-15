@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createPublicClient } from '@/lib/supabase/public';
 import { getFixedCosts } from '@/lib/fixedCosts';
 
 // Always run at request time. The numbers must be real, never build-time stale.
@@ -15,7 +15,7 @@ export const revalidate = 0;
  */
 export async function GET() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
 
     // SCALABLE BY DESIGN: liveCount is a COUNT query (never limited by the
     // payload), the grid payload is capped at the 12 newest. At 500 products
@@ -23,16 +23,16 @@ export async function GET() {
     // launched_at (set by the pipeline), never manual sort_order (which the
     // autonomous deploy never sets. Every new product would collide at 0).
     const [{ count: totalCount }, { count: liveTotal }, liveRes, spendRes] = await Promise.all([
-      supabase.from('zo_products').select('id', { count: 'exact', head: true }),
-      supabase.from('zo_products').select('id', { count: 'exact', head: true }).eq('status', 'live'),
+      supabase.from('v_products').select('id', { count: 'exact', head: true }),
+      supabase.from('v_products').select('id', { count: 'exact', head: true }).eq('status', 'live'),
       supabase
-        .from('zo_products')
+        .from('v_products')
         .select('slug, name, tagline, description, status, url, icon, sort_order, category, launched_at')
         .eq('status', 'live')
         .order('launched_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(12),
-      supabase.from('zo_cost_logs').select('cost_usd'),
+      supabase.from('v_cost_logs').select('cost_usd'),
     ]);
 
     if (liveRes.error) throw liveRes.error;

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createPublicClient } from '@/lib/supabase/public';
 
 /**
  * Fixed costs of running the ecosystem, folded into the public total.
@@ -10,9 +10,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
  */
 export async function getFixedCosts(): Promise<number> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
-      .from('zo_config')
+      .from('v_config_public')
       .select('key,value')
       .in('key', [
         'website_fixed_onetime_usd',

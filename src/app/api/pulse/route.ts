@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createPublicClient } from '@/lib/supabase/public';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -27,10 +27,10 @@ const EVENT_MAP: Record<string, { icon: string; mind: string; line: string }> = 
 
 export async function GET() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const [eventsRes, versionRes] = await Promise.all([
       supabase
-        .from('pipeline_events')
+        .from('v_pipeline_events')
         .select('event_type, project_id, created_at')
         .in('event_type', Object.keys(EVENT_MAP))
         .order('created_at', { ascending: false })

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createPublicClient } from '@/lib/supabase/public';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -71,18 +71,18 @@ const HALTED_OF: Record<string, number> = {
  */
 export async function GET() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createPublicClient();
     const active = [...Object.keys(STATION_OF), ...Object.keys(HALTED_OF)];
 
     const [{ data: projs }, { data: mindRows }] = await Promise.all([
       supabase
-        .from('zo_projects')
+        .from('v_projects')
         .select('project_id,name,status,created_at,updated_at')
         .in('status', active)
         .order('updated_at', { ascending: false })
         .limit(1),
       supabase
-        .from('zo_mind_logs')
+        .from('v_mind_logs')
         .select('mind_name,action,output_summary,created_at,project_id')
         .order('created_at', { ascending: false })
         .limit(120),
@@ -100,7 +100,7 @@ export async function GET() {
     let inflight = null;
     if (p) {
       const { data: costRows } = await supabase
-        .from('zo_cost_logs')
+        .from('v_cost_logs')
         .select('cost_usd')
         .eq('project_id', p.project_id);
       const cost = (costRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
@@ -153,7 +153,7 @@ export async function GET() {
     let lastBirth = null;
     if (!inflight) {
       const { data: launched } = await supabase
-        .from('zo_products')
+        .from('v_products')
         .select('name,created_at')
         .eq('status', 'live')
         .order('created_at', { ascending: false })

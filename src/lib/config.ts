@@ -23,7 +23,11 @@ export const PROJECT_CONFIG = {
 
 /** Server-only config. Never import from client components */
 export const SERVER_CONFIG = {
-  supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
+  // Optional: the flagship site reads only PUBLIC data through the anon key +
+  // read-only views (see lib/supabase/public.ts), so it runs without this key.
+  // Forked products STILL provide it — their billing webhook writes
+  // profiles/subscriptions with no user session and needs the service role.
+  supabaseServiceRoleKey: optionalEnv('SUPABASE_SERVICE_ROLE_KEY'),
   stripeSecretKey: requireEnv('STRIPE_SECRET_KEY'),
   stripeWebhookSecret: optionalEnv('STRIPE_WEBHOOK_SECRET'),
   resendApiKey: requireEnv('RESEND_API_KEY'),
