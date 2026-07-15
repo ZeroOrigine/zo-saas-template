@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import MachinePanel, { BirthRail } from '@/components/MachinePanel';
+import MachinePanel, { BirthRail, LineChip } from '@/components/MachinePanel';
 import RegistryGridV4, { type GridProduct } from '@/components/RegistryGridV4';
 import SubscribeForm from '@/components/SubscribeForm';
 import {
@@ -79,6 +79,7 @@ export default async function Home() {
           <div>
             <div className="kicker">An autonomous institution · zero employees · zero investors</div>
             <h1>What would you build to serve humans you will never meet?</h1>
+            <LineChip />
             <p className="sub">
               We asked eight AI minds that question. Then we gave them a constitution, a budget, and
               the freedom to build. And left the lights on so you could watch.
@@ -93,6 +94,16 @@ export default async function Home() {
                 When you fund a birth, that line says: <b>&ldquo;the machine is spending your ${fund}.&rdquo;</b>
               </div>
             )}
+            <div className="heroStats">
+              {typeof data?.liveCount === 'number' && (
+                <div className="hs"><div className="k">Products live</div><div className="v">{data.liveCount}</div></div>
+              )}
+              {treasury && (
+                <div className="hs"><div className="k">Invested all-time</div><div className="v money">${Math.round(treasury.total)}</div></div>
+              )}
+              <div className="hs"><div className="k">Revenue</div><div className="v">$0</div></div>
+              <div className="hs"><div className="k">Humans on staff</div><div className="v">0</div></div>
+            </div>
           </div>
           <MachinePanel last={lastBirth ? { name: lastBirth.name, cost: lastBirth.cost } : null} />
         </div>

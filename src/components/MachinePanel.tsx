@@ -63,7 +63,7 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
         <span className="l"><span className={`dot${f && !f.halted ? '' : ' off'}`}></span>The machine is thinking</span>
         <span className="r">unedited · live</span>
       </div>
-      <div className={`stream${f ? '' : ' quiet'}`}>
+      <div className={`stream${f ? '' : ' quiet'}`} aria-live="polite">
         {f ? (
           lines.length ? (
             lines.map((l, i) => (
@@ -100,6 +100,20 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Compact one-line machine status for small screens. Same hook, no new fetches. */
+export function LineChip() {
+  const d = useBirthline();
+  const f = d?.inflight ?? null;
+  return (
+    <div className="linechip">
+      <span className={`dot${f && !f.halted ? '' : ' off'}`}></span>
+      {f
+        ? `line: building ${f.name} · $${f.cost.toFixed(2)}`
+        : `line idle${d?.lastBirth ? ` · last birth ${d.lastBirth.name}` : ''}`}
     </div>
   );
 }
