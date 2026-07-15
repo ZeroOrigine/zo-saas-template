@@ -2481,3 +2481,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .funders-list { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .funders-list li { border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text-secondary); }
 .funders-list li strong { color: var(--amber); }
+
+/* ═══ v4 mobile fixes: kill the legacy .rail{flex} bleed + phone layout ═══ */
+.v4 .rail { display: block; }
+@media (max-width: 700px) {
+  .v4 .hero { padding: 44px 24px 20px; gap: 28px; }
+  .v4 .wrap { padding: 0 20px; }
+  .v4 .stream { height: auto; min-height: 110px; max-height: 200px; }
+  .v4 .st label { display: none; }
+  .v4 .st.here label, .v4 .st.halt label, .v4 .st.done:last-child label { display: block; }
+  .v4 .railcap { font-size: 15px; margin-top: 16px; }
+  .v4 .mFoot .v { font-size: 14.5px; }
+  .v4 .gtop .bal { font-size: 32px; }
+  .v4 .big { font-size: clamp(48px, 15vw, 80px); }
+  .v4 nav .btn { padding: 8px 13px; font-size: 13px; }
+}
