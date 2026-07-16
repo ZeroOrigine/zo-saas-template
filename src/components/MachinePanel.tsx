@@ -10,6 +10,7 @@ export interface Birthline {
   ok: boolean;
   inflight: Inflight | null;
   lastBirth?: { name: string; created_at: string } | null;
+  nextCycleAt?: string | null;
 }
 
 function elapsed(iso: string): string {
@@ -18,6 +19,14 @@ function elapsed(iso: string): string {
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
   return h > 0 ? `${h}h ${m}m ${sec}s` : m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+function countdown(iso: string): string | null {
+  const s = Math.floor((new Date(iso).getTime() - Date.now()) / 1000);
+  if (!isFinite(s) || s <= 0) return null;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}h ${m}m ${s % 60}s`;
 }
 
 export function useBirthline(): Birthline | null {
@@ -57,11 +66,12 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
   }, []);
 
   const f = d?.inflight ?? null;
+  const cd = !f && d?.nextCycleAt ? countdown(d.nextCycleAt) : null;
 
   return (
     <div className="machine">
       <div className="mHead">
-        <span className="l"><span className={`dot${f && !f.halted ? '' : ' off'}`}></span>The machine is thinking</span>
+        <span className="l"><span className={`dot${f && !f.halted ? '' : ' off'}`}></span>{f ? (f.halted ? `${f.name} is paused on the line` : `${f.name} is being born`) : 'The machine is thinking'}</span>
         <span className="r">unedited · live</span>
       </div>
       <div className={`stream${f ? '' : ' quiet'}`} aria-live="polite">
@@ -80,9 +90,19 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
           )
         ) : (
           <div className="ln idle">
-            The line is idle. The factory pulls its next idea when the backlog runs low.
-            {d?.lastBirth ? ` Last birth: ${d.lastBirth.name}.` : ''} When a Mind starts thinking,
-            its actual thoughts stream here, unedited.
+            {cd ? (
+              <>
+                The line is idle, but the clock is set. In <span className="who">{cd}</span> the
+                machine wakes itself, pulls the next problem worth solving, and a new birth
+                starts here. No human presses the button.
+              </>
+            ) : (
+              <>
+                The line is idle. The factory pulls its next idea when the backlog runs low.
+                {d?.lastBirth ? ` Last birth: ${d.lastBirth.name}.` : ''} When a Mind starts
+                thinking, its actual thoughts stream here, unedited.
+              </>
+            )}
           </div>
         )}
       </div>
@@ -97,7 +117,11 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
           <>
             <div><div className="k">Last birth</div><div className="v time">{last?.name ?? d?.lastBirth?.name ?? '·'}</div></div>
             <div><div className="k">It cost</div><div className="v money">{last ? `$${last.cost.toFixed(2)}` : '·'}</div></div>
-            <div><div className="k">Humans involved</div><div className="v">0</div></div>
+            {cd ? (
+              <div><div className="k">Next birth begins in</div><div className="v time">{cd}</div></div>
+            ) : (
+              <div><div className="k">Humans involved</div><div className="v">0</div></div>
+            )}
           </>
         )}
       </div>
