@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 interface Inflight {
   name: string; status: string; station: number; halted: boolean;
   born: string; cost: number; thought: string | null; thoughtBy: string | null;
+  launchedAt?: string | null;
 }
 export interface Birthline {
   ok: boolean;
@@ -121,7 +122,7 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
       <div className="mFoot">
         {f ? (
           <>
-            <div><div className="k">{done ? 'Born in' : 'On the line'}</div><div className="v time">{done ? elapsedBetween(f.born, f.since) : elapsed(f.born)}</div></div>
+            <div><div className="k">{done ? 'Born in' : 'On the line'}</div><div className="v time">{done ? elapsedBetween(f.born, f.launchedAt ?? f.since) : elapsed(f.born)}</div></div>
             <div><div className="k">{done ? 'It cost' : 'Compute spent'}</div><div className="v money">${f.cost.toFixed(2)}</div></div>
             <div><div className="k">Humans involved</div><div className="v">0</div></div>
           </>

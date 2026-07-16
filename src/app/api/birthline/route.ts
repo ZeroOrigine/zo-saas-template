@@ -116,8 +116,23 @@ export async function GET() {
       const firstThought = (costRows ?? []).reduce<string | null>(
         (min, r) => (r.created_at && (!min || r.created_at < min) ? r.created_at : min), null);
       const thought = rows.find((r) => r.project_id === p.project_id);
+      // The true launch stamp: zo_projects.updated_at is NOT bumped by the
+      // launch PATCH (it froze at the resume time on Julley), but the deploy
+      // sync writes zo_products.launched_at — use it so 'Born in' is honest.
+      let launchedAt: string | null = null;
+      if (p.status === 'launched') {
+        try {
+          const { data: prod } = await supabase
+            .from('v_products')
+            .select('launched_at')
+            .ilike('name', p.name)
+            .maybeSingle();
+          launchedAt = prod?.launched_at ?? null;
+        } catch { /* fail-soft: panel falls back to since */ }
+      }
       inflight = {
         name: p.name,
+        launchedAt,
         status: p.status,
         station:
           STATION_OF[p.status] ?? HALTED_OF[p.status] ??
