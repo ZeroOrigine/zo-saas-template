@@ -62,9 +62,16 @@ const STATION_OF: Record<string, number> = {
 const HALTED_OF: Record<string, number> = {
   qa_infra_error: 4,
   qa_failed: 4,
+  qa_patch_broken: 4,
   deploy_failed: 5,
   budget_halted: 3,
+  lifetime_cap_pending: 3,
 };
+
+// Rule 13: never allowlist a growing set. A project is ON THE LINE unless its
+// status is in this small, closed, terminal/pre-line set. Any halt status the
+// pipeline invents tomorrow stays visible automatically, honestly labeled.
+const OFF_THE_LINE = ['approved', 'dropped', 'sunset'];
 
 /**
  * The Birth Line. Real-time position of the product currently being born.
@@ -74,13 +81,11 @@ const HALTED_OF: Record<string, number> = {
 export async function GET() {
   try {
     const supabase = createPublicClient();
-    const active = [...Object.keys(STATION_OF), ...Object.keys(HALTED_OF)];
-
     const [{ data: projs }, { data: mindRows }] = await Promise.all([
       supabase
         .from('v_projects')
         .select('project_id,name,status,created_at,updated_at')
-        .in('status', active)
+        .not('status', 'in', `(${OFF_THE_LINE.join(',')})`)
         .order('updated_at', { ascending: false })
         .limit(1),
       supabase
@@ -103,17 +108,23 @@ export async function GET() {
     if (p) {
       const { data: costRows } = await supabase
         .from('v_cost_logs')
-        .select('cost_usd')
+        .select('cost_usd,created_at')
         .eq('project_id', p.project_id);
       const cost = (costRows ?? []).reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+      // The clock starts at the machine's FIRST THOUGHT, not at project seeding
+      // (seeding sat 37 minutes before the first call on the Julley build).
+      const firstThought = (costRows ?? []).reduce<string | null>(
+        (min, r) => (r.created_at && (!min || r.created_at < min) ? r.created_at : min), null);
       const thought = rows.find((r) => r.project_id === p.project_id);
       inflight = {
         name: p.name,
         status: p.status,
-        station: STATION_OF[p.status] ?? HALTED_OF[p.status] ?? 3,
-        halted: p.status in HALTED_OF,
+        station:
+          STATION_OF[p.status] ?? HALTED_OF[p.status] ??
+          (p.status.startsWith('qa') ? 4 : p.status.startsWith('deploy') ? 5 : 3),
+        halted: !(p.status in STATION_OF),
         since: p.updated_at,
-        born: p.created_at,
+        born: firstThought ?? p.created_at,
         cost: Math.round(cost * 100) / 100,
         thought: sanitizeThought(thought ? (thought.output_summary || thought.action) : null),
         thoughtBy: thought?.mind_name ? (PUBLIC_MIND[thought.mind_name] ?? 'a Mind') : null,
