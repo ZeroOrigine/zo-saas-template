@@ -174,8 +174,22 @@ export async function GET() {
       lastBirth = (launched ?? [])[0] ?? null;
     }
 
+    // Next scheduled cycle, if the founder has armed one (n8n cron writes
+    // zo_config.next_cycle_at). Public by design; absent or in the past means
+    // NO countdown. The website never invents a schedule (Rule 3).
+    let nextCycleAt: string | null = null;
+    try {
+      const { data: cfg } = await supabase
+        .from('v_config_public')
+        .select('value')
+        .eq('key', 'next_cycle_at')
+        .maybeSingle();
+      const v = cfg?.value == null ? null : String(cfg.value).replace(/^"+|"+$/g, '');
+      if (v && new Date(v).getTime() > Date.now()) nextCycleAt = v;
+    } catch { /* fail-soft: no countdown */ }
+
     return NextResponse.json(
-      { ok: true, inflight, lastBirth, at: new Date().toISOString() },
+      { ok: true, inflight, lastBirth, nextCycleAt, at: new Date().toISOString() },
       { headers: { 'Cache-Control': 'public, max-age=0, s-maxage=10, stale-while-revalidate=20' } },
     );
   } catch {
