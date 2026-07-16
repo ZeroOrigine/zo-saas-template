@@ -16,7 +16,8 @@ function elapsed(iso: string): string {
   const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  return h > 0 ? `${h}:${String(m).padStart(2, '0')}` : `${m}m ${s % 60}s`;
+  const sec = s % 60;
+  return h > 0 ? `${h}h ${m}m ${sec}s` : m > 0 ? `${m}m ${sec}s` : `${sec}s`;
 }
 
 export function useBirthline(): Birthline | null {
