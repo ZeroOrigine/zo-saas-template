@@ -2412,6 +2412,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .v4 .p h3{font-size:18px;margin-top:11px}
 .v4 .p .tag{font-size:13px;color:var(--dim);margin-top:6px;min-height:38px;line-height:1.5}
 .v4 .p .num{margin-top:13px;padding-top:11px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--dim2);display:flex;justify-content:space-between}
+.v4 .p{position:relative}
+.v4 .p:hover{box-shadow:0 14px 40px -18px rgba(61,220,151,.35);transform:translateY(-3px)}
+.v4 .p:focus-visible{outline:2px solid var(--alive);outline-offset:2px}
+.v4 .p .visit{position:absolute;top:16px;right:18px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--alive);opacity:0;transform:translateX(-4px);transition:.18s}
+.v4 .p:hover .visit{opacity:1;transform:none}
+.v4 .p .host{margin-top:10px;font-family:var(--mono);font-size:10.5px;color:var(--dim2);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v4 .p .num{gap:8px;align-items:center}
+.v4 .p .num .cat{display:inline-flex;align-items:center;gap:5px}
+.v4 .p .num .cat i{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none}
+.v4 .p .num .born{color:var(--dim2)}
+.v4 .mind{cursor:default}
+.v4 .mind:hover{transform:translateY(-2px);border-color:var(--line2)}
 .v4 .grave{background:#0a0707}
 .v4 .g{border:1px solid #2a1c1e;border-left:3px solid var(--dead);border-radius:10px;padding:20px 22px;background:#100b0c;margin-top:12px}
 .v4 .g .h{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}

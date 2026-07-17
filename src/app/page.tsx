@@ -19,13 +19,13 @@ const MIND_COPY: Record<string, { role: string; think: string }> = {
   immune: { role: 'the night watch', think: 'Watches every live product. Patches what breaks while the world sleeps.' },
 };
 
-function agoLabel(lastSeen: string | null, busy: boolean): string {
+function agoLabel(lastSeen: string | null, busy: boolean, idleVerb = 'idle'): string {
   if (busy) return 'working now';
   if (!lastSeen) return 'dormant';
   const h = Math.floor((Date.now() - new Date(lastSeen).getTime()) / 3600000);
-  if (h < 1) return 'idle · <1h';
-  if (h < 24) return `idle · ${h}h`;
-  return `idle · ${Math.floor(h / 24)}d`;
+  if (h < 1) return `${idleVerb} · <1h`;
+  if (h < 24) return `${idleVerb} · ${h}h`;
+  return `${idleVerb} · ${Math.floor(h / 24)}d`;
 }
 
 export default async function Home() {
@@ -147,7 +147,7 @@ export default async function Home() {
                     <div className="role">{copy.role}</div>
                     <div className="think">{copy.think}</div>
                     <div className="stat">
-                      <span>{agoLabel(m.lastSeen, m.busy)}</span>
+                      <span>{agoLabel(m.lastSeen, m.busy, m.key === 'immune' ? 'on watch' : 'idle')}</span>
                       <span>{m.calls.toLocaleString()} thoughts</span>
                     </div>
                   </div>
