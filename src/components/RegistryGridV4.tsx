@@ -7,6 +7,11 @@ export interface GridProduct {
   category?: string | null; launched_at?: string | null;
 }
 
+const CAT_HUE: Record<string, string> = {
+  education: '#9d7bff', compliance: '#ff8f5e', business: '#3ddc97',
+  transport: '#5eb1ff', productivity: '#ffd166', finance: '#ff7ba6',
+};
+
 type SortKey = 'new' | 'cost' | 'az';
 const SORTS: { key: SortKey; label: string }[] = [
   { key: 'new', label: 'Newest' },
@@ -56,13 +61,26 @@ export default function RegistryGridV4({ products, costs }: {
       <div className="grid">
         {shown.map((p) => {
           const cost = costs[`zo-${p.slug}`];
+          let host: string | null = null;
+          try { host = p.url ? new URL(p.url).hostname : null; } catch { host = null; }
+          const born = p.launched_at
+            ? new Date(p.launched_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            : null;
+          const hue = p.category ? CAT_HUE[p.category] ?? 'var(--dim2)' : null;
           return (
             <a key={p.slug} className="p" href={p.url ?? '#'} target="_blank" rel="noopener noreferrer">
+              <span className="visit" aria-hidden="true">visit ↗</span>
               <div className="badge"><span className="d"></span>Live{p.launched_at ? ' · born autonomously' : ''}</div>
               <h3>{p.name}</h3>
               <div className="tag">{p.tagline}</div>
+              {host && <div className="host">{host}</div>}
               <div className="num">
-                <span>{p.category ?? '·'}</span>
+                {hue ? (
+                  <span className="cat"><i style={{ background: hue }}></i>{p.category}</span>
+                ) : (
+                  <span>·</span>
+                )}
+                {born && <span className="born">born {born}</span>}
                 <span style={{ color: cost ? 'var(--alive)' : undefined }}>{cost ? `$${cost.toFixed(2)}` : '·'}</span>
               </div>
             </a>
