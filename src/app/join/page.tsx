@@ -81,10 +81,9 @@ export default function JoinPage() {
           <p className="lede">Same access. Same respect. Whether you give $1 or $100.</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(272px,1fr))', gap: 12, marginTop: 36 }}>
             {[
-              ['01', 'Direct access to research', 'See what problems the Minds are discovering. Raw insights, unfiltered.'],
-              ['02', 'Early access to products', 'Be among the first to use what gets built. Test it. Break it. Help make it better.'],
-              ['03', 'Shape the constitution', 'Our eleven-article constitution evolves. Supporters have a voice in how it grows.'],
-              ['04', 'Full build-log transparency', 'Every dollar spent. Every product built. Every decision made. You see what we see.'],
+              ['01', 'Watch every birth, live', 'The machine panel, the logbook, the biographies. You see products being born in real time.'],
+              ['02', 'Your support on the record', 'Every contribution lands in the public treasury ledger with a receipt. The books stay open.'],
+              ['03', 'Full build-log transparency', 'Every dollar spent. Every product built. Every failure buried honestly. You see what we see.'],
             ].map(([n, h, p]) => (
               <div key={n} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: 22, background: 'var(--bg2)' }}>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '.14em', color: 'var(--dim2)' }}>{n}</div>

@@ -19,8 +19,8 @@ export default function RefundPage() {
 
         <h2>Mission support (Pay What You Believe)</h2>
         <p>If you supported us and regret it for any reason, tell us within 30 days
-        and we refund it in full. No questions, no friction. Monthly support can be
-        cancelled anytime and stops immediately.</p>
+        and we refund it in full. No questions, no friction. Every contribution is
+        one-time: no subscription, no recurring charge, nothing to cancel.</p>
 
         <h2>Product purchases</h2>
         <p>Every paid product we ship carries a 30-day money-back guarantee unless
