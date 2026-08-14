@@ -2,6 +2,7 @@ import Link from 'next/link';
 import JoinRevealObserver from '@/components/JoinRevealObserver';
 import DonateButton from '@/components/DonateButton';
 import FundCustom from '@/components/FundCustom';
+import GeneClaimForm from '@/components/GeneClaimForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -93,6 +94,20 @@ export default function JoinPage() {
               </div>
             ))}
           </div>
+        </div></section>
+
+        {/* Claim genome access */}
+        <section id="claim" className="reveal"><div className="wrap">
+          <div className="eyebrow">Benefit 04</div>
+          <h2>Claim your genome access</h2>
+          <p className="lede">
+            Already supported? Enter the email from your donation and your GitHub username.
+            The machine matches your claim against the donation ledger and invites you as a
+            read-only collaborator on the private gene library. You can also browse the{' '}
+            <Link href="/genome" style={{ color: 'var(--alive)', textDecoration: 'underline' }}>public family tree</Link>{' '}
+            first: every gene&apos;s name and origin is open, the code itself is for supporters.
+          </p>
+          <GeneClaimForm />
         </div></section>
 
         {/* The promise */}
