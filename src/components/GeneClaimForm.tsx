@@ -47,8 +47,9 @@ export default function GeneClaimForm() {
       >
         <div style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '.14em', color: 'var(--alive)' }}>CLAIM RECORDED</div>
         <p style={{ color: 'var(--txt)', marginTop: 10, fontSize: 15.5 }}>
-          The machine verifies your claim against the donation ledger and sends the
-          read-only GitHub invite. Watch for the invitation from ZeroOrigine/zo-genes.
+          The machine processes claims within the hour and emails you the outcome either
+          way: your GitHub invite, a confirmation if your account already has access, or
+          what to fix if the email does not match a donation on record.
         </p>
       </div>
     );
