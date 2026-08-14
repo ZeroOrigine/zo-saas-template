@@ -41,14 +41,15 @@ export async function getHomeData() {
     const [products, projects, costs, events] = await Promise.all([
       supabase.from('v_products').select('slug,name,tagline,status,url,icon,sort_order,category,launched_at,created_at').order('launched_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }),
       supabase.from('v_projects').select('project_id,name,status,created_at'),
-      supabase.from('v_cost_logs').select('cost_usd,project_id,created_at'),
+      // Row-cap class: aggregate view, never row-capped (the api/stats lesson).
+      supabase.from('v_cost_by_project').select('project_id,total_usd,calls'),
       supabase.from('v_pipeline_events').select('event_type,project_id,created_at')
         .in('event_type', Object.keys(FRIENDLY)).order('created_at', { ascending: false }).limit(10),
     ]);
     const costRows = costs.data ?? [];
     const { getFixedCosts } = await import('@/lib/fixedCosts');
     const totalSpend =
-      costRows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0) + (await getFixedCosts());
+      costRows.reduce((s, r) => s + (Number(r.total_usd) || 0), 0) + (await getFixedCosts());
     const live = (products.data ?? []).filter((p) => p.status === 'live');
     const allProjects = projects.data ?? [];
     const dropped = allProjects.filter((p) => p.status === 'dropped').length;
@@ -66,7 +67,7 @@ export async function getHomeData() {
       totalSpend,
       products: live,
       feed,
-      apiCalls: costRows.length,
+      apiCalls: costRows.reduce((s, r) => s + (Number(r.calls) || 0), 0),
     };
   } catch {
     return null;
@@ -94,7 +95,8 @@ export async function getTreasury(): Promise<TreasuryData | null> {
   try {
     const supabase = createPublicClient();
     const [costs, recent, donations] = await Promise.all([
-      supabase.from('v_cost_logs').select('cost_usd'),
+      // Row-cap class: aggregate view, never row-capped.
+      supabase.from('v_cost_by_project').select('total_usd,calls'),
       supabase
         .from('v_cost_logs')
         .select('created_at,workflow,project_id,cost_usd')
@@ -107,7 +109,7 @@ export async function getTreasury(): Promise<TreasuryData | null> {
         .limit(200),
     ]);
     const rows = costs.data ?? [];
-    const apiSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const apiSpend = rows.reduce((s, r) => s + (Number(r.total_usd) || 0), 0);
     const { getFixedCosts } = await import('@/lib/fixedCosts');
     const fixed = await getFixedCosts();
     const dayStart = new Date();
@@ -142,7 +144,7 @@ export async function getTreasury(): Promise<TreasuryData | null> {
       apiSpend: Math.round(apiSpend * 100) / 100,
       fixed: Math.round(fixed * 100) / 100,
       total: Math.round((apiSpend + fixed) * 100) / 100,
-      calls: rows.length,
+      calls: rows.reduce((s, r) => s + (Number(r.calls) || 0), 0),
       todaySpend: Math.round(todaySpend * 100) / 100,
       dailyBudget: dailyBudget && !Number.isNaN(dailyBudget) ? dailyBudget : null,
       donationsTotal: Math.round(donationsTotal * 100) / 100,
@@ -158,13 +160,13 @@ export async function getRegistry(): Promise<RegistryRow[] | null> {
     const supabase = createPublicClient();
     const [projects, costs, products] = await Promise.all([
       supabase.from('v_projects').select('project_id,name,status,category,created_at').order('created_at', { ascending: false }),
-      supabase.from('v_cost_logs').select('project_id,cost_usd'),
+      // Row-cap class: aggregate view, never row-capped.
+      supabase.from('v_cost_by_project').select('project_id,total_usd'),
       supabase.from('v_products').select('slug,url,status'),
     ]);
     const costBy: Record<string, number> = {};
     for (const r of costs.data ?? []) {
-      const k = r.project_id || '';
-      costBy[k] = (costBy[k] || 0) + (Number(r.cost_usd) || 0);
+      costBy[r.project_id || ''] = Number(r.total_usd) || 0;
     }
     const urlBy: Record<string, string> = {};
     for (const p of products.data ?? []) {
@@ -247,8 +249,11 @@ const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string
 export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: { attempts: number; launched: number; avgCostLive: number; totalCalls: number; firstMonth: string } } | null> {
   try {
     const supabase = createPublicClient();
-    const [costs, projects, products, recentThoughts] = await Promise.all([
+    const [costs, totals, projects, products, recentThoughts] = await Promise.all([
+      // Recent rows only feed per-Mind activity; the SUM comes from the
+      // aggregate view below (row-cap class: limit(2000) was a deferred trap).
       supabase.from('v_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
+      supabase.from('v_cost_by_project').select('total_usd,calls'),
       supabase.from('v_projects').select('status,created_at'),
       supabase.from('v_products').select('slug,status'),
       supabase.from('v_mind_logs').select('mind_name,created_at').order('created_at', { ascending: false }).limit(40),
@@ -281,7 +286,7 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
 
     const allProjects = projects.data ?? [];
     const liveProducts = (products.data ?? []).filter((p) => p.status === 'live');
-    const totalSpend = rows.reduce((s, r) => s + (Number(r.cost_usd) || 0), 0);
+    const totalSpend = (totals.data ?? []).reduce((s, r) => s + (Number(r.total_usd) || 0), 0);
     const first = allProjects.map((p) => p.created_at).sort()[0];
 
     return {
@@ -290,7 +295,7 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
         attempts: allProjects.length,
         launched: liveProducts.length,
         avgCostLive: liveProducts.length ? Math.round((totalSpend / liveProducts.length) * 100) / 100 : 0,
-        totalCalls: rows.length,
+        totalCalls: (totals.data ?? []).reduce((s, r) => s + (Number(r.calls) || 0), 0),
         firstMonth: first ? new Date(first).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }) : '·',
       },
     };
@@ -374,7 +379,8 @@ export async function getLogbook(): Promise<LogEntry[] | null> {
     const supabase = createPublicClient();
     const [projects, costs, postmortems, reflexes, proposals] = await Promise.all([
       supabase.from('v_projects').select('project_id,name,status,created_at'),
-      supabase.from('v_cost_logs').select('project_id,cost_usd'),
+      // Row-cap class: aggregate view, never row-capped.
+      supabase.from('v_cost_by_project').select('project_id,total_usd'),
       supabase.from('v_postmortems').select('project_id,kind,error,cost_usd_at_halt,created_at').order('created_at', { ascending: false }).limit(40),
       supabase.from('v_reflex_log').select('reflex,action,detail,created_at').order('created_at', { ascending: false }).limit(40),
       supabase.from('v_proposals').select('kind,title,status,created_at,decided_at').order('created_at', { ascending: false }).limit(40),
@@ -382,8 +388,7 @@ export async function getLogbook(): Promise<LogEntry[] | null> {
 
     const costByProject = new Map<string, number>();
     for (const c of costs.data ?? []) {
-      const k = c.project_id || '';
-      costByProject.set(k, (costByProject.get(k) || 0) + (Number(c.cost_usd) || 0));
+      costByProject.set(c.project_id || '', Number(c.total_usd) || 0);
     }
     const nameOf = (pid: string) => (pid || '').replace(/^zo-/, '').replace(/^RA-.*/, 'a research run') || 'the machine';
     const money = (n: number) => '$' + (Math.round(n * 100) / 100).toFixed(2);
@@ -412,6 +417,63 @@ export async function getLogbook(): Promise<LogEntry[] | null> {
 
     entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
     return entries.slice(0, 60);
+  } catch {
+    return null;
+  }
+}
+
+// ── The genome flow (home + /genome visual) ─────────────────────────────────
+// Drawn live from the gene registry. Founding-era products predate origin
+// stamping, so their genes sit inside the founding pool; stamped-era products
+// are listed by the build genes they contributed.
+export interface GenomeFlowData {
+  contributors: { name: string; status: string; genes: number }[];
+  total: number;
+  inheritances: number;
+  pool: number;
+}
+const GENOME_DROPPED_NAMES: Record<string, string> = {
+  'zo-portalpulse': 'PortalPulse',
+  'zo-certrelay': 'CertRelay',
+};
+export async function getGenomeFlow(): Promise<GenomeFlowData | null> {
+  try {
+    const supabase = createPublicClient();
+    const [{ data: modules }, { data: products }] = await Promise.all([
+      supabase.from('v_genome').select('module_id,module_type,project_origin,times_used,created_at'),
+      supabase.from('v_products').select('name,status'),
+    ]);
+    const rows = modules ?? [];
+    if (!rows.length) return null;
+    const prods = products ?? [];
+    const byOrigin = new Map<string, { genes: number; first: string }>();
+    for (const r of rows) {
+      if (!r.project_origin) continue;
+      if ((r.module_type ?? 'build') !== 'build') continue;
+      const cur = byOrigin.get(r.project_origin) ?? { genes: 0, first: r.created_at };
+      cur.genes += 1;
+      if (r.created_at < cur.first) cur.first = r.created_at;
+      byOrigin.set(r.project_origin, cur);
+    }
+    const contributors = Array.from(byOrigin.entries())
+      .map(([origin, v]) => {
+        const slug = origin.replace(/^zo-/, '');
+        const match = prods.find((p) => p.name.toLowerCase().replace(/\s+/g, '') === slug);
+        return {
+          name: match?.name ?? GENOME_DROPPED_NAMES[origin] ?? slug,
+          status: match?.status ?? (GENOME_DROPPED_NAMES[origin] ? 'dropped' : 'unknown'),
+          genes: v.genes,
+          first: v.first,
+        };
+      })
+      .sort((a, b) => (a.first < b.first ? -1 : 1))
+      .map(({ name, status, genes }) => ({ name, status, genes }));
+    return {
+      contributors,
+      total: rows.length,
+      inheritances: rows.reduce((s, r) => s + (Number(r.times_used) || 0), 0),
+      pool: rows.filter((r) => !r.project_origin).length,
+    };
   } catch {
     return null;
   }

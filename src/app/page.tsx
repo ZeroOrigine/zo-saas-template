@@ -3,8 +3,9 @@ import MachinePanel, { BirthRail, LineChip } from '@/components/MachinePanel';
 import RegistryGridV4, { type GridProduct } from '@/components/RegistryGridV4';
 import SubscribeForm from '@/components/SubscribeForm';
 import {
-  getHomeData, getMindsStatus, getRegistry, getTreasury, getLastBirth, getEthicsLatest,
+  getHomeData, getMindsStatus, getRegistry, getTreasury, getLastBirth, getEthicsLatest, getGenomeFlow,
 } from '@/lib/zo';
+import GenomeFlow from '@/components/GenomeFlow';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,8 +30,8 @@ function agoLabel(lastSeen: string | null, busy: boolean, idleVerb = 'idle'): st
 }
 
 export default async function Home() {
-  const [data, mindsData, registry, treasury, lastBirth, ethics] = await Promise.all([
-    getHomeData(), getMindsStatus(), getRegistry(), getTreasury(), getLastBirth(), getEthicsLatest(),
+  const [data, mindsData, registry, treasury, lastBirth, ethics, genome] = await Promise.all([
+    getHomeData(), getMindsStatus(), getRegistry(), getTreasury(), getLastBirth(), getEthicsLatest(), getGenomeFlow(),
   ]);
 
   const fund = mindsData?.metrics.avgCostLive ? Math.round(mindsData.metrics.avgCostLive) : null;
@@ -67,6 +68,7 @@ export default async function Home() {
           <li><a href="#minds">Minds</a></li>
           <li><a href="#registry">Products</a></li>
           <li><a href="#grave">Graveyard</a></li>
+          <li><a href="#genome">Genome</a></li>
           <li><a href="#treasury">Treasury</a></li>
           <li><a href="#law">Law</a></li>
         </ul>
@@ -207,6 +209,35 @@ export default async function Home() {
                 )}
               </div>
             ))}
+          </div></section>
+        )}
+
+        {/* ═══ GENOME ═══ */}
+        {genome && (
+          <section id="genome"><div className="wrap">
+            <div className="headrow">
+              <div>
+                <div className="eyebrow">The genome</div>
+                <h2>The dead leave genes. Every birth inherits them.</h2>
+                <p className="lede">
+                  When a product survives QA, its proven modules are recorded in the gene library.
+                  Every product born after inherits all of them. Even the graveyard contributes:
+                  the oldest gene in the library came from a product that never shipped. This
+                  drawing is generated from the registry the moment you load the page.
+                </p>
+              </div>
+              <Link className="seeall" href="/genome">The full family tree →</Link>
+            </div>
+            <GenomeFlow
+              contributors={genome.contributors}
+              total={genome.total}
+              inheritances={genome.inheritances}
+              pool={genome.pool}
+            />
+            <p className="lede" style={{ marginTop: 18, fontSize: 15 }}>
+              The tree is public. The gene code itself goes to{' '}
+              <Link href="/join" style={{ color: 'var(--alive)', textDecoration: 'underline' }}>supporters</Link>.
+            </p>
           </div></section>
         )}
 

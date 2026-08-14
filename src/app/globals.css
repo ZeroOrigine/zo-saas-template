@@ -2527,3 +2527,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .v4 .heroStats{gap:8px}
   .v4 .hs{padding:8px 12px;min-width:0;flex:1 1 40%}
 }
+
+/* Logbook mobile: long unbroken machine strings (module ids, commit shas)
+   were pushing the page 40px past the viewport. Verified via rendered audit
+   2026-08-14. Break anywhere: these are machine words, not prose. */
+.zo-logbook .log-detail,
+.zo-logbook .log-item { overflow-wrap: anywhere; }

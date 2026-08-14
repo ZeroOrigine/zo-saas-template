@@ -3,6 +3,7 @@ import JoinRevealObserver from '@/components/JoinRevealObserver';
 import DonateButton from '@/components/DonateButton';
 import FundCustom from '@/components/FundCustom';
 import GeneClaimForm from '@/components/GeneClaimForm';
+import { getMindsStatus } from '@/lib/zo';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -17,7 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function JoinPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function JoinPage() {
+  // One product's average cost, from the same live source as the home page.
+  const minds = await getMindsStatus();
+  const birth = minds?.metrics.avgCostLive ? Math.round(minds.metrics.avgCostLive) : 58;
+
   return (
     <div className="v4">
       <JoinRevealObserver />
@@ -63,8 +70,8 @@ export default function JoinPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginTop: 34, maxWidth: 720 }}>
             <DonateButton amount={5} label="$5" />
             <DonateButton amount={25} label="$25" />
-            <DonateButton amount={58} label="$58. Births a product" />
-            <DonateButton amount={174} label="$174. Three births" />
+            <DonateButton amount={birth} label={`$${birth}. Births a product`} />
+            <DonateButton amount={birth * 3} label={`$${birth * 3}. Three births`} />
           </div>
 
           <FundCustom />
