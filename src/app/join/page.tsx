@@ -84,6 +84,7 @@ export default function JoinPage() {
               ['01', 'Watch every birth, live', 'The machine panel, the logbook, the biographies. You see products being born in real time.'],
               ['02', 'Your support on the record', 'Every contribution lands in the public treasury ledger with a receipt. The books stay open.'],
               ['03', 'Full build-log transparency', 'Every dollar spent. Every product built. Every failure buried honestly. You see what we see.'],
+              ['04', 'Inherit the machine\'s genes', 'Supporters get read access to zo-genes: the QA-proven modules the machine learns birth after birth, importable into your own projects, updated for life. Claim below with the email you supported with.'],
             ].map(([n, h, p]) => (
               <div key={n} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: 22, background: 'var(--bg2)' }}>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '.14em', color: 'var(--dim2)' }}>{n}</div>
