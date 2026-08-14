@@ -231,8 +231,9 @@ export default async function GenomePage() {
           <div className="eyebrow">Read the genes themselves</div>
           <h2>The tree is public. The genes go to <em style={{ fontStyle: 'normal', color: 'var(--alive)' }}>supporters</em>.</h2>
           <p className="lede" style={{ marginInline: 'auto', textAlign: 'center' }}>
-            Supporters get read access to the private gene library: the proven code, the full
-            ledger, updated after every birth, for life.
+            Supporters get read access to the private gene library: the promoted, import-ready
+            genes with their docs, plus the full recorded tree. The machine harvests more genes
+            from every birth, and access is for life.
           </p>
           <div className="heroCta" style={{ justifyContent: 'center', marginTop: 24 }}>
             <Link href="/join" className="btn gold">Fund a birth</Link>

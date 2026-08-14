@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createPublicClient } from '@/lib/supabase/public';
+import { rateLimitCheck, clientIp } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,14 @@ export const dynamic = 'force-dynamic';
 // no oracle: every well-formed claim gets the same answer.
 export async function POST(req: Request) {
   try {
+    // Abuse guard: the claim processor now EMAILS the entered address the
+    // outcome, so an unthrottled form would be a spam relay against any
+    // address an attacker types. 5 claims per IP per day is generous for a
+    // human and useless for a relay. Fail-closed by the gene's contract.
+    const verdict = await rateLimitCheck('zo_gene_claim', clientIp(req as unknown as Parameters<typeof clientIp>[0]), 5, 200);
+    if (!verdict.allowed) {
+      return NextResponse.json({ ok: false, error: 'Too many claims from this connection today. Try again tomorrow.' }, { status: 429 });
+    }
     const { email, github, company } = await req.json();
     if (typeof company === 'string' && company.trim() !== '') {
       return NextResponse.json({ ok: true }); // honeypot
