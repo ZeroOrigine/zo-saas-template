@@ -2,12 +2,20 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import ZoBeacon from '@/components/ZoBeacon';
+import { notFound } from 'next/navigation';
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // THE TEMPLATE ISLAND. These pages (pricing, auth, dashboard, maintenance)
+  // belong to a PRODUCT, not to ZeroOrigine. On the public site they were live
+  // and cross-linked by their own footer, advertising a "$29/month Pro" plan
+  // that does not exist, from a company whose entire premise is never inflating
+  // a number. Route handlers under (app)/api are unaffected: a layout does not
+  // gate them, so Stripe, health and feedback keep working everywhere.
+  if (process.env.ZO_PUBLIC_SITE === 'true') notFound();
   return (
     <div className="flex min-h-screen flex-col" style={{ background: '#fff', color: '#111827' }}>
       <Header />
