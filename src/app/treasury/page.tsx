@@ -49,13 +49,24 @@ export default async function TreasuryPage({
 
   let q = supabase
     .from('v_cost_logs')
-    .select('created_at,workflow,project_id,cost_usd', { count: 'exact' })
+    .select('created_at,workflow,project_id,cost_usd')
     .order('created_at', { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (product) q = q.eq('project_id', product);
 
-  const [{ data: costs, count }, { data: dons }, treasury] = await Promise.all([
+  // THE COUNT MUST NOT DEPEND ON THE PAGE. Asking for the count on the same
+  // ranged query returns null once the range is past the end, and the page
+  // then printed "page 99 of 1" — a page reporting the ledger as eleven times
+  // smaller than it is, on the one page whose whole job is to state its size
+  // correctly. The count is now its own head-only query with no range on it,
+  // so overshooting the last page shows no rows and STILL prints the real
+  // total, which is the honest answer to "how much is there".
+  let cq = supabase.from('v_cost_logs').select('created_at', { count: 'exact', head: true });
+  if (product) cq = cq.eq('project_id', product);
+
+  const [{ data: costs }, { count }, { data: dons }, treasury] = await Promise.all([
     q,
+    cq,
     supabase
       .from('v_donations_public')
       .select('created_at,amount,donor_name,allocated_project_id')
@@ -88,8 +99,11 @@ export default async function TreasuryPage({
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
-  const totalRows = count ?? 0;
-  const lastPage = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+  // UNKNOWN IS NOT ZERO. If the count cannot be read, the page says so rather
+  // than printing "of 1" and implying the ledger is one page long.
+  const totalRows = typeof count === 'number' ? count : null;
+  const lastPage = totalRows !== null ? Math.max(1, Math.ceil(totalRows / PAGE_SIZE)) : null;
+  const pastEnd = lastPage !== null && page > lastPage;
   const qs = (p: number) =>
     `/treasury?page=${p}${product ? `&product=${encodeURIComponent(product)}` : ''}`;
 
@@ -106,7 +120,7 @@ export default async function TreasuryPage({
           Every donation is here too, and whether it has been allocated into a birth yet.
           These costs are the machine&apos;s own estimate from token counts, not vendor invoices.
           The invoiced ledger is being built and the two are deliberately not added together.
-          {totalRows > 0 ? (
+          {totalRows !== null && totalRows > 0 ? (
             <> {totalRows.toLocaleString()} cost {totalRows === 1 ? 'line' : 'lines'} recorded
               {product ? <> for <b>{product.replace(/^zo-/, '')}</b></> : null}.</>
           ) : null}
@@ -148,7 +162,14 @@ export default async function TreasuryPage({
             <span style={{ textAlign: 'right' }}>Amount</span>
           </div>
           {rows.length === 0 ? (
-            <div className="lrow"><span style={{ color: 'var(--dim)' }}>No lines on this page.</span></div>
+            <div className="lrow">
+              <span style={{ color: 'var(--dim)' }}>
+                {pastEnd
+                  ? <>Nothing here. The ledger ends at page {lastPage}.{' '}
+                      <Link href={qs(lastPage!)} style={{ color: 'var(--alive)' }}>Go to the last page →</Link></>
+                  : 'No lines on this page.'}
+              </span>
+            </div>
           ) : rows.map((r, i) => (
             <div key={i} className="lrow">
               <span>{new Date(r.created_at).toLocaleDateString('en-CA', {
@@ -176,10 +197,12 @@ export default async function TreasuryPage({
             like the whole ledger. */}
         <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginTop: 22, fontSize: 14 }}>
           {page > 1 ? <Link href={qs(page - 1)} style={{ color: 'var(--alive)' }}>← newer</Link> : <span style={{ color: 'var(--dim2)' }}>← newer</span>}
-          <span style={{ color: 'var(--dim)', fontFamily: 'var(--mono)' }}>
-            page {page} of {lastPage}
+          <span style={{ color: lastPage === null ? 'var(--gold)' : 'var(--dim)', fontFamily: 'var(--mono)' }}>
+            {lastPage !== null ? <>page {page} of {lastPage}</> : <>page {page} · ⚠ total could not be read</>}
           </span>
-          {page < lastPage ? <Link href={qs(page + 1)} style={{ color: 'var(--alive)' }}>older →</Link> : <span style={{ color: 'var(--dim2)' }}>older →</span>}
+          {lastPage === null
+            ? (rows.length === PAGE_SIZE ? <Link href={qs(page + 1)} style={{ color: 'var(--alive)' }}>older →</Link> : <span style={{ color: 'var(--dim2)' }}>older →</span>)
+            : (page < lastPage ? <Link href={qs(page + 1)} style={{ color: 'var(--alive)' }}>older →</Link> : <span style={{ color: 'var(--dim2)' }}>older →</span>)}
         </div>
 
         <p style={{ color: 'var(--dim)', fontSize: 13, marginTop: 28, maxWidth: 700 }}>
