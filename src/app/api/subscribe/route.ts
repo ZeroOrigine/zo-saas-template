@@ -20,10 +20,19 @@ export async function POST(req: Request) {
     // Anon INSERT via a validated RLS policy (no service role). A duplicate email
     // (23505) means already subscribed, idempotent success, not an error. We keep
     // anon to INSERT-only, so no UPDATE surface is opened.
+    const addr = email.toLowerCase().trim();
     const { error } = await supabase
       .from('zo_subscribers')
-      .insert({ email: email.toLowerCase().trim(), source: 'website' });
+      .insert({ email: addr, source: 'website' });
     if (error && error.code !== '23505') throw error;
+    // 23505 means the address is already a row — which INCLUDES anyone who
+    // previously unsubscribed. The old code swallowed that as success and left
+    // unsubscribed_at set: the person asked to rejoin, was told yes, and would
+    // never have heard anything again. Consent is restored explicitly.
+    if (error?.code === '23505') {
+      const { error: reErr } = await supabase.rpc('resubscribe_email', { p_email: addr });
+      if (reErr) throw reErr;
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false, error: 'Something went wrong. Try again.' }, { status: 500 });
