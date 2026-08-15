@@ -15,9 +15,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: BASE + p, lastModified: now, changeFrequency: 'daily', priority: p === '' ? 1 : 0.7,
   }));
   try {
+    // RegistryRow carries project_id ("zo-rigfile"), NOT slug. The story route
+    // is /story/<slug>, so the prefix comes off. My first version read .slug,
+    // got undefined on every row, and shipped a sitemap with zero story pages
+    // while looking perfectly healthy: the fail-soft path fired silently.
     const registry = await getRegistry();
     for (const row of registry || []) {
-      const slug = (row as { slug?: string }).slug;
+      const slug = String(row.project_id || '').replace(/^zo-/, '');
       if (slug) pages.push({ url: `${BASE}/story/${slug}`, lastModified: now, priority: 0.6 });
     }
   } catch { /* the static half still ships */ }
