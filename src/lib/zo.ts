@@ -82,6 +82,14 @@ export interface TreasuryData {
   todaySpend: number;
   dailyBudget: number | null;
   donationsTotal: number;
+  // Supporter money is not one number. A donation is allocated into a birth or
+  // it is still sitting in the treasury, and the receipt email PROMISES each
+  // donor their money "is allocated to the oldest unfunded birth and your
+  // receipt page will show exactly where it went". The page printed
+  // donationsTotal as the balance, which claimed all $3.00 was unspent while
+  // $2.00 had already gone into RetainageRecover.
+  donationsAllocated: number;
+  donationsUnallocated: number;
   recent: {
     created_at: string; workflow: string | null; project_id: string | null;
     cost_usd: number; kind: 'in' | 'out'; who?: string | null;
@@ -127,6 +135,9 @@ export async function getTreasury(): Promise<TreasuryData | null> {
     const dailyBudget = budgetRow?.[0]?.value ? Number(budgetRow[0].value) : null;
     const donRows = donations.data ?? [];
     const donationsTotal = donRows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const donationsAllocated = donRows
+      .filter((r) => r.allocated_project_id)
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0);
     // Money in and money out interleave in ONE ledger, newest first. A donor's
     // row appears here the moment the webhook records it.
     const outs = (recent.data ?? []).map((r) => ({
@@ -140,14 +151,25 @@ export async function getTreasury(): Promise<TreasuryData | null> {
     const merged = [...outs, ...ins]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 7);
+    // ROUND THE PARTS, THEN ADD THE ROUNDED PARTS. Rounding each component and
+    // separately rounding the raw sum lets the printed breakdown miss the
+    // printed total by a cent, on a page whose headline is that it ties. The
+    // total is now the sum of exactly the numbers shown beside it, so the
+    // displayed arithmetic is exact by construction rather than by luck.
+    const api2 = Math.round(apiSpend * 100) / 100;
+    const fix2 = Math.round(fixed * 100) / 100;
+    const don2 = Math.round(donationsTotal * 100) / 100;
+    const alloc2 = Math.round(donationsAllocated * 100) / 100;
     return {
-      apiSpend: Math.round(apiSpend * 100) / 100,
-      fixed: Math.round(fixed * 100) / 100,
-      total: Math.round((apiSpend + fixed) * 100) / 100,
+      apiSpend: api2,
+      fixed: fix2,
+      total: Math.round((api2 + fix2) * 100) / 100,
       calls: rows.reduce((s, r) => s + (Number(r.calls) || 0), 0),
       todaySpend: Math.round(todaySpend * 100) / 100,
       dailyBudget: dailyBudget && !Number.isNaN(dailyBudget) ? dailyBudget : null,
-      donationsTotal: Math.round(donationsTotal * 100) / 100,
+      donationsTotal: don2,
+      donationsAllocated: alloc2,
+      donationsUnallocated: Math.round((don2 - alloc2) * 100) / 100,
       recent: merged,
     };
   } catch {

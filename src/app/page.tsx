@@ -254,8 +254,10 @@ export default async function Home() {
                 <div className="eyebrow" style={{ color: 'var(--gold)' }}>The treasury</div>
                 <h2>Our books are public. Every line.</h2>
                 <p className="lede">
-                  Our entire cost base is machine thought. Every line has a timestamp, a Mind, and a
-                  product. So we publish all of it, as it happens. Money in. Money out. It ties.
+                  Every line below has a timestamp, a Mind, and a product. The figures are the
+                  machine&apos;s own estimate of what its thinking cost, plus a declared
+                  infrastructure figure. They are not yet reconciled against vendor invoices, and
+                  until they are, this page says estimate rather than pretending otherwise.
                 </p>
               </div>
             </div>
@@ -295,22 +297,74 @@ export default async function Home() {
               ))}
             </div>
 
-            <div className="tie">
-              <span>
-                all-time · founder <b>${(treasury.total - treasury.donationsTotal).toFixed(2)}</b>
-                {treasury.donationsTotal > 0 ? <> + supporters <b>${treasury.donationsTotal.toFixed(2)}</b></> : null}
-                {' '}− spent <b>${treasury.total.toFixed(2)}</b> (compute ${treasury.apiSpend.toFixed(2)} +
-                infrastructure ${treasury.fixed.toFixed(2)}) = balance <b>${treasury.donationsTotal.toFixed(2)}</b>
-              </span>
-              <span style={{ color: 'var(--alive)' }}>✓ it ties, to the cent</span>
-            </div>
+            {/* ══ THE RECONCILIATION, COMPUTED ══
+                This line used to print `= balance {donationsTotal}` next to a
+                hardcoded "✓ it ties, to the cent". The balance was a constant,
+                not the result of the subtraction beside it, so the two sides
+                could never visibly disagree and the tick proved nothing. The
+                equation as printed was also false: 1652.61 + 3.00 − 1655.61 is
+                0.00, not 3.00. And the $3.00 was wrong on the data too, because
+                $2.00 of it had already been allocated into RetainageRecover.
+
+                It also published how much of the founder's own money is in
+                this, derived as `total − donations`, which is a plug: money-in
+                defined as whatever makes money-out balance. A reconciliation
+                whose one side is the residual of the other cannot fail, which
+                is exactly why it was worth nothing. The founder figure is gone
+                from the public page by his decision; what is left is two
+                identities that are actually measured and actually checked. */}
+            {(() => {
+              // ⚠ NO "SPENT", AND NO TICK, UNTIL CASH OUT IS INVOICE-BACKED.
+              //
+              // This line printed `spent $1,655.61` beside `✓ it ties, to the
+              // cent`. Neither component is cash. `compute` is the machine
+              // multiplying its own token counters by rates hardcoded in
+              // config.py, never reconciled against an Anthropic invoice.
+              // `infrastructure` was one hardcoded $72/month standing in for
+              // Supabase, n8n, Netlify, Buffer and every domain. And the
+              // Anthropic subscription that runs the sessions where the
+              // research, auditing and building actually happen was not
+              // counted anywhere at all.
+              //
+              // A ledger that adds up perfectly and omits its largest vendor is
+              // still wrong. Internal consistency is not completeness, and a
+              // computed tick on an incomplete cost base would be a worse lie
+              // than the hardcoded one it replaced, because it would look
+              // earned. The tick returns when zo_payments is complete.
+              const donTies = Math.abs(
+                (treasury.donationsAllocated + treasury.donationsUnallocated) - treasury.donationsTotal) < 0.005;
+              return (
+                <div className="tie">
+                  <span>
+                    all-time · estimated cost of machine thought{' '}
+                    <b>${treasury.apiSpend.toFixed(2)}</b> · declared infrastructure{' '}
+                    <b>${treasury.fixed.toFixed(2)}</b>
+                    {treasury.donationsTotal > 0 ? (
+                      <> · supporters <b>${treasury.donationsTotal.toFixed(2)}</b> (allocated into births $
+                        {treasury.donationsAllocated.toFixed(2)} + not yet allocated $
+                        {treasury.donationsUnallocated.toFixed(2)}){donTies ? ' ✓' : ' ⚠'}</>
+                    ) : null}
+                  </span>
+                  <span style={{ color: 'var(--gold)' }}>
+                    estimates, not a cash reconciliation
+                  </span>
+                </div>
+              );
+            })()}
 
             <div className="note">
-              <b>Why this page exists ·</b> a treasury that cannot reconcile is a lie. Ours
-              reconciles to the cent, every night. Every cost here is an API call
-              with a timestamp, a Mind, and a product · {treasury.calls.toLocaleString()} of them so
-              far. <b>Every dollar so far is the founder&apos;s. The first public donation starts a
-              new line in this ledger. With your name on it, if you want it there.</b>
+              <b>Why this page exists ·</b> a treasury that cannot reconcile is a lie, and a
+              treasury that claims to reconcile while omitting its largest vendor is a worse one.
+              Every cost here is an API call with a timestamp, a Mind, and a product ·
+              {' '}{treasury.calls.toLocaleString()} of them so far. What is NOT here yet: the
+              subscriptions that keep the machine running, counted as invoices rather than
+              estimates. That ledger is being built, and this line will say so until it is done. <b>{treasury.donationsTotal > 0
+                ? <>Supporters have put ${treasury.donationsTotal.toFixed(2)} into this ledger so far.
+                    Every donation is allocated to the oldest unfunded birth, and the receipt says
+                    exactly where it went.</>
+                : <>The first public donation starts a new line in this ledger. With your name on it,
+                    if you want it there.</>}</b>
+              {' '}<Link href="/treasury" style={{ color: 'var(--alive)' }}>See every line →</Link>
             </div>
           </div></section>
         )}
