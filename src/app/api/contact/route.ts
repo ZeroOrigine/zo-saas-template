@@ -52,7 +52,30 @@ export async function POST(req: Request) {
       topic: kind,
       source: 'website',
     });
-    if (error) throw error;
+
+    // THE GATE IS IN POSTGRES, NOT HERE, AND ON PURPOSE.
+    // The anon key ships in the browser bundle, so anyone can POST straight to
+    // the table and never call this function at all — drilled on production,
+    // three bypass writes returned 201 before the database trigger existed.
+    // Everything above is a courtesy that gives a human a sentence instead of
+    // an error. The refusal below is the database talking, and it is the only
+    // check both paths must pass.
+    if (error) {
+      const msg = `${error.message || ''} ${error.details || ''}`;
+      if (msg.includes('rate_limited')) {
+        return NextResponse.json(
+          { ok: false, error: 'You have already sent us a few messages today. We have them, and we will reply.' },
+          { status: 429 },
+        );
+      }
+      if (msg.includes('duplicate')) {
+        // Idempotent from the sender's point of view: they pressed send twice,
+        // or their connection retried. Their message IS with us. Telling them
+        // it failed would make them send a third.
+        return NextResponse.json({ ok: true });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
