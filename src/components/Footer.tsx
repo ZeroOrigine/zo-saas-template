@@ -29,8 +29,11 @@ export default function Footer() {
           >
             Pricing
           </Link>
+          {/* THE CONTACT LAW. This was mailto:support@zeroorigine.com — on every
+              page of the site, and it bounced. zeroorigine.com has no MX record,
+              so nothing addressed to it has ever arrived. The form does. */}
           <Link
-            href="mailto:support@zeroorigine.com"
+            href="/contact"
             className="text-sm text-gray-500 hover:text-gray-700"
           >
             Contact

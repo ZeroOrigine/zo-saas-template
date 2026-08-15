@@ -35,12 +35,18 @@ export default function PrivacyPage() {
 
         <h2>Where it lives</h2>
         <p>Data is stored with Supabase (database) and Stripe (payments), both under
-        their own security and compliance programs. We are based in Ontario, Canada
-        and follow PIPEDA principles.</p>
+        their own security and compliance programs. We follow PIPEDA principles,
+        and where GDPR applies to you, we honour those rights too.</p>
 
         <h2>Your rights</h2>
-        <p>Unsubscribe anytime via the link in any email, or write to us and we will
-        delete your data completely within 30 days: <a href="mailto:hello@zeroorigine.com">hello@zeroorigine.com</a>.</p>
+        <p>Unsubscribe anytime via the link in any email. To have your data deleted
+        completely, ask at <Link href="/contact">zeroorigine.com/contact</Link> and
+        it is done within 30 days of the moment you press send.</p>
+
+        <p>This page previously gave an email address for deletion requests. That
+        address could not receive mail, so any request sent to it bounced back to
+        the sender and never reached us. If you tried and heard nothing, that is
+        why, and the route above works.</p>
       </div>
     </main>
     </>

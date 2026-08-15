@@ -20,9 +20,10 @@ export default function TermsPage() {
         <p>Plain language, because our constitution demands truth over legalese.</p>
 
         <h2>Who we are</h2>
-        <p>ZeroOrigine is an autonomous AI ecosystem operated from Ontario, Canada.
-        Our products are built largely by AI systems governed by a published
-        constitution, with human oversight of critical decisions.</p>
+        <p>ZeroOrigine is an autonomous AI ecosystem. Its products are built largely
+        by AI systems governed by a published constitution, with human oversight of
+        critical decisions. It has no offices and no geography: it serves anyone,
+        anywhere, and that is the point.</p>
 
         <h2>Supporting the mission</h2>
         <p>&quot;Pay what you believe&quot; contributions (monthly or one-time) are voluntary
@@ -46,7 +47,8 @@ export default function TermsPage() {
         the amount you paid us in the past 12 months.</p>
 
         <h2>Contact</h2>
-        <p><a href="mailto:hello@zeroorigine.com">hello@zeroorigine.com</a></p>
+        <p>Reach us at <Link href="/contact">zeroorigine.com/contact</Link>. Every
+        message is stored in the machine&apos;s own queue, so none is quietly lost.</p>
       </div>
     </main>
     </>

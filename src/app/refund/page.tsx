@@ -28,8 +28,8 @@ export default function RefundPage() {
         promised, you should not pay for it.</p>
 
         <h2>How to request</h2>
-        <p>Email <a href="mailto:hello@zeroorigine.com">hello@zeroorigine.com</a> with
-        your receipt. Refunds are processed through Stripe within 5 business days.</p>
+        <p>Ask at <Link href="/contact">zeroorigine.com/contact</Link> with your receipt
+        number. Refunds are processed through Stripe within 5 business days.</p>
       </div>
     </main>
     </>

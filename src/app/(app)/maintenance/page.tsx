@@ -14,13 +14,14 @@ export default function MaintenancePage() {
           experience. Please check back in a few minutes.
         </p>
         <p className="mt-8 text-sm text-gray-400">
-          If this persists, contact{' '}
+          If this persists,{' '}
           <a
-            href="mailto:support@zeroorigine.com"
+            href="https://zeroorigine.com/contact"
             className="underline hover:text-gray-600"
           >
-            support@zeroorigine.com
+            tell the machine
           </a>
+          {' '}and it will be read.
         </p>
       </div>
     </div>

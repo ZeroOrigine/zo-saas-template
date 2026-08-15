@@ -4,7 +4,7 @@ import { getRegistry } from '@/lib/zo';
 export const dynamic = 'force-dynamic';
 
 const BASE = 'https://zeroorigine.com';
-const STATIC = ['', '/products', '/genome', '/logbook', '/join', '/privacy', '/terms', '/refund'];
+const STATIC = ['', '/products', '/genome', '/logbook', '/join', '/privacy', '/terms', '/refund', '/contact'];
 
 // Fail-soft, like every other reader on this site: if the registry cannot be
 // read we publish the static routes rather than an empty sitemap. An empty

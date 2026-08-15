@@ -134,7 +134,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-semibold">Questions</h2>
         <p className="mt-3 leading-relaxed text-gray-600">
           A human answers:{' '}
-          <a href="mailto:hello@zeroorigine.com" className="underline underline-offset-2">hello@zeroorigine.com</a>
+          <Link href="/contact" className="underline underline-offset-2">zeroorigine.com/contact</Link>
         </p>
         <h2 className="mt-12 text-xl font-semibold">Put your name on something that did not exist</h2>
         <p className="mt-3 leading-relaxed text-gray-600">
