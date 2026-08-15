@@ -62,7 +62,12 @@ export default async function Home() {
   return (
     <div className="v4">
       <nav><div className="wrap nav">
-        <div className="logo">Zero<span>Origine</span></div>
+        {/* The wordmark is the way home. It was a plain div, so on a page whose
+            nav is entirely #anchors there was no way back to the top once you
+            had scrolled to the Treasury, and no way home from anywhere else.
+            Clicking the logo is the one navigation convention every visitor
+            already knows. */}
+        <Link href="/" className="logo">Zero<span>Origine</span></Link>
         <ul>
           <li><a href="#control">Control room</a></li>
           <li><a href="#minds">Minds</a></li>

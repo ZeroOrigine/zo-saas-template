@@ -41,7 +41,7 @@ export default async function ReceiptPage({ params }: { params: { session: strin
   return (
     <div className="v4" style={{ minHeight: '100vh' }}>
       <nav><div className="wrap nav">
-        <div className="logo">Zero<span>Origine</span></div>
+        <Link href="/" className="logo">Zero<span>Origine</span></Link>
         <Link href="/" style={{ color: 'var(--dim)', fontSize: 14 }}>&larr; Back to the control room</Link>
       </div></nav>
 
