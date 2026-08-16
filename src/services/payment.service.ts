@@ -150,6 +150,35 @@ export async function createBillingPortalSession(
     );
   }
 
+  // Central-payments mode (rec #186): this product holds NO Stripe secret —
+  // the central payments-portal function creates the session. The button was
+  // dead before this existed: a paying customer could not cancel.
+  const portalUrl = process.env.PAYMENTS_PORTAL_URL;
+  const proxyToken = process.env.PAYMENTS_PROXY_TOKEN;
+  if (portalUrl && proxyToken) {
+    const res = await fetch(portalUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${proxyToken}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        product_slug: PROJECT_CONFIG.projectId,
+        customer_id: profile.stripe_customer_id,
+        return_url: `${PROJECT_CONFIG.siteUrl}/dashboard`,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      url?: string;
+      error?: string;
+    };
+    if (!res.ok || !data.url) {
+      throw new Error(data.error || 'Could not open billing portal.');
+    }
+    return { url: data.url } as Stripe.BillingPortal.Session;
+  }
+
+  // Legacy per-product Stripe mode
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
     return_url: `${PROJECT_CONFIG.siteUrl}/dashboard`,
