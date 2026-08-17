@@ -55,9 +55,95 @@ export function useBirthline(): Birthline | null {
   return d;
 }
 
+// ── #196 THE BIRTH WINDOW: the 3-state hero. building = the live thought
+// stream below, untouched. refused / counting = the five-row board, every
+// number READ from the pipeline's /window/status via /api/window, never
+// simulated. An unreadable condition renders amber and counts as red.
+interface WindowCondition {
+  name: string; value: unknown; threshold: unknown; pass: boolean; unreadable: boolean;
+}
+interface WindowStatus {
+  state: 'building' | 'refused' | 'counting';
+  next_window_at: string | null;
+  enabled: boolean;
+  conditions: WindowCondition[];
+  last_window: { verdict?: string; reason_text?: string | null } | null;
+  stats: { births?: number; windows_refused?: number; cost_per_birth_30d?: number; humans_served_signals?: number };
+  unreachable?: boolean;
+}
+
+export function useWindowStatus(): WindowStatus | null {
+  const [w, setW] = useState<WindowStatus | null>(null);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const r = await fetch('/api/window', { cache: 'no-store' });
+        setW((await r.json()) as WindowStatus);
+      } catch { /* keep last known; the board shows UNREADABLE, never invents */ }
+    };
+    load();
+    const t = setInterval(load, 60000);
+    return () => clearInterval(t);
+  }, []);
+  return w;
+}
+
+const CONDITION_LABELS: Record<string, string> = {
+  treasury: 'Treasury can afford a birth',
+  gates: 'Every continuous gate is green',
+  line_clear: 'The line is clear',
+  idea: 'An idea cleared the bar',
+  pulse: 'The last birth served a human',
+};
+
+function condValueText(c: WindowCondition): string {
+  if (c.unreadable) return 'UNREADABLE';
+  if (c.name === 'treasury' && c.value && typeof c.value === 'object') {
+    const v = c.value as { today?: number; est_birth?: number };
+    const t = c.threshold as { daily?: number } | null;
+    return `$${v.today?.toFixed(0)} spent + ~$${v.est_birth?.toFixed(0)} of $${t?.daily?.toFixed(0)}`;
+  }
+  if (c.name === 'gates') return Array.isArray(c.value) && c.value.length ? `${c.value.length} red` : 'all green';
+  if (c.name === 'line_clear') return Array.isArray(c.value) && c.value.length ? String(c.value[0]) : 'clear';
+  if (c.name === 'idea' && c.value && typeof c.value === 'object') {
+    const v = c.value as { name?: string; research_score?: number };
+    return `${v.name} at ${v.research_score}`;
+  }
+  if (c.name === 'idea') return 'backlog empty';
+  if (c.name === 'pulse') return `${String(c.value)} of ${String(c.threshold)} needed`;
+  return String(c.value ?? '·');
+}
+
+function WindowBoard({ w }: { w: WindowStatus }) {
+  return (
+    <div style={{ display: 'grid', gap: 6, margin: '10px 0' }}>
+      {w.conditions.map((c) => (
+        <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+          <span
+            style={{
+              width: 8, height: 8, borderRadius: 99, flexShrink: 0,
+              background: c.unreadable ? '#f5a524' : c.pass ? '#14a06b' : '#e5484d',
+            }}
+          />
+          <span style={{ opacity: 0.85 }}>{CONDITION_LABELS[c.name] ?? c.name}</span>
+          <span style={{ marginLeft: 'auto', fontFamily: 'var(--mono, monospace)', fontSize: 12, opacity: 0.7 }}>
+            {c.name === 'treasury' && !c.pass && !c.unreadable ? (
+              <a href="/#join" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                {condValueText(c)} · fund a birth
+              </a>
+            ) : condValueText(c)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 /** The terminal: the machine's actual thoughts, sanitized server-side, unedited. */
 export default function MachinePanel({ last }: { last?: { name: string; cost: number } | null }) {
   const d = useBirthline();
+  const w = useWindowStatus();
   const [lines, setLines] = useState<{ by: string; text: string }[]>([]);
   const [, tick] = useState(0);
   const seen = useRef(new Set<string>());
@@ -101,6 +187,34 @@ export default function MachinePanel({ last }: { last?: { name: string; cost: nu
                 : `${f.name} is on the line. The Mind at work is emitting source code, not sentences, at this exact second. The stage and the money below are real.`}
             </div>
           )
+        ) : w && w.state === 'refused' && w.last_window ? (
+          <div className="ln idle">
+            <div style={{ fontWeight: 700, letterSpacing: '.08em', fontSize: 12, marginBottom: 6 }}>
+              THE MACHINE REFUSED THIS WINDOW
+            </div>
+            <WindowBoard w={w} />
+            <div style={{ fontSize: 12, opacity: 0.8, fontStyle: 'italic' }}>
+              {w.last_window.reason_text}
+            </div>
+          </div>
+        ) : w ? (
+          <div className="ln idle">
+            <div style={{ fontWeight: 700, letterSpacing: '.08em', fontSize: 12, marginBottom: 6 }}>
+              {w.next_window_at && countdown(w.next_window_at)
+                ? <>NEXT BIRTH WINDOW IN <span className="who">{countdown(w.next_window_at)}</span></>
+                : 'THE BIRTH WINDOW'}
+            </div>
+            <WindowBoard w={w} />
+            <div style={{ fontSize: 12, opacity: 0.75 }}>
+              {w.enabled
+                ? 'When the window opens, the machine births only if all five read green. It refuses in public otherwise.'
+                : 'The window is armed dark. Every number above is read from the ledgers; when the founder flips the switch, the machine decides alone.'}
+              {w.stats?.windows_refused ? ` Refusals so far: ${w.stats.windows_refused}, counted proudly.` : ''}
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.55, marginTop: 6 }}>
+              Nothing on this board is decorative. Unreadable is amber, and amber is a no.
+            </div>
+          </div>
         ) : (
           <div className="ln idle">
             {cd ? (
