@@ -42,7 +42,14 @@ export default function RootLayout({
         <link href="/fonts/fonts.css" rel="stylesheet" />
       </head>
       <body>
-        {children}
+        {/* #199: the skip link QA files on every build — born in the template now */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:shadow"
+        >
+          Skip to content
+        </a>
+        <div id="main-content">{children}</div>
       </body>
     </html>
   );
