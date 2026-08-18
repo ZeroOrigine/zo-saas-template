@@ -271,7 +271,7 @@ const MIND_DEFS: { key: string; name: string; epithet: string; workflows: string
 export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: { attempts: number; launched: number; avgCostLive: number; totalCalls: number; firstMonth: string } } | null> {
   try {
     const supabase = createPublicClient();
-    const [costs, totals, projects, products, recentThoughts] = await Promise.all([
+    const [costs, totals, projects, products, recentThoughts, immune] = await Promise.all([
       // Recent rows only feed per-Mind activity; the SUM comes from the
       // aggregate view below (row-cap class: limit(2000) was a deferred trap).
       supabase.from('v_cost_logs').select('workflow,created_at,cost_usd,project_id').order('created_at', { ascending: false }).limit(2000),
@@ -279,6 +279,13 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
       supabase.from('v_projects').select('status,created_at'),
       supabase.from('v_products').select('slug,status'),
       supabase.from('v_mind_logs').select('mind_name,created_at').order('created_at', { ascending: false }).limit(40),
+      // The Immune System thinks for FREE (probes, reflexes, the reminder
+      // dispatcher) — it never writes a cost log, so measuring its life in
+      // dollars displayed the night watch as DORMANT for months (the
+      // funder-diligence trap, growth report 2026-08-17). v_immune_status
+      // aggregates its REAL vitals: hourly heartbeat, findings healed,
+      // reflex heals. Fixed 2026-08-18 (immune audit #218 A1).
+      supabase.from('v_immune_status').select('*').limit(1),
     ]);
     const rows = costs.data ?? [];
     const lastByWf: Record<string, string> = {};
@@ -299,10 +306,21 @@ export async function getMindsStatus(): Promise<{ minds: MindStatus[]; metrics: 
         .map((r) => r.mind_name),
     );
 
+    const iv = (immune.data ?? [])[0] as { last_heartbeat: string | null; findings_healed: number; heals_total: number } | undefined;
     const minds: MindStatus[] = MIND_DEFS.map((m) => {
       const seen = m.workflows.map((w) => lastByWf[w]).filter(Boolean).sort().reverse();
       const calls = m.workflows.reduce((s, w) => s + (callsByWf[w] || 0), 0);
       const busy = m.busyStatuses.some((s) => activeStatuses.has(s)) || m.mindNames.some((n) => freshMinds.has(n));
+      if (m.key === 'immune' && iv) {
+        // Vitals, not invoices: heartbeat = the hourly watchdog run that fires
+        // probes, reflexes and the reminder dispatcher; thoughts = findings
+        // healed + reflex heals, all $0. Busy = heartbeat within 90 minutes.
+        const hb = iv.last_heartbeat ?? null;
+        const hbBusy = hb ? Date.now() - new Date(hb).getTime() < 90 * 60 * 1000 : false;
+        return { key: m.key, name: m.name, epithet: m.epithet, busy: busy || hbBusy,
+                 lastSeen: hb ?? (seen[0] ?? null),
+                 calls: (Number(iv.findings_healed) || 0) + (Number(iv.heals_total) || 0) + calls };
+      }
       return { key: m.key, name: m.name, epithet: m.epithet, busy, lastSeen: seen[0] ?? null, calls };
     });
 
