@@ -7,6 +7,7 @@ export interface RegistryRowProps {
   project_id: string;
   name: string;
   status: string;
+  build_stage?: string | null;
   category: string | null;
   created_at: string;
   cost_usd: number;
@@ -17,10 +18,22 @@ const STATUS_CLASS: Record<string, string> = {
   live: 'reg-live', launched: 'reg-live', building: 'reg-busy',
   dropped: 'reg-dead', qa_failed: 'reg-warn', build_failed: 'reg-warn',
   deploy_failed: 'reg-warn', budget_halted: 'reg-warn',
+  halted_resumable: 'reg-warn', qa_infra_error: 'reg-warn',
   approved: 'reg-idle', pending_approval: 'reg-idle',
 };
 
-const displayStatus = (s: string) => (s === 'launched' ? 'live' : s).replace(/_/g, ' ');
+// #672: a killed run's status says WHAT happened (halted, resumable) and the
+// build heartbeat's stage says WHERE — the old rendering parsed the status
+// string, so a run killed at builder step 1 read as "qa infra error" on the
+// public site. The stage dot comes from metadata.build_stage, never the status.
+const displayStatus = (s: string, stage?: string | null) => {
+  if (s === 'launched') return 'live';
+  if (s === 'halted_resumable' || s === 'qa_infra_error') {
+    return stage ? `halted @ ${stage} (resumable)` : 'halted (resumable)';
+  }
+  if (s === 'building' && stage) return `building @ ${stage}`;
+  return s.replace(/_/g, ' ');
+};
 
 const PAGE = 50;
 
@@ -33,14 +46,14 @@ export default function RegistryTable({ rows }: { rows: RegistryRowProps[] }) {
   const [shown, setShown] = useState(PAGE);
 
   const statuses = useMemo(
-    () => Array.from(new Set(rows.map((r) => displayStatus(r.status)))).sort(),
+    () => Array.from(new Set(rows.map((r) => displayStatus(r.status, r.build_stage)))).sort(),
     [rows],
   );
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     return rows.filter((r) => {
-      if (status !== 'all' && displayStatus(r.status) !== status) return false;
+      if (status !== 'all' && displayStatus(r.status, r.build_stage) !== status) return false;
       if (s && !`${r.name} ${r.category ?? ''}`.toLowerCase().includes(s)) return false;
       return true;
     });
@@ -91,7 +104,7 @@ export default function RegistryTable({ rows }: { rows: RegistryRowProps[] }) {
                       : r.name}
                     {r.category ? <span className="reg-cat"> · {r.category}</span> : null}
                   </td>
-                  <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{displayStatus(r.status)}</span></td>
+                  <td><span className={`reg-badge ${STATUS_CLASS[r.status] ?? 'reg-idle'}`}>{displayStatus(r.status, r.build_stage)}</span></td>
                   <td>{new Date(r.created_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
                   <td className="reg-cost">{r.cost_usd > 0 ? `$${r.cost_usd.toFixed(2)}` : '·'}</td>
                   <td><Link href={`/story/${slug}`} className="reg-story">biography &rarr;</Link></td>
