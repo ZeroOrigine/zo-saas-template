@@ -181,7 +181,7 @@ export async function getRegistry(): Promise<RegistryRow[] | null> {
   try {
     const supabase = createPublicClient();
     const [projects, costs, products] = await Promise.all([
-      supabase.from('v_projects').select('project_id,name,status,category,created_at').order('created_at', { ascending: false }),
+      supabase.from('v_projects').select('project_id,name,status,category,created_at,build_stage').order('created_at', { ascending: false }),
       // Row-cap class: aggregate view, never row-capped.
       supabase.from('v_cost_by_project').select('project_id,total_usd'),
       supabase.from('v_products').select('slug,url,status'),
@@ -198,6 +198,7 @@ export async function getRegistry(): Promise<RegistryRow[] | null> {
       project_id: p.project_id,
       name: p.name,
       status: p.status,
+      build_stage: p.build_stage ?? null,
       category: p.category,
       created_at: p.created_at,
       cost_usd: Math.round((costBy[p.project_id] || 0) * 100) / 100,
