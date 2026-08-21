@@ -269,6 +269,26 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
         n.vx *= 0.9; n.vy *= 0.9; n.x += n.vx; n.y += n.vy;
         n.x = Math.max(30, Math.min(GW - 30, n.x)); n.y = Math.max(24, Math.min(GH - 24, n.y));
       });
+      // W9: HARD separation between gene nodes. Two genes linked to the same
+      // products are pulled to the same centroid, and no spring tuning wins
+      // that fight forever — so after integration, gene pairs closer than
+      // 70px are pushed apart to exactly 70px along their axis.
+      const MIN_GENE_GAP = 70;
+      for (let i = 0; i < gnodes.length; i++) {
+        for (let j = i + 1; j < gnodes.length; j++) {
+          const a = gnodes[i]; const b = gnodes[j];
+          if (a.t !== 'gene' || b.t !== 'gene') continue;
+          let dx = b.x - a.x; let dy = b.y - a.y;
+          let d = Math.sqrt(dx * dx + dy * dy);
+          if (d >= MIN_GENE_GAP) continue;
+          if (d < 1) { dx = 1; dy = 0; d = 1; }
+          const push = (MIN_GENE_GAP - d) / 2;
+          a.x -= (dx / d) * push; a.y -= (dy / d) * push;
+          b.x += (dx / d) * push; b.y += (dy / d) * push;
+          a.x = Math.max(30, Math.min(GW - 30, a.x)); a.y = Math.max(24, Math.min(GH - 24, a.y));
+          b.x = Math.max(30, Math.min(GW - 30, b.x)); b.y = Math.max(24, Math.min(GH - 24, b.y));
+        }
+      }
       glinks.forEach((l) => {
         const a = gnodes[l.a]; const b = gnodes[l.b];
         const lit = gsel >= 0 && l.a === gsel;
