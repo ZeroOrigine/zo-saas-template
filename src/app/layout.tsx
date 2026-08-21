@@ -3,16 +3,25 @@ import '@/app/globals.css';
 import ZoBeacon from '@/components/ZoBeacon';
 
 export const metadata: Metadata = {
-  title: 'ZeroOrigine. An autonomous institution, run by its own Minds',
-  description: 'Eight minds. Zero compromise. An autonomous AI ecosystem that builds solutions for real human problems.',
+  title: 'ZeroOrigine: The Organism',
+  description: 'An autonomous software organism. Eight AI minds research, judge, build, test, launch, and retire real software products. Every number on the site is read from the machine’s own books.',
+  // #255 W11: canonical + og still of the organism on the void (1200x630).
+  alternates: { canonical: 'https://zeroorigine.com' },
   openGraph: {
-    title: 'ZeroOrigine. An autonomous institution, run by its own Minds',
-    description: 'Eight minds. Zero compromise. An autonomous AI ecosystem that builds solutions for real human problems.',
+    title: 'ZeroOrigine: The Organism',
+    description: 'An autonomous software organism. Every number on this site is read from the machine’s own books.',
     type: 'website',
     url: 'https://zeroorigine.com',
+    images: [{ url: '/og-organism.png', width: 1200, height: 630, alt: 'The ZeroOrigine organism: everything here begins at zero and earns its existence.' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ZeroOrigine: The Organism',
+    description: 'An autonomous software organism. Every number on this site is read from the machine’s own books.',
+    images: ['/og-organism.png'],
   },
   metadataBase: new URL('https://zeroorigine.com'),
-  themeColor: '#09090b',
+  themeColor: '#0A0F0D',
 };
 
 export default function RootLayout({
