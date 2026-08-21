@@ -273,7 +273,7 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
       // products are pulled to the same centroid, and no spring tuning wins
       // that fight forever — so after integration, gene pairs closer than
       // 70px are pushed apart to exactly 70px along their axis.
-      const MIN_GENE_GAP = 70;
+      const MIN_GENE_GAP = Math.min(90, GW / 4);
       for (let i = 0; i < gnodes.length; i++) {
         for (let j = i + 1; j < gnodes.length; j++) {
           const a = gnodes[i]; const b = gnodes[j];
@@ -301,10 +301,11 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
           gx.fillStyle = n.hold ? '#E8B44C' : '#3DFF9E';
           gx.beginPath(); gx.arc(n.x, n.y, gsel === i ? 8 : 6, 0, 7); gx.fill();
           gx.fillStyle = 'rgba(233,228,214,.9)'; gx.font = '11px IBM Plex Mono, monospace'; gx.textAlign = 'center';
-          // W9: when another gene sits within 30px, this label drops BELOW
-          // its node so two labels never overprint into noise
+          // W9: when another gene sits within 90px (long slugs are ~100px of
+          // 11px mono), this label drops BELOW its node so two labels can
+          // never overprint into noise even at mobile widths
           const crowded = gnodes.some((m, j) => j < i && m.t === 'gene'
-            && (m.x - n.x) ** 2 + (m.y - n.y) ** 2 < 30 * 30);
+            && (m.x - n.x) ** 2 + (m.y - n.y) ** 2 < 90 * 90);
           gx.fillText(n.n, n.x, crowded ? n.y + 22 : n.y - 14);
         } else {
           gx.fillStyle = 'rgba(233,228,214,.5)'; gx.beginPath(); gx.arc(n.x, n.y, 3.4, 0, 7); gx.fill();
