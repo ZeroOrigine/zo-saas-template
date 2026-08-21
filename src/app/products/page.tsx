@@ -1,36 +1,29 @@
-import Link from 'next/link';
-import SubNav from '@/components/SubNav';
-import type { Metadata } from 'next';
-import { getRegistry } from '@/lib/zo';
-import RegistryTable from '@/components/RegistryTable';
+// #255 W7: the full register of births. Home shows a preview; this page IS
+// the registry, built for hundreds of rows (W2's search + pagination rails
+// live here). ?scaletest=N exercises the rails with labeled synthetic rows.
+import RegistryAll from '@/components/RegistryAll';
+import { expandForScaleTest, getSiteState } from '@/lib/siteState';
+import '@/app/organism.css';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'The Registry. Every product the Minds ever attempted | ZeroOrigine',
-  description: 'Every attempt: live, building, failed, dropped. With the real cost of each. Radical transparency, machine-written.',
-};
-
-export default async function RegistryPage() {
-  const rows = await getRegistry();
-
-  return (
-    <>
-    <SubNav />
-    <main className="legal-page mc-registry">
-      <div className="zo-container">
-        <Link href="/" className="legal-back">&larr; Back to mission control</Link>
-        <h1>The Registry</h1>
-        <p className="legal-updated">Every product the Minds ever attempted. Including the ones that died. Each row links to its machine-written biography.</p>
-
-        {!rows ? (
-          <p>Registry temporarily unreachable. The database will answer again shortly.</p>
-        ) : (
-          <RegistryTable rows={rows} />
-        )}
-        <p className="reg-foot">Costs are the actual API spend recorded by the CFO Mind. Not estimates. Dropped products stay listed forever: an institution that hides its failures is lying about its successes.</p>
-      </div>
-    </main>
-    </>
-  );
+export default async function ProductsRegistry({
+  searchParams,
+}: {
+  searchParams?: { scaletest?: string };
+}) {
+  const state = await getSiteState();
+  if (!state) {
+    return (
+      <main className="cert">
+        <p style={{ fontFamily: 'var(--mono, monospace)' }}>
+          The registry endpoint is not answering right now. Rather than show an
+          invented list, this page waits. Refresh in a minute.
+        </p>
+      </main>
+    );
+  }
+  const n = Number(searchParams?.scaletest || 0);
+  const finalState = n > 0 && n <= 2000 ? expandForScaleTest(state, n) : state;
+  return <RegistryAll products={finalState.products} />;
 }

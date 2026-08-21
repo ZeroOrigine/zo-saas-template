@@ -156,3 +156,8 @@
   .cert .visit{display:inline-block;margin-top:26px;font-family:var(--mono);font-size:12px;letter-spacing:1.2px;text-transform:uppercase;border:1px solid var(--life);color:var(--life);padding:9px 18px;border-radius:2px}
   .cert .visit:hover{background:var(--life);color:var(--void);text-decoration:none}
   .cert .back{font-family:var(--mono);font-size:12px;color:var(--bone-dim);display:inline-block;margin-bottom:22px}
+
+  /* #255 W7: view-all doors from the home previews to the full registries */
+  .viewall{display:inline-block;margin-top:16px;font-family:var(--mono);font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;border:1px solid var(--life);color:var(--life);padding:8px 18px;border-radius:2px}
+  .viewall:hover{background:var(--life);color:var(--void);text-decoration:none}
+  .registry-head{padding-top:110px}

@@ -45,16 +45,26 @@ const BIRTH_LOG: Array<[string, string, string?]> = [
   ['organism', 'waking'],
 ];
 
-const PAGE_SIZE = 25;
-const SEARCH_THRESHOLD = 30;
 const CLUSTER_THRESHOLD = 50;
+const BIRTHS_PREVIEW = 10;
+const GENES_PREVIEW = 8;
+
+// W8: the public rendering law. Machine artifacts (JSON blobs, internal
+// paths, finding classes) NEVER render on the public site, even if the
+// payload regresses. A gene row shows a human sentence or the honest hold.
+export function genePublicText(g: { d?: string; status: [string, string] }): string {
+  const d = (g.d || '').trim();
+  if (!d || d[0] === '[' || d[0] === '{' || d.includes('genes/') || d.includes('"path"')) {
+    return g.status[0] === 'ship'
+      ? 'inherited by every product born after it'
+      : 'held back until its findings clear';
+  }
+  return d;
+}
 
 export default function OrganismPage({ state, proof }: { state: SiteState; proof: ProofSummary | null }) {
   const [alive, setAlive] = useState(false);
   const [reduced, setReduced] = useState(false);
-  const [cat, setCat] = useState('all');
-  const [query, setQuery] = useState('');
-  const [page, setPage] = useState(0);
   const [funding, setFunding] = useState<number | null>(null);
   const [fundErr, setFundErr] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
@@ -62,20 +72,10 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
   const tipRef = useRef<HTMLDivElement>(null);
   const geneCv = useRef<HTMLCanvasElement>(null);
 
-  const cats = useMemo(
-    () => ['all', ...Array.from(new Set(state.products.map((p) => p.cat)))],
-    [state.products],
-  );
-  const searchable = state.products.length > SEARCH_THRESHOLD;
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return state.products.filter(
-      (p) => (cat === 'all' || p.cat === cat) && (!q || p.name.toLowerCase().includes(q)),
-    );
-  }, [state.products, cat, query]);
-  const pages = searchable ? Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)) : 1;
-  const pageRows = searchable ? filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE) : filtered;
-  useEffect(() => setPage(0), [cat, query]);
+  // W7: home is a PREVIEW. The latest births and genes render here; the full
+  // registries live on /products and /genes, built for hundreds of rows.
+  const previewBirths = useMemo(() => state.products.slice(0, BIRTHS_PREVIEW), [state.products]);
+  const previewGenes = useMemo(() => state.genes.slice(0, GENES_PREVIEW), [state.genes]);
 
   // ---------- the birth ----------
   useEffect(() => {
@@ -174,8 +174,10 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
       cx.fillStyle = rg; cx.beginPath(); cx.arc(core.x, core.y, 46 * br, 0, 7); cx.fill();
       cx.fillStyle = '#0A0F0D'; cx.beginPath(); cx.arc(core.x, core.y, 13, 0, 7); cx.fill();
       cx.strokeStyle = 'rgba(61,255,158,.9)'; cx.lineWidth = 1.4; cx.beginPath(); cx.arc(core.x, core.y, 13, 0, 7); cx.stroke();
-      cx.fillStyle = 'rgba(61,255,158,.95)'; cx.font = '700 11px IBM Plex Mono, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-      cx.fillText('LAW', core.x, core.y);
+      // W6: the nucleus is the origin mark. It reads 0; the constitutional
+      // meaning lives in its hover tooltip, not in a label.
+      cx.fillStyle = 'rgba(61,255,158,.95)'; cx.font = '700 13px IBM Plex Mono, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+      cx.fillText('0', core.x, core.y);
       nodes.forEach((n) => {
         const pu = 0.6 + Math.abs(Math.sin(t * 0.002 + n.a * 3)) * 0.4;
         cx.fillStyle = 'rgba(61,255,158,' + 0.25 * pu + ')'; cx.beginPath(); cx.arc(n.x, n.y, 10, 0, 7); cx.fill();
@@ -190,6 +192,9 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
     };
     const hover = (mx: number, my: number): { t: string; d: string } | null => {
       let best: { t: string; d: string } | null = null; let bd = 20 * 20;
+      // W6: the nucleus itself is a hit target carrying the constitution line
+      const dc = (core.x - mx) ** 2 + (core.y - my) ** 2;
+      if (dc < bd) { bd = dc; best = { t: 'The Constitution', d: 'ethics holds veto over every birth' }; }
       nodes.forEach((n) => { const d = (n.x - mx) ** 2 + (n.y - my) ** 2; if (d < bd) { bd = d; best = { t: n.m.n, d: n.m.role + ' · ' + n.m.d }; } });
       sats.forEach((s) => { const d = ((s._x || 0) - mx) ** 2 + ((s._y || 0) - my) ** 2; if (d < bd) { bd = d; best = { t: s.name, d: s.sub }; } });
       return best;
@@ -247,7 +252,12 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
         for (let j = i + 1; j < gnodes.length; j++) {
           const a = gnodes[i]; const b = gnodes[j];
           const dx = b.x - a.x; const dy = b.y - a.y; const d2 = dx * dx + dy * dy || 1;
-          if (d2 < 5200) { const f = 28 / d2; a.vx -= dx * f; a.vy -= dy * f; b.vx += dx * f; b.vy += dy * f; }
+          // W9: gene-gene pairs repel harder and from further away, because
+          // each gene carries a text label that must stay readable at rest
+          const geneair = a.t === 'gene' && b.t === 'gene';
+          const reach = geneair ? 16000 : 5200;
+          const power = geneair ? 110 : 28;
+          if (d2 < reach) { const f = power / d2; a.vx -= dx * f; a.vy -= dy * f; b.vx += dx * f; b.vy += dy * f; }
         }
       }
       glinks.forEach((l) => {
@@ -271,7 +281,11 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
           gx.fillStyle = n.hold ? '#E8B44C' : '#3DFF9E';
           gx.beginPath(); gx.arc(n.x, n.y, gsel === i ? 8 : 6, 0, 7); gx.fill();
           gx.fillStyle = 'rgba(233,228,214,.9)'; gx.font = '11px IBM Plex Mono, monospace'; gx.textAlign = 'center';
-          gx.fillText(n.n, n.x, n.y - 14);
+          // W9: when another gene sits within 30px, this label drops BELOW
+          // its node so two labels never overprint into noise
+          const crowded = gnodes.some((m, j) => j < i && m.t === 'gene'
+            && (m.x - n.x) ** 2 + (m.y - n.y) ** 2 < 30 * 30);
+          gx.fillText(n.n, n.x, crowded ? n.y + 22 : n.y - 14);
         } else {
           gx.fillStyle = 'rgba(233,228,214,.5)'; gx.beginPath(); gx.arc(n.x, n.y, 3.4, 0, 7); gx.fill();
         }
@@ -367,26 +381,13 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
 
         <section id="births">
           <div className="folio"><span className="no">FOLIO 02</span><h2>The register of births</h2><span className="note">every product, every date, every dollar</span></div>
-          <div className="filters" role="group" aria-label="Filter by category">
-            {cats.map((c) => (
-              <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)}>{c}</button>
-            ))}
-          </div>
-          {searchable && (
-            <div className="rail">
-              <input
-                type="search" placeholder="search the registry" aria-label="Search products"
-                value={query} onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          )}
           <div className="count-line">
-            showing <b>{pageRows.length}</b> of <b>{state.products.length}</b> living products · rendered from the registry, not hand-written
+            the latest <b>{previewBirths.length}</b> of <b>{state.products.length}</b> living products · rendered from the registry, not hand-written
           </div>
           <div className="ledger"><table>
             <thead><tr><th>Born</th><th>Product</th><th>Category</th><th className="num">Cost of birth</th><th>Status</th></tr></thead>
             <tbody>
-              {pageRows.map((p) => (
+              {previewBirths.map((p) => (
                 <tr key={p.slug}>
                   <td className="mono">{p.born}</td>
                   <td><Link href={'/product/' + p.slug}>{p.name}</Link></td>
@@ -398,13 +399,7 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
               ))}
             </tbody>
           </table></div>
-          {searchable && pages > 1 && (
-            <div className="pager">
-              <button onClick={() => setPage(page - 1)} disabled={page === 0}>previous</button>
-              <span>page {page + 1} of {pages}</span>
-              <button onClick={() => setPage(page + 1)} disabled={page >= pages - 1}>next</button>
-            </div>
-          )}
+          <Link className="viewall" href="/products">View the full registry · {state.products.length} products</Link>
           <p className="caveat">A product is &quot;launched&quot; only after the machine walks its own front door on the live site:
             signup, login, password reset, the core action, and checkout. Births before August 2026 predate per-product
             cost attribution; their costs live in the aggregate books below and are marked accordingly. No number is invented to fill a cell.</p>
@@ -441,9 +436,9 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
           <div className="ledger" style={{ marginTop: 22 }}><table>
             <thead><tr><th>Gene</th><th>What it carries</th><th>Status</th></tr></thead>
             <tbody>
-              {state.genes.map((g) => (
+              {previewGenes.map((g) => (
                 <tr key={g.slug}>
-                  <td className="mono">{g.slug}</td><td>{g.d}</td>
+                  <td className="mono">{g.slug}</td><td>{genePublicText(g)}</td>
                   <td><span className={'stamp ' + g.status[0]}>{g.status[1]}</span></td>
                 </tr>
               ))}
@@ -452,6 +447,7 @@ export default function OrganismPage({ state, proof }: { state: SiteState; proof
               )}
             </tbody>
           </table></div>
+          <Link className="viewall" href="/genes">View all genes · {state.genes.length} in the genome</Link>
         </section>
 
         <section id="books">
