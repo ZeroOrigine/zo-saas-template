@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import SubNav from '@/components/SubNav';
 import type { Metadata } from 'next';
-import { createPublicClient } from '@/lib/supabase/public';
+import { getTreasuryLedger } from '@/services/public.service';
 import { getTreasury } from '@/lib/zo';
 
 /**
@@ -45,33 +45,8 @@ export default async function TreasuryPage({
 }) {
   const page = Math.max(1, Number(searchParams.page) || 1);
   const product = (searchParams.product || '').trim();
-  const supabase = createPublicClient();
-
-  let q = supabase
-    .from('v_cost_logs')
-    .select('created_at,workflow,project_id,cost_usd')
-    .order('created_at', { ascending: false })
-    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-  if (product) q = q.eq('project_id', product);
-
-  // THE COUNT MUST NOT DEPEND ON THE PAGE. Asking for the count on the same
-  // ranged query returns null once the range is past the end, and the page
-  // then printed "page 99 of 1" — a page reporting the ledger as eleven times
-  // smaller than it is, on the one page whose whole job is to state its size
-  // correctly. The count is now its own head-only query with no range on it,
-  // so overshooting the last page shows no rows and STILL prints the real
-  // total, which is the honest answer to "how much is there".
-  let cq = supabase.from('v_cost_logs').select('created_at', { count: 'exact', head: true });
-  if (product) cq = cq.eq('project_id', product);
-
-  const [{ data: costs }, { count }, { data: dons }, treasury] = await Promise.all([
-    q,
-    cq,
-    supabase
-      .from('v_donations_public')
-      .select('created_at,amount,donor_name,allocated_project_id')
-      .order('created_at', { ascending: false })
-      .limit(200),
+  const [{ costs, count, donations: dons }, treasury] = await Promise.all([
+    getTreasuryLedger(page, product, PAGE_SIZE),
     getTreasury(),
   ]);
 

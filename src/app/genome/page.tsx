@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import JoinRevealObserver from '@/components/JoinRevealObserver';
-import { createPublicClient } from '@/lib/supabase/public';
+import { getGenomeData } from '@/services/public.service';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -68,11 +68,7 @@ function geneName(moduleId: string): string {
 }
 
 export default async function GenomePage() {
-  const supabase = createPublicClient();
-  const [{ data: modules }, { data: products }] = await Promise.all([
-    supabase.from('v_genome').select('module_id,name,description,module_type,project_origin,times_used,created_at'),
-    supabase.from('v_products').select('name,status,url'),
-  ]);
+  const { modules, products } = await getGenomeData();
 
   const rows: GenomeRow[] = (modules ?? []) as GenomeRow[];
   const prods: ProductRow[] = (products ?? []) as ProductRow[];

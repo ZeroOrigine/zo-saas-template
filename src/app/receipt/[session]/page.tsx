@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { createPublicClient } from '@/lib/supabase/public';
+import { getReceipt } from '@/services/public.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,15 +22,7 @@ interface Donation {
 }
 
 async function getDonation(sessionId: string): Promise<Donation | null> {
-  try {
-    const supabase = createPublicClient();
-    // get_receipt is a security-definer RPC: fetchable by the (secret) session id,
-    // but zo_donations stays non-enumerable to anon.
-    const { data } = await supabase.rpc('get_receipt', { p_session_id: sessionId });
-    return (data?.[0] as Donation) ?? null;
-  } catch {
-    return null;
-  }
+  return getReceipt<Donation>(sessionId);
 }
 
 export default async function ReceiptPage({ params }: { params: { session: string } }) {
